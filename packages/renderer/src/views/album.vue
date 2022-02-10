@@ -1,0 +1,193 @@
+<template>
+  <div class="mt-16 px-8 h-full overflow-y-scroll">
+    <div style="height:calc(100% - 16rem)">
+      <div class="flex h-40 overflow-hidden">
+        <el-image
+          :src="albumInfo.coverImg"
+          class="w-40 h-40 rounded flex-shrink-0"
+        />
+        <div class="ml-4 text-gray-300 text-xl text-left flex flex-col">
+          <strong>{{ albumInfo.name }}</strong>
+          <div class="text-gray-400 flex mt-2 justify-between items-center text-xs">
+            <div class="flex items-center ">
+              <el-avatar
+                :size="16"
+                :src="albumInfo.creator.avatar"
+              />
+              <span class="text-sm ml-2 text-blue-300">{{ albumInfo.creator.nickname }}</span>
+            </div>
+            <p>最近更新：{{ $filters.timeFormat(albumInfo.updateTime) }}</p>
+          </div>
+          <p
+            class="text-xs text-left overflow-y-scroll leading-5 mt-2"
+            vue
+            no-v-html
+            v-html="albumInfo.description.replace(/\n/g,'<br/>')"
+          />
+          <div class="mt-2 text-xs flex">
+            <span class="w-24 cursor-pointer bg-red-700 flex items-center justify-center hover:bg-red-600 leading-6 mr-3 rounded-xl">
+              <i class="iconfont icon-botany2 mr-1" />
+              播放全部
+            </span>
+            <span class="w-24 flex items-center justify-center cursor-pointer hover:bg-gray-600 bg-gray-700 leading-6 mr-3 rounded-xl">
+              <i class="iconfont icon-icon-xian-" />
+              收藏
+            </span>
+            <span class="w-24 flex items-center justify-center cursor-pointer leading-6 mr-3 rounded-xl border border-gray-500 hover:border-gray-400">
+              <i class="iconfont icon-download" />
+              下载全部
+            </span>
+          </div>
+        </div>
+      </div>
+      <el-table
+        class="mt-8"
+        stripe
+        cell-class-name="bg-primary-100 cursor-pointer" 
+        :header-cell-style="{backgroundColor: '#212121 !important'}"
+        :data="songList"
+        @row-dblclick="playSong"
+      >
+        <el-table-column
+          label="歌曲"
+          width="200"
+          prop="name"
+          class="whitespace-nowrap"
+        >
+          <template #default="scope">
+            <el-tooltip :content="scope.row.name">
+              <span class="whitespace-nowrap">{{ scope.row.name }}</span>
+            </el-tooltip>
+            <i
+              v-if="scope.row.mv"
+              class="iconfont ml-2 icon-mv cursor-pointer text-red-500"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="歌手"
+          width="200"
+          class="truncate"
+        >
+          <template #default="scope">
+            <span
+              v-for="art in scope.row.art"
+              :key="art.id"
+              class="truncate"
+            >{{ art.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="专辑">
+          <template #default="scope">
+            <el-tooltip :content="scope.row.album">
+              <span class="whitespace-nowrap overflow-hidden">{{ scope.row.album }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="时长"
+          prop="name"
+        >
+          <template #default="scope">
+            {{ $filters.durationFormat(scope.row.time) }}
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>    
+</template>
+<script lang="ts" setup>
+import { ref, watchEffect, inject } from 'vue';
+import { getAlbumDetailWy,getSongUrlWy } from '../api/netease';
+import { useRoute } from 'vue-router';
+const $filters = inject('$filters');
+const $eventBus = inject('$eventBus');
+const route = useRoute();
+const albumInfo = ref({
+  name: '',
+  id: '',
+  description: '',
+  subscribedCount: 0,
+  trackCount: 0,
+  coverImg: '',
+  createTime: 0,
+  updateTime: 0,
+  creator: {
+    avatar: '',
+    desc: '',
+    nickname: '',
+  },
+});
+const songList = ref([]);
+watchEffect(() => {
+  if (route.query.type && +route.query.type == 1) {
+    getAlbumDetailWy(route.query.id as string).then((res) => {
+      if (res.data.code === 200) {
+        const {
+          name,
+          id,
+          description,
+          subscribedCount,
+          trackCount,
+          coverImgUrl: coverImg,
+          createTime,
+          updateTime,
+        } = res.data.playlist;
+        const {
+          avatarUrl: avatar,
+          description: desc,
+          nickname,
+        } = res.data.playlist.creator;
+        albumInfo.value = {
+          name,
+          id,
+          description,
+          subscribedCount,
+          trackCount,
+          coverImg,
+          createTime,
+          updateTime,
+          creator: {
+            avatar,
+            desc,
+            nickname,
+          },
+        };
+        songList.value = res.data.playlist.tracks.map((ele:any)=>{
+            return {
+                name:ele.name,
+                id:ele.id,
+                mv:ele.mv,
+                time:ele.dt,
+                art:ele.ar.map((el:any)=>{
+                    return {
+                        name:el.name,
+                        id:el.id,
+                    };
+                }),
+                album:ele.al.name,
+                picUrl:ele.al.picUrl,
+            };
+        });
+      }
+    });
+  }
+});
+const playSong = (song:any) => {
+    $eventBus.emit('playSong',{
+      song,
+      type:+route.query.type,
+    });
+};
+</script>
+<style lang="less">
+.el-table__row--striped {
+    background-color:#212121 !important;
+    td{
+        background-color:#212121 !important;
+    }
+}
+.el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf{
+    border-color:#121212 !important;
+}
+</style>

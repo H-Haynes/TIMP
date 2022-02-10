@@ -1,0 +1,43 @@
+<template lang="">
+  <div class="w-48 h-full bg-primary-500">
+    <div class="h-16 bg-primary-100  text-white flex items-center justify-end">
+      <i
+        class="iconfont icon-houtui mr-4 cursor-pointer text-xl"
+        @click="router.back()"
+      />
+      <i class="iconfont icon-qianjin mr-4 cursor-pointer text-xl" />
+    </div>
+    <div class="py-4">
+      <ul class="text-white-300 text-sm px-4 leading-8 text-left">
+        <li
+          v-for="nav in navList"
+          :key="nav.path"
+          class="hover:bg-gray-600 cursor-pointer px-4"
+        >
+          {{ nav.name }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+<script lang="ts" setup>
+  import {ref} from 'vue';
+  import {useRouter} from 'vue-router';
+  const router = useRouter();
+  const navList = ref([
+    {
+      name:'发现音乐',
+      path:'/find',
+    },
+    {
+      name:'私人FM',
+      path:'/fm',
+    },
+    {
+      name:'视频',
+      path:'/video',
+    },
+  ]);
+</script>
+<style lang="">
+</style>
