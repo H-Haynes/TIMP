@@ -2,10 +2,10 @@
 
 TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件，fork了vite-electron-builder仓库作为项目框架，项目采用vue3 + vite + electron + windicss进行开发，数据来源于github开源项目.
 
-网易云音乐: [网易云音乐API](https://github.com/Binaryify/NeteaseCloudMusicApi)
-QQ音乐API: [QQ音乐API](https://github.com/Rain120/qq-music-api)
-酷狗音乐API: [酷狗音乐API](http://127.0.0.1)
-咪咕音乐API: [咪咕音乐API](http://127.0.0.1)
+- 网易云音乐: [网易云音乐API](https://github.com/Binaryify/NeteaseCloudMusicApi)
+- QQ音乐API: [QQ音乐API](https://github.com/Rain120/qq-music-api)
+- 酷狗音乐API: [酷狗音乐API](http://127.0.0.1)
+- 咪咕音乐API: [咪咕音乐API](http://127.0.0.1)
 
 ## 项目开发运行环境
 
@@ -36,7 +36,7 @@ QQ音乐API: [QQ音乐API](https://github.com/Rain120/qq-music-api)
 
 ## 开发命令
 
-`npm run watch` : 本地开发并开启热更新
-`npm run compile`: 编译为桌面应用程序
-`npm run build` : 项目打包
-`npm run test` : 本地测试
+- `npm run watch` : 本地开发并开启热更新
+- `npm run compile`: 编译为桌面应用程序
+- `npm run build` : 项目打包
+- `npm run test` : 本地测试

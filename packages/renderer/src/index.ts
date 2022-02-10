@@ -1,7 +1,7 @@
 import {createApp} from 'vue';
 import App from '/@/App.vue';
 import '../assets/css/index.css';
-import 'tailwindcss/tailwind.css';
+// import 'tailwindcss/tailwind.css';
 import router from '/@/router/index';
 import 'virtual:windi.css';
 import mitt from 'mitt';
