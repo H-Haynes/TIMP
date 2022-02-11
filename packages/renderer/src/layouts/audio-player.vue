@@ -15,14 +15,17 @@
       <div class="flex overflow-hidden flex-1 flex-col w-full item-center mx-2">
         <div class="flex">
           <p class="flex-1 truncate">
-            {{ playInfo.name || "TIMP，随心听曲"}}
+            {{ playInfo.name || "TIMP，随心听曲" }}
           </p>
           <i class="iconfont icon-icon-xian- text-sm ml-2 cursor-pointer" />
           <i class="iconfont icon-xunhuan text--sm ml-2 cursor-pointer" />
         </div>
         <p class="flex justify-between items-ceter text-xs mt-1 text-gray-500">
           <span>{{ $filters.secToMin(currentTime) }}</span>
-          <span v-if="playInfo.name" class="truncate mx-2">{{ playInfo.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'') }}-{{ playInfo.name }}</span>
+          <span
+            v-if="playInfo.name"
+            class="truncate mx-2"
+          >{{ playInfo.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'') }}-{{ playInfo.name }}</span>
           <span v-else>暂无歌曲</span>
           <span>{{ $filters.durationFormat(playInfo.time) }}</span>
         </p>
@@ -77,6 +80,7 @@
     art:[],
     time:0,
     picUrl:'',
+    albumId:'',
   });
 
   // 获取歌曲信息，包含:name,time,picUrl,art
@@ -86,6 +90,7 @@
       art:[],
       time:0,
       picUrl:'',
+      albumId:'',
     };
     if(platformType == platform.wy){
       const result = await getSongDetailWy(id);
@@ -107,8 +112,9 @@
         });
         songInfo.name = infoResult.data.response.songinfo.data.track_info.title;
         songInfo.time = infoResult.data.response.songinfo.data.track_info.interval * 1000;
+        songInfo.albumId = infoResult.data.response.songinfo.data.track_info.album.mid;
       }
-      const picResult = await getSongPicQQ(id);
+      const picResult = await getSongPicQQ(songInfo.albumId);
       if(picResult.data.response.code === 0){
         songInfo.picUrl = picResult.data.response.data.imageUrl;
       }

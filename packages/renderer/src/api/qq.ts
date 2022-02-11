@@ -40,3 +40,15 @@ export const getCategoryListQQ = () => {
 export const getAlbumListQQ = (type:number,page = 1) => {
     return axios.get(`${prefix}/getSongLists?categoryId=${type}&page=${page}`);
 };
+
+// 获取排行榜列表
+
+export const getRankListQQ = () => {
+    return axios.get(`${prefix}/getTopLists?limit=50`);
+};
+
+// 获取排行榜详情
+
+export const getRankDetailQQ = (id:number) => {
+    return axios.get(`${prefix}/getRanks?topId=${id}&limit=100`);
+};

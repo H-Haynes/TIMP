@@ -21,6 +21,7 @@ const $filters = {
         return `${year}-${addZero(month)}-${addZero(day)} ${addZero(hour)}:${addZero(minute)}:${addZero(seconds)}`;
     },
     durationFormat:(value) =>{
+        if(!value) return '--:--';
         const minute = Math.floor(value / 60000);
         const second = Math.floor(value % 60000 / 1000);
         const addZero = (num:number) => num < 10 ? '0' + num : num;

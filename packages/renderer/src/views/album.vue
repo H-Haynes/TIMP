@@ -1,5 +1,5 @@
 <template>
-  <div class="px-8 flex flex-col h-full overflow-y-scroll">
+  <div class="px-8 flex flex-col h-full overflow-y-scroll"  v-loading.lock="loading" element-loading-background="rgba(0,0,0,.7)">
     <div class="h-16 w-full flex-shrink-0"></div>
     <div class="flex-1 overflow-y-scroll">
       <div class="flex h-40 overflow-hidden">
@@ -107,10 +107,11 @@
 <script lang="ts" setup>
 import { ref, watchEffect, inject } from 'vue';
 import { getAlbumDetailWy } from '../api/netease';
-import {getAlbumDetailQQ} from '../api/qq';
+import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute } from 'vue-router';
 const $filters = inject('$filters');
 const $eventBus:any = inject('$eventBus');
+const loading = ref(false);
 const route = useRoute();
 const albumInfo = ref({
   name: '',
@@ -128,109 +129,101 @@ const albumInfo = ref({
   },
 });
 const songList = ref([]);
-watchEffect(async() => {
-  if (route.query.type && +route.query.type == 1) {
-    getAlbumDetailWy(route.query.id as string).then((res) => {
-      if (res.data.code === 200) {
-        const {
-          name,
-          id,
-          description,
-          subscribedCount,
-          trackCount,
-          coverImgUrl: coverImg,
-          createTime,
-          trackUpdateTime:updateTime,
-        } = res.data.playlist;
-        const {
-          avatarUrl: avatar,
-          description: desc,
-          nickname,
-        } = res.data.playlist.creator;
-        albumInfo.value = {
-          name,
-          id,
-          description,
-          subscribedCount,
-          trackCount,
-          coverImg,
-          createTime,
-          updateTime,
-          creator: {
-            avatar,
-            desc,
-            nickname,
-          },
-        };
-        songList.value = res.data.playlist.tracks.map((ele:any)=>{
-            return {
-                name:ele.name,
-                id:ele.id,
-                mv:ele.mv,
-                time:ele.dt,
-                art:ele.ar.map((el:any)=>{
-                    return {
-                        name:el.name,
-                        id:el.id,
-                    };
-                }),
-                album:ele.al.name,
-                picUrl:ele.al.picUrl,
-            };
-        });
-      }
+
+const getWyAlbum = async(id:string) =>{
+  const res = await getAlbumDetailWy(id);
+  if(res.data.code === 200){
+    const {name,id,description,subscribedCount,trackCount,coverImgUrl: coverImg,createTime,trackUpdateTime:updateTime,} = res.data.playlist;
+    const {avatarUrl: avatar,description: desc,nickname,} = res.data.playlist.creator;
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname,},};
+    songList.value = res.data.playlist.tracks.map((ele:any)=>{
+          return {name:ele.name,id:ele.id,mv:ele.mv,time:ele.dt,album:ele.al.name,picUrl:ele.al.picUrl,
+              art:ele.ar.map((el:any)=>{
+                  return {
+                      name:el.name,
+                      id:el.id,
+                  };
+              }),
+              
+          };
     });
-  }else if(route.query.type && +route.query.type == 2){
-    const albumResult = await getAlbumDetailQQ(route.query.id as string);
-      if(albumResult.data.response.code === 0){
-        let {
-          dissname:name,
-          dissid:id,
-          desc:description,
-          visitnum:subscribedCount,
-          cmtnum:trackCount,
-          logo: coverImg,
-          ctime:createTime,
-          ctime:updateTime,
-          headurl:avatar,
-          nick:desc,
-          nickname
-        } = albumResult.data.response.cdlist[0];
-        updateTime *= 1000;
-       
-        albumInfo.value = {
-          name,
-          id,
-          description,
-          subscribedCount,
-          trackCount,
-          coverImg,
-          createTime,
-          updateTime,
-          creator: {
-            avatar,
-            desc,
-            nickname,
-          },
-        };
-        songList.value = albumResult.data.response.cdlist[0].songlist.map((ele:any)=>{
-            return {
-                name:ele.name,
-                id:ele.mid,
-                mv:ele.mv.id || undefined,
-                time:ele.interval * 1000,
-                art:ele.singer.map((el:any)=>{
-                    return {
-                        name:el.name,
-                        id:el.id,
-                    };
-                }),
-                album:ele.album.name,
-                picUrl:ele.album.picUrl,
-            };
-        });
-      }
   }
+};
+
+const getQQAlbum = async(id:string) => {
+  const result = await getAlbumDetailQQ(id);
+  if(result.data.response.code === 0){
+    let {dissname:name,dissid:id,desc:description,visitnum:subscribedCount,cmtnum:trackCount,logo: coverImg,ctime:createTime,ctime:updateTime,headurl:avatar,nick:desc,nickname} = result.data.response.cdlist[0];
+    updateTime *= 1000;
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname,},};
+    songList.value = result.data.response.cdlist[0].songlist.map((ele:any)=>{
+        return {name:ele.name,id:ele.mid,mv:ele.mv.vid || undefined,time:ele.interval * 1000,album:ele.album.name,picUrl:ele.album.picUrl,
+            art:ele.singer.map((el:any)=>{
+                return {
+                    name:el.name,
+                    id:el.id,
+                };
+            }),
+            
+        };
+    });
+  }
+};
+
+const getQQRankDetail = async(id:number) => {
+  const result = await getRankDetailQQ(id);
+  console.log(result);
+  if(result.data.response.code === 0){
+    let {title:name,topId:id,titleShare:description,listenNum:subscribedCount,listenNum:trackCount,frontPicUrl: coverImg,updateTime:createTime,updateTime:updateTime,topAlbumURL:avatar,AdShareContent:desc,AdShareContent:nickname} = result.data.response.req_1.data.data;
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname,},};
+    let list = [];
+    if(result.data.response.req_1.data.songInfoList.length>0){
+      list = result.data.response.req_1.data.songInfoList.map(ele=>({
+            name:ele.name,
+            id:ele.mid,
+            mv:ele.mv.vid || undefined,
+            time:ele.interval * 1000,
+            album:ele.album.name,
+            picUrl:ele.album.picUrl,
+            art:ele.singer.map((el:any)=>{
+                return {
+                    name:el.name,
+                    id:el.id,
+                };
+            }),
+            
+      }));
+    }else{
+      list = result.data.response.req_1.data.data.song.map(ele=>({
+            name:ele.title,
+            id:ele.songId,
+            albumMid:ele.albumMid,
+            mv:ele.vid || undefined,
+            time:null,
+            album:'-',
+            picUrl:ele.cover,
+            art:[{
+              name:ele.singerName,
+              id:ele.singerMid,
+            }],
+      }));
+    }
+    songList.value = list;
+  }
+};
+
+watchEffect(async() => {
+  loading.value = true;
+  if (route.query.type && +route.query.type == 1) {
+    await getWyAlbum(route.query.id as string);
+  }else if(route.query.type && +route.query.type == 2){
+    if(!route.query.isRank){
+      await getQQAlbum(route.query.id as string);
+    }else{
+      await getQQRankDetail(+(route.query.id as unknown as number));
+    }
+  }
+  loading.value = false;
 });
 const playSong = (song:any) => {
     $eventBus.emit('playSong',{
@@ -246,9 +239,7 @@ const playSong = (song:any) => {
         background-color:#212121 !important;
     }
 }
-.el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf{
-    border-color:#121212 !important;
-}
+
 .el-table__empty-text{
   width:100%;
 }

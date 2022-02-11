@@ -30,14 +30,16 @@
     </el-carousel>
 
     <ul class="flex flex-wrap text-sm text-gray-300 mb-8 px-4">
-      <li class="px-2 border mr-2 mb-2 border-gray-500">
-        排行榜
+      <li class="px-2 border mr-2 mb-2 border-red-800 text-red-800 cursor-pointer" @click="getRankAlbum">
+          排行榜
       </li>
       <li
         v-for="category in categoryList.slice(0,10)"
         :key="category.category"
-        class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
+        class="px-2 border mr-2 mb-2 hover:bg-gray-700 cursor-pointer border-gray-700"
         @click="getAlbumList(category.id)"
+        :class="{'bg-gray-700':currentCategory===category.id}"
+
       >
         {{ category.name }}
       </li>
@@ -45,13 +47,13 @@
         v-for="category in categoryList.slice(10,-1)"
         v-show="showAllCategory"
         :key="category.category"
-        class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
+        class="px-2 border mr-2 mb-2 hover:bg-gray-700 cursor-pointer border-gray-700"
         @click="getAlbumList(category.id)"
       >
         {{ category.name }}
       </li>
       <li
-        class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
+        class="px-2 border mr-2 mb-2 hover:bg-gray-700 cursor-pointer border-gray-700"
         @click="showAllCategory = !showAllCategory"
       >
         {{ showAllCategory ? '收起' : '更多···' }}
@@ -70,7 +72,7 @@
           :key="list.id||list.name"
           class="w-40 mb-4 flex mx-1 flex-col justify-center items-center"
         >
-          <router-link :to="{path:'/album',query:{type:2,id:list.id}}">
+          <router-link :to="{path:'/album',query:{type:2,id:list.id,isRank:list.isRank}}">
             <el-image
               lazy
               class="w-40 h-40"
@@ -94,7 +96,7 @@
     import type{Ref} from 'vue';
     import {useRouter} from 'vue-router';
     import {ref, watchEffect,onMounted,inject} from 'vue';
-    import {getRecommendQQ,getCategoryListQQ, getAlbumListQQ} from '/@/api/qq';
+    import {getRecommendQQ,getCategoryListQQ, getAlbumListQQ, getRankListQQ} from '/@/api/qq';
     const loading=ref(false);
     const playList = ref([]);
     const emptyNum = ref(0);
@@ -138,7 +140,7 @@
       // 一行多少个
       const singleLineNum = Math.floor(wrapWidth / (itemWidth + fontSize * 0.25* 2)) ; // mx-1 等于 0.25rem *2
       console.log(singleLineNum);
-      emptyNum.value =  playList.value.length % singleLineNum;
+      emptyNum.value =  playList.value.length % singleLineNum || 0;
     });
 
     onMounted( async()=>{
@@ -175,7 +177,7 @@
 
     const scroll = e => {
         const scrollDis = e.target.scrollHeight - e.target.offsetHeight; // 可滚动距离
-        if(scrollDis - e.target.scrollTop  < 100 && loading.value === false){
+        if(scrollDis - e.target.scrollTop  < 100 && loading.value === false && currentCategory.value !==0){
           getAlbumList(currentCategory.value,page.value + 1);
         }
     };
@@ -193,6 +195,22 @@
           return ele;
         });
         playList.value = page.value ===1 ? list :  playList.value.concat(list);
+      }
+      loading.value = false;
+    };
+
+    const getRankAlbum = async () =>{
+      loading.value = true;
+      currentCategory.value = 0;
+      const result = await getRankListQQ();
+      if(result.data.response.code === 0){
+        const list = result.data.response.data.topList.map(ele=>({
+          id:ele.id,
+          name:ele.topTitle,
+          picUrl:ele.picUrl,
+          isRank:1,
+        }));
+        playList.value = list;
       }
       loading.value = false;
     };

@@ -30,14 +30,15 @@
         </el-carousel-item>
       </el-carousel>
 
-      <ul class="flex flex-wrap text-sm text-gray-300 mb-8 px-4">
-        <li class="px-2 border mr-2 mb-2 border-gray-500">
+      <ul class="flex flex-wrap text-sm text-gray-400 mb-8 px-4">
+        <li class="px-2 border mr-2 mb-2 border-red-800 text-red-800 cursor-pointer" @click="getRankAlbum">
           排行榜
         </li>
         <li
           v-for="category in categoryList.slice(0,10)"
           :key="category.category"
-          class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
+          class="px-2 border mr-2 mb-2 hover:bg-gray-700 cursor-pointer border-gray-700"
+          :class="{'bg-gray-700':currentCategory===category.name}"
           @click="getAlbumList(category.name)"
         >
           {{ category.name }}
@@ -46,13 +47,14 @@
           v-for="category in categoryList.slice(10,categoryList.length-1)"
           v-show="showAllCategory"
           :key="category.category"
-          class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
+          class="px-2 border mr-2 mb-2 hover:bg-gray-700 cursor-pointer border-gray-700"
+          :class="{'bg-gray-700':currentCategory===category.name}"
           @click="getAlbumList(category.name)"
         >
           {{ category.name }}
         </li>
         <li
-          class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
+          class="px-2 border mr-2 mb-2 hover:bg-gray-700 cursor-pointer border-gray-700"
           @click="showAllCategory = !showAllCategory"
         >
           {{ showAllCategory ? '收起' : '更多···' }}
@@ -97,7 +99,7 @@
 import type {Ref} from 'vue';
 import { ref, watchEffect, onMounted, inject } from 'vue';
 import {useRouter} from 'vue-router';
-import { getRecommendWy, getBannerWy,getCategoryListWy,getAlbumListWy } from '/@/api/netease';
+import { getRecommendWy, getBannerWy,getCategoryListWy,getAlbumListWy,getRankListWy } from '/@/api/netease';
 
 const loading = ref(false);
 const playList = ref([]);
@@ -146,26 +148,41 @@ const getAlbumList = async (category:string,pageNum = 1) => {
   page.value = pageNum;
   currentCategory.value = category;
   loading.value = true;
-  const albumListResult = await getAlbumListWy(category,pageNum);
-  if(albumListResult.data.code === 200){
-    const list = albumListResult.data.playlists.map(ele=>{
-      return {
-        id:ele.id,
-        name:ele.name,
-        picUrl:ele.coverImgUrl,
-      };
-    });
-    playList.value = pageNum == 1 ? list : playList.value.concat(list); // 不是第一页则进行拼接
-  }
-  loading.value = false;
+    const albumListResult = await getAlbumListWy(category,pageNum);
+    if(albumListResult.data.code === 200){
+      const list = albumListResult.data.playlists.map(ele=>{
+        return {
+          id:ele.id,
+          name:ele.name,
+          picUrl:ele.coverImgUrl,
+        };
+      });
+      playList.value = pageNum == 1 ? list : playList.value.concat(list); // 不是第一页则进行拼接
+    }
+    loading.value = false;
 };
 
  const scroll = e => {
     const scrollDis = e.target.scrollHeight - e.target.offsetHeight; // 可滚动距离
-    if(scrollDis - e.target.scrollTop  < 100 && loading.value === false){
+    if(scrollDis - e.target.scrollTop  < 100 && loading.value === false && currentCategory.value !== 'rank'){
       // console.log('滚动到底部');
       getAlbumList(currentCategory.value,page.value + 1);
     }
+};
+
+const getRankAlbum = async () =>{
+  loading.value = true;
+  currentCategory.value = 'rank';
+  const result = await getRankListWy();
+  if(result.data.code === 200){
+    const list = result.data.list.map(ele=>({
+      id:ele.id,
+      name:ele.name,
+      picUrl:ele.coverImgUrl,
+    }));
+    playList.value = list;
+  }
+  loading.value = false;
 };
 
 watchEffect(() => {
@@ -189,7 +206,7 @@ watchEffect(()=>{
   // 一行多少个
   const singleLineNum = Math.floor(wrapWidth / (itemWidth + fontSize * 0.25* 2)) ; // mx-1 等于 0.25rem *2
   console.log(singleLineNum);
-  emptyNum.value =  playList.value.length % singleLineNum;
+  emptyNum.value =  playList.value.length % singleLineNum || 0;
 });
 </script>
 <style lang="less">

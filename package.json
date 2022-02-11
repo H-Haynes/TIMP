@@ -78,7 +78,7 @@
     "mac": {
       "icon": "buildResources/icon.ins",
       "category": "public.app-category.productivity",
-      "artifactName": "${productName}_${version}.${ext}",
+      "artifactName": "${productName}v${version}.${ext}",
       "target": [
         "dmg",
         "zip"

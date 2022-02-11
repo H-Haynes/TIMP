@@ -39,3 +39,9 @@ export const getCategoryListWy = () => {
 export const getAlbumListWy = (type:string,page = 1) => {
     return axios.get(`${prefix}/top/playlist?cat=${type}&offset=${(page-1) * 50}`);
 };
+
+// 获取排行榜单列表
+
+export const getRankListWy = () => {
+    return axios.get(`${prefix}/toplist`);
+};
