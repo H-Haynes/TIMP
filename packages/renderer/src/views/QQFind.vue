@@ -3,7 +3,7 @@
     v-loading="loading"
     class="flex-1 overflow-y-scroll"
     style="height:calc(100% - 4rem)"
-    element-loading-background="transparent"
+    element-loading-background="rgba(0,0,0,.7)"
     @scroll="scroll"
   >
     <el-carousel
@@ -37,7 +37,7 @@
         v-for="category in categoryList.slice(0,10)"
         :key="category.category"
         class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
-        @click="getAlbumList(category.name)"
+        @click="getAlbumList(category.id)"
       >
         {{ category.name }}
       </li>
@@ -46,7 +46,7 @@
         v-show="showAllCategory"
         :key="category.category"
         class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"
-        @click="getAlbumList(category.name)"
+        @click="getAlbumList(category.id)"
       >
         {{ category.name }}
       </li>
@@ -68,7 +68,7 @@
         <li
           v-for="list in playList"
           :key="list.id||list.name"
-          class="w-40 mb-4 flex flex-col justify-center items-center"
+          class="w-40 mb-4 flex mx-1 flex-col justify-center items-center"
         >
           <router-link :to="{path:'/album',query:{type:2,id:list.id}}">
             <el-image
@@ -94,16 +94,18 @@
     import type{Ref} from 'vue';
     import {useRouter} from 'vue-router';
     import {ref, watchEffect,onMounted,inject} from 'vue';
-    import {getRecommendQQ,getCategoryListQQ} from '/@/api/qq';
+    import {getRecommendQQ,getCategoryListQQ, getAlbumListQQ} from '/@/api/qq';
     const loading=ref(false);
     const playList = ref([]);
     const emptyNum = ref(0);
     const listWrap:Ref<HTMLUListElement|null> = ref(null);
     const categoryList = ref([]);
+    const currentCategory = ref(10000000);
     const showAllCategory = ref(false);
     const bannerList = ref([]);
     const router = useRouter();
     const $eventBus:any = inject('$eventBus');
+    const page = ref(1);
     watchEffect(()=>{
         loading.value = true;
         getRecommendQQ().then((res: any)=>{
@@ -174,9 +176,25 @@
     const scroll = e => {
         const scrollDis = e.target.scrollHeight - e.target.offsetHeight; // 可滚动距离
         if(scrollDis - e.target.scrollTop  < 100 && loading.value === false){
-          console.log('滚动到底部');
-          // getAlbumList(currentCategory.value,page.value + 1);
+          getAlbumList(currentCategory.value,page.value + 1);
         }
+    };
+
+    const getAlbumList = async (category:number,pageNum=1) => {
+      page.value = pageNum;
+      loading.value = true;
+      currentCategory.value = category;
+      const result = await getAlbumListQQ(category,page.value);
+      if(result.data.response.code === 0){
+        const list = result.data.response.data.list.map(ele=>{
+          ele.name = ele.dissname;
+          ele.picUrl = ele.imgurl;
+          ele.id = ele.dissid;
+          return ele;
+        });
+        playList.value = page.value ===1 ? list :  playList.value.concat(list);
+      }
+      loading.value = false;
     };
 </script>
 <style lang="">

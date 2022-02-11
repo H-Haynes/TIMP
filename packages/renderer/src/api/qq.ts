@@ -34,3 +34,9 @@ export const getSongPicQQ = (id:string|number) => {
 export const getCategoryListQQ = () => {
     return axios.get(`${prefix}/getSongListCategories`);
 };
+
+// 获取歌单列表
+
+export const getAlbumListQQ = (type:number,page = 1) => {
+    return axios.get(`${prefix}/getSongLists?categoryId=${type}&page=${page}`);
+};
