@@ -12,3 +12,6 @@
 .el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf{
     border-color:#29292b !important;
 }
+.hideScrollBar::-webkit-scrollbar{
+    display: none;
+}

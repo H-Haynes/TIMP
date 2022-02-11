@@ -5,6 +5,7 @@ import '../assets/css/index.css';
 import router from '/@/router/index';
 import 'virtual:windi.css';
 import mitt from 'mitt';
+import clickOutside from '/@/directives/clickOutside';
 
 const app = createApp(App);
 const $filters = {
@@ -36,5 +37,6 @@ const $filters = {
 };
 app.provide('$filters',$filters);
 app.provide('$eventBus',mitt());
+app.use(clickOutside);
 app.use(router);
 app.mount('#app');

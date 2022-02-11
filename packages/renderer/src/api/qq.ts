@@ -52,3 +52,8 @@ export const getRankListQQ = () => {
 export const getRankDetailQQ = (id:number) => {
     return axios.get(`${prefix}/getRanks?topId=${id}&limit=100`);
 };
+
+// 搜索
+export const searchQQ = (keyword:string) => {
+    return axios.get(`${prefix}/getSmartbox?key=${keyword}&limit=30`);
+};

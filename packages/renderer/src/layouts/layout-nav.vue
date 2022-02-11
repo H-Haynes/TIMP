@@ -9,13 +9,11 @@
     </div>
     <div class="py-4">
       <ul class="text-white-300 text-sm px-4 leading-8 text-left">
-        <li
-          v-for="nav in navList"
-          :key="nav.path"
-          class="hover:bg-gray-600 cursor-pointer px-4"
-        >
-          {{ nav.name }}
-        </li>
+        <router-link v-for="nav in navList" :key="nav.path" :to="{path:nav.path}">
+          <li class="hover:bg-gray-600 cursor-pointer px-4">
+            {{ nav.name }}
+          </li>
+        </router-link>
       </ul>
     </div>
   </div>
@@ -31,7 +29,7 @@
     },
     {
       name:'私人FM',
-      path:'/fm',
+      path:'/radio',
     },
     {
       name:'视频',

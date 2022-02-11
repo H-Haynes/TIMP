@@ -17,6 +17,7 @@ declare module 'vue' {
     NSearch: typeof import('./src/components/n-search.vue')['default']
     ReactiveCounter: typeof import('./src/components/ReactiveCounter.vue')['default']
     ReactiveHash: typeof import('./src/components/ReactiveHash.vue')['default']
+    SearchPanel: typeof import('./src/components/searchPanel.vue')['default']
   }
 }
 

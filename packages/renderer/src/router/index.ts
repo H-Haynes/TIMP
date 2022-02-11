@@ -15,9 +15,19 @@ const router = createRouter({
                     component: () => import('/@/views/find.vue'),
                 },
                 {
-                    path:'/album',
+                    path:'album',
                     name:'album',
                     component: () => import('/@/views/album.vue'),
+                },
+                {
+                    path:'radio',
+                    name:'radio',
+                    component: () => import('/@/views/radio.vue'),
+                },
+                {
+                    path:'video',
+                    name:'video',
+                    component: () => import('/@/views/video.vue'),
                 },
             ],
         },

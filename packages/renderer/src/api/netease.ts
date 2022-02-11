@@ -45,3 +45,10 @@ export const getAlbumListWy = (type:string,page = 1) => {
 export const getRankListWy = () => {
     return axios.get(`${prefix}/toplist`);
 };
+
+// 搜索(多重匹配)
+
+export const searchWy = (keyword:string) => {
+    return axios.get(`${prefix}/search/search/multimatch?keywords=${keyword}`);
+    // return axios.get(`${prefix}/search/suggest?keywords=${keyword}`);
+};
