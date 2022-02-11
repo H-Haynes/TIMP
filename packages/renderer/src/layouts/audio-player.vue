@@ -61,10 +61,10 @@
 </template>
 <script lang="ts" setup>
   import type {Ref} from 'vue';
-
+  import { platform} from '../../typings/enum';
   import {inject,ref,onMounted,watchEffect} from 'vue';
-  import { getSongUrlQQ, getSongPicQQ } from '../api/qq';
-  import {getSongUrlWy} from '/@/api/netease';
+  import { getSongUrlQQ, getSongPicQQ, getSongInfoQQ } from '../api/qq';
+  import {getSongUrlWy,getSongDetailWy} from '/@/api/netease';
   import { ElMessage } from 'element-plus';
   const $eventBus:any = inject('$eventBus');
   const $filters = inject('$filters');
@@ -78,29 +78,71 @@
     time:0,
     picUrl:'',
   });
-  $eventBus.on('playSong',async ({song,type}:any)=>{
-    if(type == 1){
-      const result = await getSongUrlWy(song.id);
-      if(result.data.code == 200){
-        playSrc.value = result.data.data[0].url;
+
+  // 获取歌曲信息，包含:name,time,picUrl,art
+  const getSongInfo = async (id:string|number,platformType:platform) =>{
+    let songInfo = {
+      name:'',
+      art:[],
+      time:0,
+      picUrl:'',
+    };
+    if(platformType == platform.wy){
+      const result = await getSongDetailWy(id);
+      if(result.data.code === 200){
+        songInfo.name = result.data.songs[0].name;
+        songInfo.art = result.data.songs[0].ar;
+        songInfo.picUrl = result.data.songs[0].al.picUrl;
+        songInfo.time = result.data.songs[0].dt;
       }
-    }else if(type == 2){
-      console.log(song);
-      const result = await getSongUrlQQ(song.id);
-      // 获取播放地址
-      if(!result.data.data.playUrl[song.id].error){
-        playSrc.value = result.data.data.playUrl[song.id].url;
-      }else{
-        return ElMessage.error(result.data.data.playUrl[song.id].error);
-      }
-      
+    }else if(platformType == platform.qq){
       // 获取歌曲信息
-      const infoResult = await getSongPicQQ(song.id);
+      const infoResult = await getSongInfoQQ(id);
       if(infoResult.data.response.code === 0){
-        playInfo.value.picUrl = infoResult.data.response.data.imageUrl;
+        songInfo.art = infoResult.data.response.songinfo.data.track_info.singer.map(ele=>{
+          return {
+            name:ele.name,
+            id:ele.mid,
+          };
+        });
+        songInfo.name = infoResult.data.response.songinfo.data.track_info.title;
+        songInfo.time = infoResult.data.response.songinfo.data.track_info.interval * 1000;
+      }
+      const picResult = await getSongPicQQ(id);
+      if(picResult.data.response.code === 0){
+        songInfo.picUrl = picResult.data.response.data.imageUrl;
       }
     }
-    playInfo.value = song;
+    return songInfo;
+  };
+
+  // 获取播放地址
+  const getSongUrl = async (id:string|number,platformType:platform)=>{
+    if(platformType == platform.wy){
+      const result = await getSongUrlWy(id);
+      if(result.data.code == 200){
+        return result.data.data[0].url;
+      }else{
+        return ElMessage.error('暂无播放地址');
+      }
+    }else if(platformType == platform.qq){
+      const result = await getSongUrlQQ(id);
+      if(!result.data.data.playUrl[id].error){
+        return result.data.data.playUrl[id].url;
+      }else{
+        return ElMessage.error(result.data.data.playUrl[id].error);
+      }
+    }
+  };
+
+  
+
+
+  $eventBus.on('playSong',async ({id:songId,type}:any)=>{
+    const songUrl = await getSongUrl(songId,type);
+    playSrc.value = songUrl;
+    playInfo.value = await getSongInfo(songId,type);
+      
   });
   const setCurrentTime = (percent:number) =>{
     console.log(percent,playInfo.value.time);

@@ -34,4 +34,5 @@ const $filters = {
 };
 app.provide('$filters',$filters);
 app.provide('$eventBus',mitt());
-app.use(router).mount('#app');
+app.use(router);
+app.mount('#app');

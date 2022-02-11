@@ -1,7 +1,7 @@
 <template lang="">
   <div
     ref="progress"
-    class="h-1 rounded relative bg-white"
+    class="h-1 rounded relative bg-white cursor-pointer"
     :style="{
       width:props.width,
     }"
@@ -46,17 +46,6 @@ import { onMounted } from 'vue';
             const percent = Math.ceil(e.offsetX / progress.value.offsetWidth * 100);
             emit('update:value',percent);
         }
-        // 计算百分比
-        
-
-
-        // const progressWidth = progress.value.offsetWidth;
-        // const progressLeft = progress.value.offsetLeft;
-        // const progressX = e.clientX - progressLeft;
-        // const percent = progressX / progressWidth;
-        // const time = percent * props.time;
-        // props.currentTime.value = time;
-        // props.audio.value.currentTime = time;
     };
     onMounted(()=>{
         console.log(props.value);
@@ -75,7 +64,7 @@ import { onMounted } from 'vue';
             height:10px;
             border-radius:50%;
             position:absolute;
-            left:100%;
+            left:calc(100% - 10px);
             top:50%;
             background:orange;
             transform: translateY(-50%);

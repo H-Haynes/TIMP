@@ -13,18 +13,18 @@ export const getAlbumDetailQQ = (id:string) => {
 
 // 获取播放地址
 
-export const getSongUrlQQ = (id:string) => {
+export const getSongUrlQQ = (id:string|number) => {
     return axios.get(`${prefix}//getMusicPlay?songmid=${id}`);
 };
 
 // 获取歌曲信息
 
-export const getSongInfoQQ = (id:string) => {
+export const getSongInfoQQ = (id:string|number) => {
     return axios.get(`${prefix}/getSongInfo?songmid=${id}`);
 };
 
 // 获取歌曲+专辑+图片
 
-export const getSongPicQQ = (id:string) => {
+export const getSongPicQQ = (id:string|number) => {
     return axios.get(`${prefix}/getImageUrl?id=${id}`);
 };

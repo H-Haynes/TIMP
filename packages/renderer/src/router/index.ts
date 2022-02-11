@@ -1,4 +1,4 @@
-import { createRouter,createWebHashHistory, createWebHistory } from 'vue-router';
+import { createRouter,createWebHashHistory } from 'vue-router';
 
 const router = createRouter({
     history: createWebHashHistory(process.env.NODE_ENV=='production' ? '' : ''),

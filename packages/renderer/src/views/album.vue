@@ -1,6 +1,7 @@
 <template>
-  <div class="mt-16 px-8 h-full overflow-y-scroll">
-    <div style="height:calc(100% - 16rem)">
+  <div class="px-8 flex flex-col h-full overflow-y-scroll">
+    <div class="h-16 w-full flex-shrink-0"></div>
+    <div class="flex-1 overflow-y-scroll">
       <div class="flex h-40 overflow-hidden">
         <el-image
           :src="albumInfo.coverImg"
@@ -22,7 +23,7 @@
             class="text-xs text-left overflow-y-scroll leading-5 mt-2"
             vue
             no-v-html
-            v-html="albumInfo.description.replace(/\n/g,'<br/>')"
+            v-html="albumInfo.description ?albumInfo.description.replace(/\n/g,'<br/>') : '' "
           />
           <div class="mt-2 text-xs flex">
             <span class="w-24 cursor-pointer bg-red-700 flex items-center justify-center hover:bg-red-600 leading-6 mr-3 rounded-xl">
@@ -50,7 +51,6 @@
       >
         <el-table-column
           label="歌曲"
-          width="200"
           prop="name"
           class="whitespace-nowrap"
         >
@@ -66,7 +66,6 @@
         </el-table-column>
         <el-table-column
           label="歌手"
-          width="200"
           class="truncate"
         >
           <template #default="scope">
@@ -88,6 +87,7 @@
         <el-table-column
           label="时长"
           prop="name"
+          width="100"
         >
           <template #default="scope">
             {{ $filters.durationFormat(scope.row.time) }}
@@ -106,11 +106,11 @@
 </template>
 <script lang="ts" setup>
 import { ref, watchEffect, inject } from 'vue';
-import { getAlbumDetailWy,getSongUrlWy } from '../api/netease';
+import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ} from '../api/qq';
 import { useRoute } from 'vue-router';
 const $filters = inject('$filters');
-const $eventBus = inject('$eventBus');
+const $eventBus:any = inject('$eventBus');
 const route = useRoute();
 const albumInfo = ref({
   name: '',
@@ -140,7 +140,7 @@ watchEffect(async() => {
           trackCount,
           coverImgUrl: coverImg,
           createTime,
-          updateTime,
+          trackUpdateTime:updateTime,
         } = res.data.playlist;
         const {
           avatarUrl: avatar,
@@ -182,7 +182,6 @@ watchEffect(async() => {
     });
   }else if(route.query.type && +route.query.type == 2){
     const albumResult = await getAlbumDetailQQ(route.query.id as string);
-    console.log(albumResult.data.response,99)
       if(albumResult.data.response.code === 0){
         let {
           dissname:name,
@@ -235,8 +234,8 @@ watchEffect(async() => {
 });
 const playSong = (song:any) => {
     $eventBus.emit('playSong',{
-      song,
-      type:+route.query.type,
+      id:song.id,
+      type:+(route.query.type as unknown as number),
     });
 };
 </script>
