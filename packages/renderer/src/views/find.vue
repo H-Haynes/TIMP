@@ -56,11 +56,6 @@
       return component;
     });
 
-    const scroll = e => {
-      const scrollDis = e.target.scrollHeight - e.target.offsetHeight; // 可滚动距离
-      if(scrollDis - e.target.scrollTop  < 100){
-        console.log('滚动到底部');
-      }
-    };
+   
 
 </script>

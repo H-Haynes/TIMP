@@ -1,10 +1,11 @@
 <template lang="">
   <div
+    v-loading="loading"
     class="flex-1 overflow-y-scroll relative"
     style="height:calc(100% - 4rem)"
+    element-loading-background="rgba(0,0,0,.7)"
     @scroll="scroll"
   >
-    <div class="w-full h-full absolute left-0 top-0" v-show="loading" v-loading="loading" element-loading-background="rgba(0,0,0,.7)"></div>
     <div class="h-full">
       <el-carousel
         v-show="bannerList.length>0"
