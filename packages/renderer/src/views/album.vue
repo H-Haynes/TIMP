@@ -70,11 +70,12 @@
           class="truncate"
         >
           <template #default="scope">
-            <span
+            <!-- <span
               v-for="art in scope.row.art"
               :key="art.id"
               class="truncate"
-            >{{ art.name }}</span>
+            >{{ art.name }}</span> -->
+            <span>{{scope.row.art.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'')}}</span>
           </template>
         </el-table-column>
         <el-table-column label="专辑">
@@ -92,6 +93,13 @@
             {{ $filters.durationFormat(scope.row.time) }}
           </template>
         </el-table-column>
+        <template #empty>
+          <div class="bg-primary-200 w-full h-80 flex justify-center items-center flex-col">
+              <i class="iconfont icon-zanwushuju text-7xl" />
+             <span class="text-gray-500">没有数据</span>
+          </div>
+         
+        </template>
       </el-table>
     </div>
   </div>    
@@ -99,6 +107,7 @@
 <script lang="ts" setup>
 import { ref, watchEffect, inject } from 'vue';
 import { getAlbumDetailWy,getSongUrlWy } from '../api/netease';
+import {getAlbumDetailQQ} from '../api/qq';
 import { useRoute } from 'vue-router';
 const $filters = inject('$filters');
 const $eventBus = inject('$eventBus');
@@ -119,7 +128,7 @@ const albumInfo = ref({
   },
 });
 const songList = ref([]);
-watchEffect(() => {
+watchEffect(async() => {
   if (route.query.type && +route.query.type == 1) {
     getAlbumDetailWy(route.query.id as string).then((res) => {
       if (res.data.code === 200) {
@@ -171,6 +180,57 @@ watchEffect(() => {
         });
       }
     });
+  }else if(route.query.type && +route.query.type == 2){
+    const albumResult = await getAlbumDetailQQ(route.query.id as string);
+    console.log(albumResult.data.response,99)
+      if(albumResult.data.response.code === 0){
+        let {
+          dissname:name,
+          dissid:id,
+          desc:description,
+          visitnum:subscribedCount,
+          cmtnum:trackCount,
+          logo: coverImg,
+          ctime:createTime,
+          ctime:updateTime,
+          headurl:avatar,
+          nick:desc,
+          nickname
+        } = albumResult.data.response.cdlist[0];
+        updateTime *= 1000;
+       
+        albumInfo.value = {
+          name,
+          id,
+          description,
+          subscribedCount,
+          trackCount,
+          coverImg,
+          createTime,
+          updateTime,
+          creator: {
+            avatar,
+            desc,
+            nickname,
+          },
+        };
+        songList.value = albumResult.data.response.cdlist[0].songlist.map((ele:any)=>{
+            return {
+                name:ele.name,
+                id:ele.mid,
+                mv:ele.mv.id || undefined,
+                time:ele.interval * 1000,
+                art:ele.singer.map((el:any)=>{
+                    return {
+                        name:el.name,
+                        id:el.id,
+                    };
+                }),
+                album:ele.album.name,
+                picUrl:ele.album.picUrl,
+            };
+        });
+      }
   }
 });
 const playSong = (song:any) => {
@@ -189,5 +249,11 @@ const playSong = (song:any) => {
 }
 .el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf{
     border-color:#121212 !important;
+}
+.el-table__empty-text{
+  width:100%;
+}
+.el-table__inner-wrapper::before{
+  background:none;
 }
 </style>

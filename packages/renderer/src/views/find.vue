@@ -25,7 +25,7 @@
               :src="list.picUrl"
             />
             <p class="mt-1 text-left text-xs h-10 overflow-hidden text-gray-200 font-medium">
-              {{ list.name }}
+              {{ list.name }}{{list.id}}
             </p>
           </router-link>
         </li>
@@ -78,6 +78,7 @@
                     const list = res.data.response.playlist.data.v_playlist.map(ele=>{
                         ele.name = ele.title;
                         ele.picUrl = ele.cover_url_medium;
+                        ele.id = ele.tid;
                         return ele;
                     });
                     playList.value = list;

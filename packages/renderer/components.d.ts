@@ -4,6 +4,7 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    DragProgress: typeof import('./src/components/DragProgress.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElectronVersions: typeof import('./src/components/ElectronVersions.vue')['default']
     ElImage: typeof import('element-plus/es')['ElImage']

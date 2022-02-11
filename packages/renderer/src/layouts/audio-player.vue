@@ -36,14 +36,12 @@
     </div>
     <div class="flex text-gray-400">
       <i class="iconfont icon-list mr-4 text-lg" />
-      <div class="flex">
+      <div class="flex items-center">
         <i class="iconfont icon-yinliang mr-2 text-lg" />
-        <el-progress
-          style="width:150px"
-          :stroke-width="3"
-          color="orange"
-          :show-text="false"
-          :percentage="100"
+        <drag-progress
+          :value="audioVolume"
+          width="150px"
+          @update:value="e=>audioVolume = e"
         />
       </div>
       <i class="iconfont icon-ci ml-2 text-lg" />
@@ -56,33 +54,68 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import {inject,ref,onMounted} from 'vue';
+  import type {Ref} from 'vue';
+
+  import {inject,ref,onMounted,watchEffect} from 'vue';
+  import { getSongUrlQQ, getSongPicQQ } from '../api/qq';
   import {getSongUrlWy} from '/@/api/netease';
-  
+  import { ElMessage } from 'element-plus';
+  import DragProgress from '/@/components/DragProgress.vue';
   const $eventBus:any = inject('$eventBus');
   const $filters = inject('$filters');
   const playSrc = ref('');
-  const audio = ref(null);
+  const audio:Ref<null|HTMLAudioElement> = ref(null);
   const currentTime = ref(0);
+  const audioVolume = ref(1);
   const playInfo = ref({
     name:'',
     art:[],
     time:0,
+    picUrl:'',
   });
   $eventBus.on('playSong',async ({song,type}:any)=>{
-    playInfo.value = song;
     if(type == 1){
       const result = await getSongUrlWy(song.id);
       if(result.data.code == 200){
         playSrc.value = result.data.data[0].url;
       }
+    }else if(type == 2){
+      const result = await getSongUrlQQ(song.id);
+      // 获取播放地址
+      if(!result.data.data.playUrl[song.id].error){
+        playSrc.value = result.data.data.playUrl[song.id].url;
+      }else{
+        return ElMessage.error(result.data.data.playUrl[song.id].error);
+      }
+      playInfo.value = song;
+      // 获取歌曲信息
+      const infoResult = await getSongPicQQ(song.id);
+      if(infoResult.data.response.code === 0){
+        playInfo.value.picUrl = infoResult.data.response.data.imageUrl;
+      }
     }
   });
+  
+  // const changeVolume = e =>{
+  //   console.log(e)
+  //   // if(audio.value){
+  //   //   audio.value.volume = e/100;
+  //   // }
+  // };
+
   onMounted(()=>{
     if(audio.value){
-          audio.value.addEventListener('timeupdate',(e)=>{
-            currentTime.value = e.target.currentTime;
-          });
+      // 获取当前音量
+      audioVolume.value = audio.value.volume * 100;
+
+          // audio.value.addEventListener('timeupdate',(e)=>{
+          //   currentTime.value = e.target.currentTime;
+          // });
+    }
+  });
+  watchEffect(()=>{
+    if(audio.value){
+      audio.value.volume = audioVolume.value / 100;
     }
   });
 </script>
