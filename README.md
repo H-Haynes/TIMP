@@ -40,3 +40,4 @@ TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件，f
 - `npm run compile`: 编译为桌面应用程序
 - `npm run build` : 项目打包
 - `npm run test` : 本地测试
+- `npm run dist --平台 --架构`: 打包为对应系统安装包程序

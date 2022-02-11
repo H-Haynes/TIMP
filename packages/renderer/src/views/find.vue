@@ -12,15 +12,12 @@
       </li>
     </ul>
     <keep-alive>
-        <component :is="componentId"></component>
+      <component :is="componentId"></component>
     </keep-alive>
-    <!-- <div class="flex-1 overflow-y-scroll" @scroll="scroll" style="height:calc(100% - 4rem)"> -->
-      
-    <!--</div> -->
   </div>
 </template>
 <script lang="ts" setup>
-    import {ref, computed} from 'vue';
+    import {ref, computed, watchEffect} from 'vue';
     import NeteaseFind from './NeteaseFind.vue';
     import QQFind from './QQFind.vue';
     const platformList = ref([
@@ -45,7 +42,7 @@
             type:5,
         },
     ]);
-    const platformType = ref(1);
+    const platformType = ref(Number(sessionStorage.getItem('platformType') || 1));
    
     const componentId = computed(()=>{
       let component;
@@ -56,6 +53,9 @@
       return component;
     });
 
-   
+   watchEffect(()=>{
+     sessionStorage.setItem('platformType',platformType.value.toString());
+   });
+
 
 </script>

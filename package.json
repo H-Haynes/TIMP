@@ -1,6 +1,7 @@
 {
   "name": "vite-electron-builder",
   "private": true,
+  "version": "1.0.0",
   "engines": {
     "node": ">=v16.13",
     "npm": ">=8.1"
@@ -23,7 +24,9 @@
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
     "typecheck:preload": "tsc --noEmit -p packages/preload/tsconfig.json",
     "typecheck:renderer": "npm run build:preload:types && vue-tsc --noEmit -p packages/renderer/tsconfig.json",
-    "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer"
+    "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer",
+    "electron": "electron .",
+    "dist": "npm run build & electron-builder"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.10.2",
@@ -33,7 +36,7 @@
     "cross-env": "7.0.3",
     "dts-for-context-bridge": "0.7.1",
     "electron": "17.0.0",
-    "electron-builder": "22.14.13",
+    "electron-builder": "^22.14.13",
     "electron-devtools-installer": "3.2.0",
     "eslint": "8.8.0",
     "eslint-plugin-vue": "8.4.1",
@@ -61,7 +64,43 @@
     "less": "^4.1.2",
     "mitt": "^3.0.0",
     "postcss-import": "^14.0.2",
+    "source-map-support": "^0.5.21",
     "vue": "3.2.29",
     "vue-router": "4"
+  },
+  "build": {
+    "appId": "com.electron.app",
+    "copyright": "CopyRight XingHe Team©️2022",
+    "productName": "TIMP音乐平台",
+    "files": [
+      "!dist/**/*"
+    ],
+    "mac": {
+      "icon": "buildResources/icon.ins",
+      "category": "public.app-category.productivity",
+      "artifactName": "${productName}_${version}.${ext}",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "buildResources/icon.ins",
+      "artifactName": "${productName}_${version}.${ext}",
+      "verifyUpdateCodeSignature": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "createDesktopShortcut": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

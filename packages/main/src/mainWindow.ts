@@ -37,7 +37,7 @@ async function createWindow() {
 
 
   await browserWindow.loadURL(pageUrl);
-
+  browserWindow.webContents.openDevTools();
   return browserWindow;
 }
 

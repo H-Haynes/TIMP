@@ -25,7 +25,7 @@ body {
 }
 .el-message {
   position: fixed;
-  top: 0px;
+  top: 0px !important;
   left: 0;
   width: 100%;
   text-align: center;

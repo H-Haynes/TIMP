@@ -43,7 +43,7 @@
           {{ category.name }}
         </li>
         <li
-          v-for="category in categoryList.slice(10,-1)"
+          v-for="category in categoryList.slice(10,categoryList.length-1)"
           v-show="showAllCategory"
           :key="category.category"
           class="px-2 border mr-2 mb-2 hover:bg-gray-500 cursor-pointer border-gray-500"

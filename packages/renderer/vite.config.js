@@ -40,7 +40,8 @@ const config = {
     },
   },
   build: {
-    sourcemap: true,
+    // sourcemap: true,
+    sourcemap: 'inline',
     target: `chrome${chrome}`,
     outDir: 'dist',
     assetsDir: '.',
