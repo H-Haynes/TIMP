@@ -15,22 +15,28 @@
       <div class="flex overflow-hidden flex-1 flex-col w-full item-center mx-2">
         <div class="flex">
           <p class="flex-1 truncate">
-            {{ playInfo.name }}
+            {{ playInfo.name || "TIMP，随心听曲"}}
           </p>
           <i class="iconfont icon-icon-xian- text-sm ml-2 cursor-pointer" />
           <i class="iconfont icon-xunhuan text--sm ml-2 cursor-pointer" />
         </div>
         <p class="flex justify-between items-ceter text-xs mt-1 text-gray-500">
           <span>{{ $filters.secToMin(currentTime) }}</span>
-          <span class="truncate mx-2">{{ playInfo.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'') }}-{{ playInfo.name }}</span>
+          <span v-if="playInfo.name" class="truncate mx-2">{{ playInfo.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'') }}-{{ playInfo.name }}</span>
+          <span v-else>暂无歌曲</span>
           <span>{{ $filters.durationFormat(playInfo.time) }}</span>
         </p>
-        <el-progress
+        <!-- <el-progress
           :stroke-width="3"
           color="orange"
           :percentage="currentTime * 1000 / playInfo.time * 100"
           class="mt-1"
           :show-text="false"
+        /> -->
+        <drag-progress
+          class="my-1"
+          :value="playInfo.time ? currentTime * 1000 / playInfo.time * 100 : 0"
+          @update:value="setCurrentTime"
         />
       </div>
     </div>
@@ -60,7 +66,6 @@
   import { getSongUrlQQ, getSongPicQQ } from '../api/qq';
   import {getSongUrlWy} from '/@/api/netease';
   import { ElMessage } from 'element-plus';
-  import DragProgress from '/@/components/DragProgress.vue';
   const $eventBus:any = inject('$eventBus');
   const $filters = inject('$filters');
   const playSrc = ref('');
@@ -80,6 +85,7 @@
         playSrc.value = result.data.data[0].url;
       }
     }else if(type == 2){
+      console.log(song);
       const result = await getSongUrlQQ(song.id);
       // 获取播放地址
       if(!result.data.data.playUrl[song.id].error){
@@ -87,30 +93,34 @@
       }else{
         return ElMessage.error(result.data.data.playUrl[song.id].error);
       }
-      playInfo.value = song;
+      
       // 获取歌曲信息
       const infoResult = await getSongPicQQ(song.id);
       if(infoResult.data.response.code === 0){
         playInfo.value.picUrl = infoResult.data.response.data.imageUrl;
       }
     }
+    playInfo.value = song;
   });
-  
-  // const changeVolume = e =>{
-  //   console.log(e)
-  //   // if(audio.value){
-  //   //   audio.value.volume = e/100;
-  //   // }
-  // };
+  const setCurrentTime = (percent:number) =>{
+    console.log(percent,playInfo.value.time);
+    currentTime.value = percent/100 * playInfo.value.time / 1000;
+    if(audio.value){
+      audio.value.currentTime = currentTime.value;
+      if(audio.value.paused){
+        audio.value.play();
+      }
+    }
+  };
 
   onMounted(()=>{
     if(audio.value){
       // 获取当前音量
       audioVolume.value = audio.value.volume * 100;
 
-          // audio.value.addEventListener('timeupdate',(e)=>{
-          //   currentTime.value = e.target.currentTime;
-          // });
+      audio.value.addEventListener('timeupdate',(e:any)=>{
+        currentTime.value = e.target.currentTime;
+      });
     }
   });
   watchEffect(()=>{
@@ -118,6 +128,7 @@
       audio.value.volume = audioVolume.value / 100;
     }
   });
+
 </script>
 <style lang="">
     

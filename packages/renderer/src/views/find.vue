@@ -25,7 +25,7 @@
               :src="list.picUrl"
             />
             <p class="mt-1 text-left text-xs h-10 overflow-hidden text-gray-200 font-medium">
-              {{ list.name }}{{list.id}}
+              {{ list.name }}
             </p>
           </router-link>
         </li>
