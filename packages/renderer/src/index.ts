@@ -34,6 +34,12 @@ const $filters = {
         const addZero = (num) => num < 10 ? '0' + num : num;
         return `${addZero(minute)}:${addZero(second)}`;
     },
+    countFormat:(value) =>{
+        if(isNaN(+value)) return 0;
+        if(value < 10000) return value;
+        if(value < 100000000) return Math.floor(value / 10000) + '万';
+        return Math.floor(value / 100000000) + '亿';
+    }
 };
 app.provide('$filters',$filters);
 app.provide('$eventBus',mitt());

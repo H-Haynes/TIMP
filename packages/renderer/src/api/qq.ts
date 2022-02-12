@@ -57,3 +57,20 @@ export const getRankDetailQQ = (id:number) => {
 export const searchQQ = (keyword:string) => {
     return axios.get(`${prefix}/getSmartbox?key=${keyword}&limit=30`);
 };
+
+// 获取电台列表
+
+export const getRadioListQQ = () => {
+    return axios.get(`${prefix}/getRadioLists`);
+};
+
+// 获取mv列表
+
+export const getMvQQ = (page=1) => {
+    return axios.get(`${prefix}/getMv?page=${page}&area_id=16&limit=30&version_id=7`);
+};
+
+// 获取mv数据
+export const getMvDataQQ = (id:number|string) => {
+    return axios.get(`${prefix}/getMvPlay?vid=${id}`);
+};

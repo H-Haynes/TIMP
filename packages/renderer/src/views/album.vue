@@ -60,6 +60,7 @@
             </el-tooltip>
             <i
               v-if="scope.row.mv"
+              @click="playMv(scope.row.mv)"
               class="iconfont ml-2 icon-mv cursor-pointer text-red-500"
             />
           </template>
@@ -108,11 +109,12 @@
 import { ref, watchEffect, inject } from 'vue';
 import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
-import { useRoute } from 'vue-router';
+import { useRoute,useRouter } from 'vue-router';
 const $filters = inject('$filters');
 const $eventBus:any = inject('$eventBus');
 const loading = ref(false);
 const route = useRoute();
+const router = useRouter();
 const albumInfo = ref({
   name: '',
   id: '',
@@ -129,7 +131,7 @@ const albumInfo = ref({
   },
 });
 const songList = ref([]);
-
+const platform = ref(route.query.type);
 const getWyAlbum = async(id:string) =>{
   const res = await getAlbumDetailWy(id);
   if(res.data.code === 200){
@@ -229,6 +231,16 @@ const playSong = (song:any) => {
     $eventBus.emit('playSong',{
       id:song.id,
       type:+(route.query.type as unknown as number),
+    });
+};
+
+const playMv = (id:any) => {
+    router.push({
+      path:'/video/player',
+      query:{
+        id,
+        type:+(route.query.type as unknown as number),
+      },
     });
 };
 </script>

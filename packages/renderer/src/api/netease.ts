@@ -52,3 +52,33 @@ export const searchWy = (keyword:string) => {
     return axios.get(`${prefix}/search/search/multimatch?keywords=${keyword}`);
     // return axios.get(`${prefix}/search/suggest?keywords=${keyword}`);
 };
+
+// 获取mv列表
+
+export const getMvWy = (page:number) =>{
+    return axios.get(`${prefix}/mv/all?offset=${(page-1) * 30}`);
+};
+
+// 获取mv数据
+
+export const getMvDataWy = (id) => {
+    return axios.get(`${prefix}/mv/detail?mvid=${id}`);
+};
+
+// 获取mv地址
+
+export const getMvUrlWy = (id) => {
+    return axios.get(`${prefix}/mv/url?id=${id}`);
+};
+
+// 获取视频详情数据
+export const getVideoDataWy = (id) => {
+    return axios.get(`${prefix}/video/detail?id=${id}`);
+};
+
+// 获取视频播放地址
+
+export const getVideoUrlWy = (id) => {
+    return axios.get(`${prefix}/video/url?id=${id}`);
+};
+

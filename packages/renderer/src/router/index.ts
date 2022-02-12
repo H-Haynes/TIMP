@@ -27,7 +27,20 @@ const router = createRouter({
                 {
                     path:'video',
                     name:'video',
-                    component: () => import('/@/views/video.vue'),
+                    component: () => import('/@/views/video/index.vue'),
+                    redirect:'/video/list',
+                    children:[
+                        {
+                            name:'videoList',
+                            path:'list',
+                            component: () => import('/@/views/video/list.vue'),
+                        },
+                        {
+                            name:'videoPlayer',
+                            path:'player',
+                            component: () => import('/@/views/video/player.vue'),
+                        }
+                    ]
                 },
             ],
         },
