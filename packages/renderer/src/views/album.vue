@@ -1,5 +1,5 @@
 <template>
-  <div class="px-8 flex flex-col h-full overflow-y-scroll"  v-loading.lock="loading" element-loading-background="rgba(0,0,0,.7)">
+  <div  class="px-8 flex flex-col h-full overflow-y-scroll"  v-loading.lock="loading" element-loading-background="rgba(0,0,0,.7)">
     <div class="h-16 w-full flex-shrink-0"></div>
     <div class="flex-1 overflow-y-scroll">
       <div class="flex h-40 overflow-hidden">
@@ -60,7 +60,7 @@
             </el-tooltip>
             <i
               v-if="scope.row.mv"
-              @click="playMv(scope.row.mv)"
+              @click="playMv(scope.row.mv,scope.row.type)"
               class="iconfont ml-2 icon-mv cursor-pointer text-red-500"
             />
           </template>
@@ -114,7 +114,7 @@
   </div>    
 </template>
 <script lang="ts" setup>
-import { ref, watchEffect, inject,toRaw } from 'vue';
+import { ref, watchEffect, inject,toRaw, } from 'vue';
 import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute,useRouter } from 'vue-router';
@@ -143,6 +143,7 @@ const songList = ref([]);
 const platform = ref(+route.query.type);
 const likeList = inject('likeList');
 const likeAlbum = inject('likeAlbum');
+
 // if(platform.value == 0 && ){
   
 // }
@@ -253,12 +254,12 @@ const playSong = (song:any) => {
     });
 };
 
-const playMv = (id:any) => {
+const playMv = (id:any,type) => {
     router.push({
       path:'/video/player',
       query:{
         id,
-        type:+(route.query.type as unknown as number),
+        type:type ||  platform.value,
       },
     });
 };
@@ -272,6 +273,7 @@ const addLike = (song:any) => {
 const unLike = (id:string) => {
   $eventBus.emit('unLike',id);
 };
+
 
 </script>
 <style lang="less">

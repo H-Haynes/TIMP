@@ -10,7 +10,7 @@ import clickOutside from '/@/directives/clickOutside';
 const app = createApp(App);
 const $filters = {
     timeFormat:(value) =>{
-        if(!value) return '';
+        if(!value) return '-';
         const date = new Date(value);
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
@@ -43,6 +43,7 @@ const $filters = {
 };
 app.provide('$filters',$filters);
 app.provide('$eventBus',mitt());
+app.provide('app',app);
 app.use(clickOutside);
 app.use(router);
 app.mount('#app');

@@ -8,7 +8,7 @@
       <layout-nav />
       <div class="flex-1  bg-primary-100 overflow-hidden">
         <n-search />
-        <router-view />
+        <router-view :key="route.query.type + route.query.id" />
       </div>
     </div>
     <audio-player />
@@ -20,6 +20,7 @@ import AudioPlayer from '@/layouts/audio-player.vue';
 import nSearch from '../components/n-search.vue';
 import indexedDB from '/@/indexedDB';
 import {ref,provide,inject} from 'vue';
+import {useRoute} from 'vue-router';
 const dbOnline = ref(false); // 数据库是否在线;
 const likeAlbum = ref({
   title:"我喜欢",
@@ -38,6 +39,7 @@ const likeAlbum = ref({
     nickname:"我"
   }
 });
+const route = useRoute();
 const likeList = ref([]);
 const $eventBus:any = inject('$eventBus');
 

@@ -10,19 +10,34 @@
     <div class="py-4 text-left">
       <span class="text-sm text-gray-600 px-5">分类</span>
       <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
-        <router-link v-for="nav in navList" :key="nav.path" :to="{path:nav.path}" v-slot="{isActive}">
-          <li class="hover:bg-gray-600 cursor-pointer px-4" :class="{'route-link-active':isActive}">
-            <i class="iconfont text-xs" :class="nav.icon" />
+        <router-link
+          v-for="nav in navList"
+          :key="nav.path"
+          v-slot="{isActive}"
+          :to="{path:nav.path}"
+        >
+          <li
+            class="hover:bg-gray-600 cursor-pointer px-4"
+            :class="{'route-link-active':isActive}"
+          >
+            <i
+              class="iconfont text-xs"
+              :class="nav.icon"
+            />
             {{ nav.name }}
           </li>
         </router-link>
       </ul>
       <span class="text-sm text-gray-600 px-5 mt-5">歌单</span>
-      <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
-        <router-link :to="{path:'/album',query:{type:item.type,id:item.id}}" v-for="item in mineList" :key="item.id">
-          <li class="hover:bg-gray-600 cursor-pointer px-4"  >
+      <ul
+        v-for="item in mineList"
+        :key="item.id"
+        class="text-white-300 text-sm px-4 leading-8 text-left mt-2"
+      >
+        <router-link :to="{path:'/album',query:{type:item.type,id:item.id}}">
+          <li class="hover:bg-gray-600 cursor-pointer px-4">
             <i class="iconfont icon-zhuanji text-xs" />
-            {{item.name}}
+            {{ item.name }}
           </li>
         </router-link>
       </ul>
@@ -34,17 +49,17 @@
   import {useRouter} from 'vue-router';
   const mineList = ref([
     {
-      name:"我喜欢",
+      name:'我喜欢',
       id:0,
-      type:0
-    }
+      type:0,
+    },
   ]);
   const router = useRouter();
   const navList = ref([
     {
       name:'发现音乐',
       path:'/find',
-      icon:"icon-yinle"
+      icon:'icon-yinle',
     },
     // {
     //   name:'私人FM',
@@ -53,9 +68,11 @@
     {
       name:'视频',
       path:'/video',
-      icon:"icon-mv"
+      icon:'icon-mv',
     },
   ]);
+
+
 </script>
 <style lang="less" scoped>
   .route-link-active,.route-link-exact-active {
