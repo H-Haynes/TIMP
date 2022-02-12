@@ -19,10 +19,12 @@
       </ul>
       <span class="text-sm text-gray-600 px-5 mt-5">歌单</span>
       <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
-        <li class="hover:bg-gray-600 cursor-pointer px-4" v-for="item in mineList" :key="item.id">
-          <i class="iconfont icon-zhuanji text-xs" />
-          {{item.name}}
-        </li>
+        <router-link :to="{path:'/album',query:{type:item.type,id:item.id}}" v-for="item in mineList" :key="item.id">
+          <li class="hover:bg-gray-600 cursor-pointer px-4"  >
+            <i class="iconfont icon-zhuanji text-xs" />
+            {{item.name}}
+          </li>
+        </router-link>
       </ul>
     </div>
   </div>
@@ -32,8 +34,9 @@
   import {useRouter} from 'vue-router';
   const mineList = ref([
     {
-      name:"我的歌单",
+      name:"我喜欢",
       id:0,
+      type:0
     }
   ]);
   const router = useRouter();

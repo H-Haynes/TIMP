@@ -8,14 +8,14 @@
           class="w-40 h-40 rounded flex-shrink-0"
         />
         <div class="ml-4 text-gray-300 text-xl text-left flex flex-col">
-          <strong>{{ albumInfo.name }}</strong>
+          <strong>{{ albumInfo.name || albumInfo.title }}</strong>
           <div class="text-gray-400 flex mt-2 justify-between items-center text-xs">
             <div class="flex items-center ">
               <el-avatar
                 :size="16"
-                :src="albumInfo.creator.avatar"
+                :src="albumInfo?.creator?.avatar"
               />
-              <span class="text-sm ml-2 text-blue-300">{{ albumInfo.creator.nickname }}</span>
+              <span class="text-sm ml-2 text-blue-300">{{ albumInfo.creator?.nickname }}</span>
             </div>
             <p>最近更新：{{ $filters.timeFormat(albumInfo.updateTime) }}</p>
           </div>
@@ -94,6 +94,14 @@
             {{ $filters.durationFormat(scope.row.time) }}
           </template>
         </el-table-column>
+        <el-table-column label="操作">
+          <template #default="scope">
+            <i @click="addLike(scope.row)" class="iconfont icon-xihuan cursor-pointer ml-2" v-if="!likeList.some(ele=>ele.id === scope.row.id)"></i>
+            <i @click="unLike(scope.row.id)" class="iconfont text-red-500 cursor-pointer icon-chuangyikongjianICON_fuzhi- ml-2" v-else/>
+            <i class="iconfont icon-icon-xian- cursor-pointer ml-2" />
+            <i class="iconfont icon-delete cursor-pointer ml-2" v-show="albumId==0"/>
+          </template>
+        </el-table-column>
         <template #empty>
           <div class="bg-primary-200 w-full h-80 flex justify-center items-center flex-col">
               <i class="iconfont icon-zanwushuju text-7xl" />
@@ -106,7 +114,7 @@
   </div>    
 </template>
 <script lang="ts" setup>
-import { ref, watchEffect, inject ,onBeforeUnmount} from 'vue';
+import { ref, watchEffect, inject,toRaw } from 'vue';
 import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute,useRouter } from 'vue-router';
@@ -115,6 +123,7 @@ const $eventBus:any = inject('$eventBus');
 const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
+const albumId = ref(route.query.id);
 const albumInfo = ref({
   name: '',
   id: '',
@@ -131,7 +140,13 @@ const albumInfo = ref({
   },
 });
 const songList = ref([]);
-const platform = ref(route.query.type);
+const platform = ref(+route.query.type);
+const likeList = inject('likeList');
+const likeAlbum = inject('likeAlbum');
+// if(platform.value == 0 && ){
+  
+// }
+
 const getWyAlbum = async(id:string) =>{
   const res = await getAlbumDetailWy(id);
   if(res.data.code === 200){
@@ -216,7 +231,11 @@ const getQQRankDetail = async(id:number) => {
 
 watchEffect(async() => {
   loading.value = true;
-  if (route.query.type && +route.query.type == 1) {
+  if(albumId.value == 0){
+    albumInfo.value = likeAlbum;
+    // console.log(likeList);
+    songList.value = likeList.value;
+  }else if (route.query.type && +route.query.type == 1) {
     await getWyAlbum(route.query.id as string);
   }else if(route.query.type && +route.query.type == 2){
     if(!route.query.isRank){
@@ -230,7 +249,7 @@ watchEffect(async() => {
 const playSong = (song:any) => {
     $eventBus.emit('playSong',{
       id:song.id,
-      type:+(route.query.type as unknown as number),
+      type:song.type || platform.value,
     });
 };
 
@@ -244,6 +263,15 @@ const playMv = (id:any) => {
     });
 };
 
+const addLike = (song:any) => {
+  let info = toRaw(song);
+  info.type = platform.value;
+  $eventBus.emit('addLike',info);
+};
+
+const unLike = (id:string) => {
+  $eventBus.emit('unLike',id);
+};
 
 </script>
 <style lang="less">

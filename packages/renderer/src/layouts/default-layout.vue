@@ -19,19 +19,60 @@ import layoutNav from '@/layouts/layout-nav.vue';
 import AudioPlayer from '@/layouts/audio-player.vue';
 import nSearch from '../components/n-search.vue';
 import indexedDB from '/@/indexedDB';
-import {ref} from 'vue';
+import {ref,provide,inject} from 'vue';
 const dbOnline = ref(false); // 数据库是否在线;
+const likeAlbum = ref({
+  title:"我喜欢",
+  id:0,
+  description:"我喜欢的歌",
+  subscribedCount:1,
+  trackCount:1,
+  coverImg:"",
+  createTime:"",
+  updateTime:"",
+  avatar:"",
+  custom:1,
+  creator:{
+    avatar:"",
+    desc:"",
+    nickname:"我"
+  }
+});
+const likeList = ref([]);
+const $eventBus:any = inject('$eventBus');
+
+provide('likeAlbum',likeAlbum.value);
+provide('likeList',likeList);
+
+
+// 获取我喜欢
+const getLikeList = () => {
+  indexedDB.get('like').then(res=>{
+    likeList.value = res;
+  });
+};
+
 indexedDB.openDB('TIMP',1).then(()=>{
   dbOnline.value = true;
-  console.log('数据库在线');
+  console.log('*****数据库已连接*****');
+}).then(()=>{
+  // 从数据库获取数据
+  getLikeList();
+});
+
+$eventBus.on('addLike',song =>{
+  indexedDB.update('like',song).then(()=>{
+    getLikeList();
+  });
+});
+
+$eventBus.on('unLike',id => {
+  indexedDB.remove('like',id).then(()=>{
+    getLikeList();
+  });
 });
 
 
-
-
-// 从数据库获取数据
-
-// 如果不存在"我喜欢"歌单，创建
 
 // 监听添加歌曲到歌单事件 
 
@@ -42,18 +83,6 @@ indexedDB.openDB('TIMP',1).then(()=>{
 
 // 监听删除歌单事件 [分自建歌单与网路歌单]
 
-setTimeout(()=>{
-  // indexedDB.add('music', {
-  //   id:789,
-  //   name:"我喜欢",
-  //   list:[123,2999],
-  // }).then(res=>{
-  //   console.log(res);
-  // });
-  indexedDB.get('like').then(res=>{
-    console.log(res);
-  });
-},1000);
 
 // 构建本地歌单
 
