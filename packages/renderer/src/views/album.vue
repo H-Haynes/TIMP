@@ -106,7 +106,7 @@
   </div>    
 </template>
 <script lang="ts" setup>
-import { ref, watchEffect, inject } from 'vue';
+import { ref, watchEffect, inject ,onBeforeUnmount} from 'vue';
 import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute,useRouter } from 'vue-router';
@@ -243,6 +243,8 @@ const playMv = (id:any) => {
       },
     });
 };
+
+
 </script>
 <style lang="less">
 .el-table__row--striped {

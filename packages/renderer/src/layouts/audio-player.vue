@@ -2,7 +2,7 @@
   <div class="h-16 flex justify-between items-center bg-primary-100 border-t border-primary-500 px-5">
     <div class="flex text-gray-400 items-center h-full ">
       <i class="iconfont icon-shangyishou mx-4  text-xl cursor-pointer" />
-      <i class="iconfont icon-bofang mx-4 text-xl cursor-pointer" />
+      <i class="iconfont  mx-4 text-xl cursor-pointer" @click="toggleState" :class="{'icon-zantingtingzhi':audioState === 'play','icon-bofang':audioState === 'pause'}"/>
       <i class="iconfont icon-xiayishou mx-4 text-xl cursor-pointer" />
     </div>
     <div class="flex w-96  items-center text-sm text-gray-400 h-full">
@@ -29,13 +29,6 @@
           <span v-else>暂无歌曲</span>
           <span>{{ $filters.durationFormat(playInfo.time) }}</span>
         </p>
-        <!-- <el-progress
-          :stroke-width="3"
-          color="orange"
-          :percentage="currentTime * 1000 / playInfo.time * 100"
-          class="mt-1"
-          :show-text="false"
-        /> -->
         <drag-progress
           class="my-1"
           :value="playInfo.time ? currentTime * 1000 / playInfo.time * 100 : 0"
@@ -75,6 +68,7 @@
   const audio:Ref<null|HTMLAudioElement> = ref(null);
   const currentTime = ref(0);
   const audioVolume = ref(1);
+  const audioState = ref('pause');
   const playInfo = ref({
     name:'',
     art:[],
@@ -144,11 +138,17 @@
   
 
 
+  // 监听播放歌曲
   $eventBus.on('playSong',async ({id:songId,type}:any)=>{
     const songUrl = await getSongUrl(songId,type);
     playSrc.value = songUrl;
     playInfo.value = await getSongInfo(songId,type);
       
+  });
+
+  // 监听暂停歌曲
+  $eventBus.on('pauseSong',()=>{
+    audio.value?.pause();
   });
   const setCurrentTime = (percent:number) =>{
     console.log(percent,playInfo.value.time);
@@ -169,6 +169,20 @@
       audio.value.addEventListener('timeupdate',(e:any)=>{
         currentTime.value = e.target.currentTime;
       });
+      // audio事件监听
+      audio.value.addEventListener('play',()=>{
+        audioState.value = 'play';
+      });
+
+      audio.value.addEventListener('pause',()=>{
+        audioState.value = 'pause';
+      });
+
+      audio.value.addEventListener('ended',()=>{
+        // 将事件设置为0
+        currentTime.value = 0;
+        audioState.value = 'pause';
+      });
     }
   });
   watchEffect(()=>{
@@ -176,6 +190,16 @@
       audio.value.volume = audioVolume.value / 100;
     }
   });
+
+  // 切换播放状态
+  const toggleState = () => {
+    if(audioState.value === 'play'){
+      audio.value?.pause();
+    }else{
+      audio.value?.play();
+    }
+  };
+  
 
 </script>
 <style lang="">

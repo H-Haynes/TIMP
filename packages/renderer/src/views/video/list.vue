@@ -1,6 +1,7 @@
 <template lang="">
-  <div class="overflow-y-scroll h-full flex flex-col">
-    <ul class="flex flex-wrap justify-around mt-16 overflow-y-scroll">
+  <div class="overflow-y-scroll h-full flex flex-col" v-loading="loading" element-loading-background="rgba(0,0,0,.7)">
+      {{wrapWidth}}
+    <ul class="flex flex-wrap justify-around mt-16 overflow-y-scroll" @scroll="loadMore" ref="listWrap">
     <router-link v-for="mv in mvList" :key="mv.id" :to="{path:'/video/player',query:{type:1,id:mv.id}}">
       <li class="w-44 h-44 rounded overflow-hidden  m-2 relative cursor-pointer">
         <img
@@ -17,19 +18,24 @@
         </p>
       </li>
       </router-link>
+        <li class="w-44 h-44 rounded overflow-hidden  m-2 empty" v-for="item in emptyNum" :key="item"></li>
     </ul>
   </div>
 </template>
 <script lang="ts"  setup>
-    import {ref, watchEffect,inject} from   'vue';
+    import type { Ref} from "vue";
+    import {ref, watchEffect,inject,onMounted,nextTick} from   'vue';
     import { getMvWy } from '/@/api/netease';
     // import { getMvQQ } from '../api/qq';
 
     const mvList = ref([]);
     const wyPage = ref(1);
+    const loading = ref(false);
     // const qqPage = ref(1);
+    const listWrap:Ref<null|HTMLUListElement> = ref(null)
     const $filters:any = inject('$filters');
     const getMvListWy = async (page=1) =>{
+        loading.value = true;
         wyPage.value = page;
         const res = await getMvWy(page);
         let list = [];
@@ -44,7 +50,10 @@
             }));
         }
         mvList.value = wyPage.value === 1 ? list : mvList.value.concat(list);
+        loading.value = false;
     };
+    const emptyNum = ref(0);
+    const wrapWidth = ref(0);
 
     // QQ音乐 Mv列表无返回
     // const getMvListQQ = async(page = 1) => {
@@ -56,10 +65,43 @@
     //     }
     // };
 
+    // watchEffect(async()=>{
+
+    //     mvList.value = wyPage.value === 1 ? await getMvListWy(wyPage.value) : mvList.value.concat(await getMvListWy(wyPage.value));
+        
+    //     // getMvListQQ(qqPage.value);
+    // });
+
+
     watchEffect(()=>{
-        getMvListWy(wyPage.value);
-        // getMvListQQ(qqPage.value);
+      // 计算空的li个数
+      // 获取ul宽度，获取li宽度，然后计算一行的长度,根据list的个数，算出空的个数；
+      // 获取跟节点字体大小
+      const fontSize = parseInt(document.documentElement.style.fontSize) || 16;
+      const itemWidth = fontSize * 11; // w-44 等于 11rem
+      // 一行多少个
+      const singleLineNum = Math.floor(wrapWidth.value / (itemWidth + fontSize * 0.55* 2)) ; // mx-2 等于 0.5rem *2
+      emptyNum.value =  mvList.value.length % singleLineNum || 0;
     });
+
+    onMounted(()=>{
+        getMvListWy(wyPage.value);
+        nextTick(()=>{
+            wrapWidth.value = listWrap.value?.offsetWidth || 0;
+        });
+        window.onresize=()=>{
+            wrapWidth.value = listWrap.value?.offsetWidth || 0;
+        };
+    });
+
+    const loadMore = (e) =>{
+        const scrollDis = e.target.scrollHeight - e.target.offsetHeight; // 可滚动距离
+        if(scrollDis - e.target.scrollTop  < 100 && loading.value === false ){
+            console.log('滚动到底部');
+            // wyPage.value++;
+            getMvListWy(wyPage.value + 1);
+        }
+    };
 </script>
 <style lang="">
     

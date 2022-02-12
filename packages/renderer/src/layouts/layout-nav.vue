@@ -9,8 +9,8 @@
     </div>
     <div class="py-4">
       <ul class="text-white-300 text-sm px-4 leading-8 text-left">
-        <router-link v-for="nav in navList" :key="nav.path" :to="{path:nav.path}">
-          <li class="hover:bg-gray-600 cursor-pointer px-4">
+        <router-link v-for="nav in navList" :key="nav.path" :to="{path:nav.path}" v-slot="{isActive}">
+          <li class="hover:bg-gray-600 cursor-pointer px-4" :class="{'route-link-active':isActive}">
             {{ nav.name }}
           </li>
         </router-link>
@@ -37,5 +37,9 @@
     },
   ]);
 </script>
-<style lang="">
+<style lang="less" scoped>
+  .route-link-active,.route-link-exact-active {
+    color: #fff ;
+    background-color: rgb(115, 115, 119);
+  }
 </style>
