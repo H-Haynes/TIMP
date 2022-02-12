@@ -1,29 +1,44 @@
 <template lang="">
-  <div class="overflow-y-scroll h-full flex flex-col" v-loading="loading" element-loading-background="rgba(0,0,0,.7)">
-      {{wrapWidth}}
-    <ul class="flex flex-wrap justify-around mt-16 overflow-y-scroll" @scroll="loadMore" ref="listWrap">
-    <router-link v-for="mv in mvList" :key="mv.id" :to="{path:'/video/player',query:{type:1,id:mv.id}}">
-      <li class="w-44 h-44 rounded overflow-hidden  m-2 relative cursor-pointer">
-        <img
-          :src="mv.pic"
-          class="w-full h-full object-cover"
-        >
-        <span class="absolute left-1 top-1 text-xs text-white ">{{ $filters.durationFormat(mv.time) }}</span>
-        <div class="absolute right-1 top-1 text-xs text-gray-300">
-          <i class="iconfont icon-bofang2 text-xs mr-1" />
-          <span>{{ $filters.countFormat(mv.playCount) }}</span>
-        </div>
-        <p class="absolute bottom-0 leading-5 px-2 left-0 text-xs text-center truncate bg-gray-500 bg-opacity-50 text-white w-full">
-          {{ mv.name }}
-        </p>
-      </li>
+  <div
+    v-loading="loading"
+    class="overflow-y-scroll h-full flex flex-col"
+    element-loading-background="rgba(0,0,0,.7)"
+  >
+    <ul
+      ref="listWrap"
+      class="flex flex-wrap justify-around mt-16 overflow-y-scroll"
+      @scroll="loadMore"
+    >
+      <router-link
+        v-for="mv in mvList"
+        :key="mv.id"
+        :to="{path:'/video/player',query:{type:1,id:mv.id}}"
+      >
+        <li class="w-44 h-44 rounded overflow-hidden  m-2 relative cursor-pointer">
+          <img
+            :src="mv.pic"
+            class="w-full h-full object-cover"
+          >
+          <span class="absolute left-1 top-1 text-xs text-white ">{{ $filters.durationFormat(mv.time) }}</span>
+          <div class="absolute right-1 top-1 text-xs text-gray-300">
+            <i class="iconfont icon-bofang2 text-xs mr-1" />
+            <span>{{ $filters.countFormat(mv.playCount) }}</span>
+          </div>
+          <p class="absolute bottom-0 leading-5 px-2 left-0 text-xs text-center truncate bg-gray-500 bg-opacity-50 text-white w-full">
+            {{ mv.name }}
+          </p>
+        </li>
       </router-link>
-        <li class="w-44 h-44 rounded overflow-hidden  m-2 empty" v-for="item in emptyNum" :key="item"></li>
+      <li
+        v-for="item in emptyNum"
+        :key="item"
+        class="w-44 h-44 rounded overflow-hidden  m-2 empty"
+      ></li>
     </ul>
   </div>
 </template>
 <script lang="ts"  setup>
-    import type { Ref} from "vue";
+    import type { Ref} from 'vue';
     import {ref, watchEffect,inject,onMounted,nextTick} from   'vue';
     import { getMvWy } from '/@/api/netease';
     // import { getMvQQ } from '../api/qq';
@@ -32,7 +47,7 @@
     const wyPage = ref(1);
     const loading = ref(false);
     // const qqPage = ref(1);
-    const listWrap:Ref<null|HTMLUListElement> = ref(null)
+    const listWrap:Ref<null|HTMLUListElement> = ref(null);
     const $filters:any = inject('$filters');
     const getMvListWy = async (page=1) =>{
         loading.value = true;

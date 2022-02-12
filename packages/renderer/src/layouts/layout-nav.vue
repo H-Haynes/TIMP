@@ -7,13 +7,22 @@
       />
       <i class="iconfont icon-qianjin mr-4 cursor-pointer text-xl" />
     </div>
-    <div class="py-4">
-      <ul class="text-white-300 text-sm px-4 leading-8 text-left">
+    <div class="py-4 text-left">
+      <span class="text-sm text-gray-600 px-5">分类</span>
+      <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
         <router-link v-for="nav in navList" :key="nav.path" :to="{path:nav.path}" v-slot="{isActive}">
           <li class="hover:bg-gray-600 cursor-pointer px-4" :class="{'route-link-active':isActive}">
+            <i class="iconfont text-xs" :class="nav.icon" />
             {{ nav.name }}
           </li>
         </router-link>
+      </ul>
+      <span class="text-sm text-gray-600 px-5 mt-5">歌单</span>
+      <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
+        <li class="hover:bg-gray-600 cursor-pointer px-4" v-for="item in mineList" :key="item.id">
+          <i class="iconfont icon-zhuanji text-xs" />
+          {{item.name}}
+        </li>
       </ul>
     </div>
   </div>
@@ -21,19 +30,27 @@
 <script lang="ts" setup>
   import {ref} from 'vue';
   import {useRouter} from 'vue-router';
+  const mineList = ref([
+    {
+      name:"我的歌单",
+      id:0,
+    }
+  ]);
   const router = useRouter();
   const navList = ref([
     {
       name:'发现音乐',
       path:'/find',
+      icon:"icon-yinle"
     },
-    {
-      name:'私人FM',
-      path:'/radio',
-    },
+    // {
+    //   name:'私人FM',
+    //   path:'/radio',
+    // },
     {
       name:'视频',
       path:'/video',
+      icon:"icon-mv"
     },
   ]);
 </script>

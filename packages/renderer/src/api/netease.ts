@@ -82,3 +82,8 @@ export const getVideoUrlWy = (id) => {
     return axios.get(`${prefix}/video/url?id=${id}`);
 };
 
+// 获取相关视频
+
+export const getRelatedVideoWy = (id) => {
+    return axios.get(`${prefix}/related/allvideo?id=${id}`);
+};
