@@ -1,5 +1,9 @@
 <template>
-  <div  class="px-8 flex flex-col h-full overflow-y-scroll"  v-loading.lock="loading" element-loading-background="rgba(0,0,0,.7)">
+  <div
+    v-loading.lock="loading"
+    class="px-8 flex flex-col h-full overflow-y-scroll"
+    element-loading-background="rgba(0,0,0,.7)"
+  >
     <div class="h-16 w-full flex-shrink-0"></div>
     <div class="flex-1 overflow-y-scroll">
       <div class="flex h-40 overflow-hidden">
@@ -8,7 +12,7 @@
           class="w-40 h-40 rounded flex-shrink-0"
         />
         <div class="ml-4 text-gray-300 text-xl text-left flex flex-col">
-          <strong>{{ albumInfo.name || albumInfo.title }}</strong>
+          <strong>{{ albumInfo?.name || albumInfo?.title }}</strong>
           <div class="text-gray-400 flex mt-2 justify-between items-center text-xs">
             <div class="flex items-center ">
               <el-avatar
@@ -30,98 +34,152 @@
               <i class="iconfont icon-botany2 mr-1" />
               播放全部
             </span>
-            <span @click="addCollect" class="w-24 flex items-center justify-center cursor-pointer hover:bg-gray-600 bg-gray-700 leading-6 mr-3 rounded-xl">
+            <span
+              v-show="platform"
+              class="w-24 flex items-center justify-center cursor-pointer hover:bg-gray-600 bg-gray-700 leading-6 mr-3 rounded-xl"
+              @click="addCollect"
+            >
               <i class="iconfont icon-icon-xian-" />
-              {{myCollect.some(ele=>ele.id == albumId) ? '取消收藏' :'收藏'}}
+              {{ myCollect.some(ele=>ele.id == albumId) ? '取消收藏' :'收藏' }}
             </span>
             <span class="w-24 flex items-center justify-center cursor-pointer leading-6 mr-3 rounded-xl border border-gray-500 hover:border-gray-400">
               <i class="iconfont icon-download" />
               下载全部
             </span>
+
+            <span
+              class="w-24  bg-red-700 flex items-center justify-center cursor-pointer leading-6 mr-3 rounded-xl  border-gray-500 hover:bg-red-600"
+              @click="handleDelCustomAlbum"
+            >
+              删除歌单
+            </span>
           </div>
         </div>
       </div>
-      <el-table
-        class="mt-8"
-        stripe
-        cell-class-name="bg-primary-100 cursor-pointer" 
-        :header-cell-style="{backgroundColor: '#212121 !important'}"
-        :data="songList"
-        @row-dblclick="playSong"
-        :key="albumId"
-      >
-        <el-table-column
-          label="歌曲"
-          prop="name"
-          class="whitespace-nowrap"
+      <div class="relative">
+        <el-table
+          :key="albumId"
+          class="mt-8"
+          stripe 
+          cell-class-name="bg-primary-100 cursor-pointer"
+          :header-cell-style="{backgroundColor: '#212121 !important'}"
+          :data="songList"
+          @row-dblclick="playSong"
         >
-          <template #default="scope">
-            <el-tooltip :content="scope.row.name">
-              <span class="whitespace-nowrap">{{ scope.row.name }}</span>
-            </el-tooltip>
-            <i
-              v-if="scope.row.mv"
-              @click="playMv(scope.row.mv,scope.row.type)"
-              class="iconfont ml-2 icon-mv cursor-pointer text-red-500"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="歌手"
-          class="truncate"
-        >
-          <template #default="scope">
-            <span>{{scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'')}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="专辑">
-          <template #default="scope">
-            <el-tooltip :content="scope.row.album">
-              <span class="whitespace-nowrap overflow-hidden">{{ scope.row.album }}</span>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="时长"
-          prop="name"
-          width="100"
-        >
-          <template #default="scope">
-            {{ $filters.durationFormat(scope.row.time) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作">
-          <template #default="scope">
-            <i @click="addLike(scope.row)" class="iconfont icon-xihuan cursor-pointer ml-2" v-if="!likeList.some(ele=>ele.id === scope.row.id)"></i>
-            <i @click="unLike(scope.row.id)" class="iconfont text-red-500 cursor-pointer icon-chuangyikongjianICON_fuzhi- ml-2" v-else/>
-            <i class="iconfont icon-icon-xian- cursor-pointer ml-2" />
-            <i class="iconfont icon-delete cursor-pointer ml-2" v-show="albumId==0"/>
-          </template>
-        </el-table-column>
-        <template #empty>
-          <div class="bg-primary-200 w-full h-80 flex justify-center items-center flex-col">
+          <el-table-column
+            label="歌曲"
+            prop="name"
+            class="whitespace-nowrap"
+          >
+            <template #default="scope">
+              <el-tooltip :content="scope.row.name">
+                <span class="whitespace-nowrap">{{ scope.row.name }}</span>
+              </el-tooltip>
+              <i
+                v-if="scope.row.mv"
+                class="iconfont ml-2 icon-mv cursor-pointer text-red-500"
+                @click="playMv(scope.row.mv,scope.row.type)"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="歌手"
+            class="truncate"
+          >
+            <template #default="scope">
+              <span>{{ scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="专辑">
+            <template #default="scope">
+              <el-tooltip :content="scope.row.album">
+                <span class="whitespace-nowrap overflow-hidden">{{ scope.row.album }}</span>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="时长"
+            prop="name"
+            width="100"
+          >
+            <template #default="scope">
+              {{ $filters.durationFormat(scope.row.time) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template #default="scope">
+              <i
+                v-if="!likeList.some(ele=>ele.id === scope.row.id)"
+                class="iconfont icon-xihuan cursor-pointer ml-2"
+                @click="addLike(scope.row)"
+              ></i>
+              <i
+                v-else
+                class="iconfont text-red-500 cursor-pointer icon-chuangyikongjianICON_fuzhi- ml-2"
+                @click="unLike(scope.row.id)"
+              />
+              <i
+                class="iconfont icon-icon-xian- cursor-pointer ml-2"
+                @click="handleCollectClick(scope.row)"
+              />
+              <i
+                v-show="+albumId==0"
+                class="iconfont icon-delete cursor-pointer ml-2"
+              />
+            </template>
+          </el-table-column>
+          <template #empty>
+            <div class="bg-primary-200 w-full h-80 flex justify-center items-center flex-col">
               <i class="iconfont icon-zanwushuju text-7xl" />
-             <span class="text-gray-500">没有数据</span>
-          </div>
-         
-        </template>
-      </el-table>
+              <span class="text-gray-500">没有数据</span>
+            </div>
+          </template>
+        </el-table>
+      </div>
+    </div>
+  
+    <div
+      v-show="showAddDialog"
+      class="fixed left-0 top-0 w-full h-full  z-50"
+    >
+      <div
+        class="mask w-full h-full"
+        @click="showAddDialog = false"
+      ></div>
+      <div
+        class="addCustomDialog w-72 h-96 absolute-center fixed p-4 z-50 bg-primary-200 rounded"
+      >
+        <ul style="max-height:200px;overflow-y:scroll">
+          <li
+            v-for="item in myAlbum"
+            :key="item.id"
+            class="text-white cursor-pointer  px-4 truncate text-left text-sm leading-7 hover:bg-gray-700"
+            @click="handleAddCollect(item.id)"
+          >
+            <i class="iconfont icon-zhuanji text-xs mr-2" />
+            {{ item.name||item.title }}
+          </li>
+        </ul>
+      </div>
     </div>
   </div>    
 </template>
 <script lang="ts" setup>
-import { ref, watchEffect, inject,toRaw, } from 'vue';
+import type {Ref} from 'vue';
+import { ref, watchEffect, inject,toRaw } from 'vue';
 import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute,useRouter } from 'vue-router';
 import poster from '@/../assets/poster.jpg';
+import { ElMessageBox,ElMessage } from 'element-plus';
+
 const $filters = inject('$filters');
 const $eventBus:any = inject('$eventBus');
 const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
-const albumId = ref(route.query.id);
-const albumInfo = ref({
+const albumId = ref(route.query.id as string);
+const albumInfo:Ref<any> = ref({
   name: '',
   id: '',
   description: '',
@@ -136,21 +194,21 @@ const albumInfo = ref({
     nickname: '',
   },
 });
-const songList = ref([]);
-const platform = ref(+route.query.type);
-const likeList = inject('likeList');
+const songList:Ref<any[]> = ref([]);
+const platform = ref(+(route.query.type as string));
+const likeList:Ref<any[]> = inject('likeList') as Ref<any[]>;
 const likeAlbum = inject('likeAlbum');
 const myCollect = inject('myCollect');
-// if(platform.value == 0 && ){
-  
-// }
+const myAlbum:Ref<any[]> = inject('myAlbum') as Ref<any[]>;
+const showAddDialog = ref(false);
+const currentSong = ref({});
 
 const getWyAlbum = async(id:string) =>{
   const res = await getAlbumDetailWy(id);
   if(res.data.code === 200){
-    const {name,id,description,subscribedCount,trackCount,coverImgUrl: coverImg,createTime,trackUpdateTime:updateTime,} = res.data.playlist;
-    const {avatarUrl: avatar,description: desc,nickname,} = res.data.playlist.creator;
-    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname,},};
+    const {name,id,description,subscribedCount,trackCount,coverImgUrl: coverImg,createTime,trackUpdateTime:updateTime} = res.data.playlist;
+    const {avatarUrl: avatar,description: desc,nickname} = res.data.playlist.creator;
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname}};
     songList.value = res.data.playlist.tracks.map((ele:any)=>{
           return {name:ele.name,id:ele.id,mv:ele.mv,time:ele.dt,album:ele.al.name,picUrl:ele.al.picUrl,
               art:ele.ar.map((el:any)=>{
@@ -170,7 +228,7 @@ const getQQAlbum = async(id:string) => {
   if(result.data.response.code === 0){
     let {dissname:name,dissid:id,desc:description,visitnum:subscribedCount,cmtnum:trackCount,logo: coverImg,ctime:createTime,ctime:updateTime,headurl:avatar,nick:desc,nickname} = result.data.response.cdlist[0];
     updateTime *= 1000;
-    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname,},};
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname}};
     songList.value = result.data.response.cdlist[0].songlist.map((ele:any)=>{
         return {name:ele.name,id:ele.mid,mv:ele.mv.vid || undefined,time:ele.interval * 1000,album:ele.album.name,picUrl:ele.album.picUrl,
             art:ele.singer.map((el:any)=>{
@@ -190,7 +248,7 @@ const getQQRankDetail = async(id:number) => {
   console.log(result);
   if(result.data.response.code === 0){
     let {title:name,topId:id,titleShare:description,listenNum:subscribedCount,listenNum:trackCount,frontPicUrl: coverImg,updateTime:createTime,updateTime:updateTime,topAlbumURL:avatar,AdShareContent:desc,AdShareContent:nickname} = result.data.response.req_1.data.data;
-    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname,},};
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname}};
     let list = [];
     if(result.data.response.req_1.data.songInfoList.length>0){
       list = result.data.response.req_1.data.songInfoList.map(ele=>({
@@ -227,23 +285,14 @@ const getQQRankDetail = async(id:number) => {
   }
 };
 
-watchEffect(async() => {
-  loading.value = true;
-  if(albumId.value == 0){
-    albumInfo.value = likeAlbum;
-    // console.log(likeList);
-    songList.value = likeList.value;
-  }else if (route.query.type && +route.query.type == 1) {
-    await getWyAlbum(route.query.id as string);
-  }else if(route.query.type && +route.query.type == 2){
-    if(!route.query.isRank){
-      await getQQAlbum(route.query.id as string);
-    }else{
-      await getQQRankDetail(+(route.query.id as unknown as number));
-    }
-  }
-  loading.value = false;
-});
+const getCustomAlbum = async (id:string|number) => {
+  // 从本地歌单查找，将歌单信息和列表重新赋值
+    if(!myAlbum.value) return;
+    const album = myAlbum.value.find(ele=>ele.id == id);
+    albumInfo.value = await toRaw(album);
+    songList.value = album.list ||[];
+};
+
 const playSong = (song:any) => {
     $eventBus.emit('playSong',{
       id:song.id,
@@ -279,10 +328,77 @@ const addCollect = () => {
         id:albumId.value,
         type:platform.value,
         name:albumInfo.value.name,
+        isRank:route.query.isRank,
       });
   }
 
 };
+
+const handleCollectClick = (song) =>{
+  if(myAlbum.value.length ==0){
+    return ElMessage.warning('请先创建歌单');
+  }
+  // 存储歌曲的名称、歌手、专辑、时长、id
+  let info = toRaw(song);
+  currentSong.value = {
+    id:info.id,
+    name:info.name,
+    album:info.album,
+    time:info.time,
+    art:info.art,
+    type:platform.value,
+  };
+  // 显示添加歌单dialog
+  showAddDialog.value = true;
+};
+
+/**
+ * 添加歌曲到自定义歌单
+ * @param albumId 歌单id
+ */
+const handleAddCollect = (albumId:string) =>{
+
+  $eventBus.emit('addSongToAlbum',{
+    id:albumId,
+    song:toRaw(currentSong.value),
+  });
+  showAddDialog.value = false;
+};
+
+/**
+ * 删除自定义歌单
+ */
+const handleDelCustomAlbum = () => {
+  ElMessageBox.confirm('确认删除歌单吗？','删除歌单',{
+    center:true,
+    confirmButtonText:'确定删除',
+    cancelButtonText:'取消',
+    confirmButtonClass:'custom-cancel-btn w-24',
+    cancelButtonClass:'custom-cancel-btn w-24',
+  }).then(()=>{
+    $eventBus.emit('delCustomAlbum',albumId.value);
+  });
+};
+
+watchEffect(async() => {
+  loading.value = true;
+  if(+albumId.value == 0 && platform.value ==0){
+    // 我喜欢
+    albumInfo.value = likeAlbum;
+    songList.value = likeList.value;
+  }else if (platform.value == 1) { //网易平台
+    await getWyAlbum(albumId.value);
+  }else if(platform.value == 2){ // QQ平台
+    if(!route.query.isRank){
+      await getQQAlbum(albumId.value); //歌单
+    }else{
+      await getQQRankDetail(+albumId.value); // 排行榜
+    }
+  }else if(platform.value == 0){ //自建歌单
+    await getCustomAlbum(albumId.value);
+  }
+  loading.value = false;
+});
 
 </script>
 <style lang="less">

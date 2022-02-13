@@ -19,7 +19,7 @@ import layoutNav from '@/layouts/layout-nav.vue';
 import AudioPlayer from '@/layouts/audio-player.vue';
 import nSearch from '../components/n-search.vue';
 import indexedDB from '/@/indexedDB';
-import {ref,provide,inject} from 'vue';
+import {ref,provide,inject,toRaw} from 'vue';
 import {useRoute} from 'vue-router';
 import { ElMessage } from 'element-plus';
 import poster from '../../assets/poster.jpg';
@@ -110,14 +110,40 @@ $eventBus.on('unCollect',id => {
 });
 
 $eventBus.on('createAlbum',albumInfo => {
-
   indexedDB.add('album',albumInfo).then(()=>{
     getMyAlbumList();
     ElMessage.success('歌单创建成功');
   });
 });
 
+/**
+ * 添加歌曲到自建歌单
+ * @param id 歌单id
+ * @param song 歌曲信息
+ */
+$eventBus.on('addSongToAlbum',({id,song})=>{
+  // 检查是否重复
+  let album = myAlbum.value.find(item => item.id === id);
+  if(album.list.some(ele=>ele.id === song.id)){
+    ElMessage.warning('歌曲已存在');
+    return;
+  }else{
+    // 未重复 , 添加歌曲，更新整项
+    // TODO: 添加歌曲到自定义歌单改为添加数据到数据库，而不是更新整项
+    album.list.unshift(song);
+    indexedDB.update('album',toRaw(album)).then(()=>{
+      getMyAlbumList();
+      ElMessage.success('歌曲添加成功');
+    });
+  }
+});
 
+$eventBus.on('delCustomAlbum',(id:string) => {
+  indexedDB.remove('album',id).then(()=>{
+    getMyAlbumList();
+    ElMessage.success('歌单删除成功');
+  });
+});
 // 监听添加歌曲到歌单事件 
 
 

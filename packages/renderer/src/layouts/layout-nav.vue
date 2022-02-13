@@ -46,7 +46,7 @@
         我的歌单 <i class="iconfont icon-plus txt-xs hover:text-orange-500 ml-8 text-gray-500 cursor-pointer" @click="createAlbum"></i>
       </span>
       <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
-        <router-link v-for="item in myAlbum" :key="item.id" :to="{path:'/album',query:{id:item.id,type:item.type}}">
+        <router-link v-for="item in myAlbum" :key="item.id" :to="{path:'/album',query:{id:item.id,type:0,isRank:item.isRank}}">
           <li class="hover:bg-gray-600 cursor-pointer px-4 truncate">
             <i class="iconfont icon-zhuanji text-xs" />
             {{item.name||item.title}}
@@ -55,7 +55,7 @@
       </ul>
       <span class="text-sm text-gray-600 px-5 mt-5 flex items-center">我的收藏</span>
       <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
-        <router-link v-for="item in myCollect" :key="item.id" :to="{path:'/album',query:{id:item.id,type:item.type}}">
+        <router-link v-for="item in myCollect" :key="item.id" :to="{path:'/album',query:{id:item.id,type:item.type,isRank:item.isRank}}">
           <li class="hover:bg-gray-600 cursor-pointer px-4 truncate">
             <i class="iconfont icon-zhuanji text-xs" />
             {{item.name}}
@@ -80,7 +80,7 @@
   const $eventBus:any = inject('$eventBus');
   const navList = ref([
     {
-      name:'发现音乐',
+      name:'音乐',
       path:'/find',
       icon:'icon-yinle',
     },
@@ -126,7 +126,8 @@
             avatar:"",
             desc:"",
             nickname:"我"
-          }
+          },
+          list:[],
         };
         $eventBus.emit('createAlbum',albumInfo);
     });
