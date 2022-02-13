@@ -48,6 +48,7 @@
             </span>
 
             <span
+              v-if="!platform"
               class="w-24  bg-red-700 flex items-center justify-center cursor-pointer leading-6 mr-3 rounded-xl  border-gray-500 hover:bg-red-600"
               @click="handleDelCustomAlbum"
             >

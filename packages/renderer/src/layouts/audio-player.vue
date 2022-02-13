@@ -57,7 +57,7 @@
       <template #title>
         <div class="">播放列表</div>
       </template>
-      <el-table :data="playList">
+      <el-table :data="playList" @row-dblclick="toggleSong">
         <el-table-column label="歌曲名">
           <template #default="scope">
             <span class="truncate" :class="{'text-red-500':curSongId == scope.row.id}">{{scope.row.name}}</span>
@@ -98,7 +98,7 @@
   const audioState = ref('pause');
   const playList = inject('playList');
   const curSongId = ref(localStorage.getItem('curSongId') || '');
-  const visiblePlayList = ref(true);
+  const visiblePlayList = ref(false);
   const appear = ref(true);
   const playInfo = ref({
     name:'',
@@ -290,6 +290,13 @@
     $eventBus.emit('playSong',{
       id:playList.value[index === 0 ? len - 1 : index- 1 ].id,
       type:playList.value[index ===  0 ? len - 1 : index - 1  ].type,
+      auto:true,
+    });
+  };
+  const toggleSong = (song) =>{
+    $eventBus.emit('playSong',{
+      id:song.id,
+      type:song.type,
       auto:true,
     });
   };
