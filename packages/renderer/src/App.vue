@@ -23,22 +23,6 @@ body {
   width: 100%;
   height: 100%;
 }
-.el-message {
-  position: fixed;
-  top: 0px !important;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  background: #121212;
-  color: #999;
-  font-size: 14px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 5px;
-}
-.el-message--error {
-  background: #f40;
-  color: #fff;
-}
+
+
 </style>

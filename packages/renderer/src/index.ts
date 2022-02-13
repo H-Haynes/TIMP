@@ -6,6 +6,7 @@ import router from '/@/router/index';
 import 'virtual:windi.css';
 import mitt from 'mitt';
 import clickOutside from '/@/directives/clickOutside';
+import 'element-plus/dist/index.css'
 
 const app = createApp(App);
 const $filters = {

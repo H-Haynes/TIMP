@@ -21,6 +21,8 @@ import nSearch from '../components/n-search.vue';
 import indexedDB from '/@/indexedDB';
 import {ref,provide,inject} from 'vue';
 import {useRoute} from 'vue-router';
+import { ElMessage } from 'element-plus';
+import poster from '../../assets/poster.jpg';
 const dbOnline = ref(false); // 数据库是否在线;
 const likeAlbum = ref({
   title:"我喜欢",
@@ -28,7 +30,7 @@ const likeAlbum = ref({
   description:"我喜欢的歌",
   subscribedCount:1,
   trackCount:1,
-  coverImg:"",
+  coverImg:poster,
   createTime:"",
   updateTime:"",
   avatar:"",
@@ -43,14 +45,31 @@ const route = useRoute();
 const likeList = ref([]);
 const $eventBus:any = inject('$eventBus');
 
+const myCollect = ref([]);
+const myAlbum = ref([]);
+
 provide('likeAlbum',likeAlbum.value);
 provide('likeList',likeList);
-
+provide('myCollect',myCollect);
+provide('myAlbum', myAlbum);
 
 // 获取我喜欢
 const getLikeList = () => {
   indexedDB.get('like').then(res=>{
     likeList.value = res;
+  });
+};
+// 获取我收藏的歌单
+const getCollectList = () => {
+  indexedDB.get('collect').then(res=>{
+    myCollect.value = res;
+  });
+};
+
+// 获取自建歌单
+const getMyAlbumList = () => {
+  indexedDB.get('album').then(res=>{
+    myAlbum.value = res;
   });
 };
 
@@ -60,6 +79,8 @@ indexedDB.openDB('TIMP',1).then(()=>{
 }).then(()=>{
   // 从数据库获取数据
   getLikeList();
+  getCollectList();
+  getMyAlbumList();
 });
 
 $eventBus.on('addLike',song =>{
@@ -74,6 +95,27 @@ $eventBus.on('unLike',id => {
   });
 });
 
+$eventBus.on('addCollect',albumInfo => {
+  indexedDB.update('collect',albumInfo).then(()=>{
+    getCollectList();
+    ElMessage.success('收藏成功');
+  });
+});
+
+$eventBus.on('unCollect',id => {
+  indexedDB.remove('collect',id).then(()=>{
+    getCollectList();
+    ElMessage.success('已取消收藏');
+  });
+});
+
+$eventBus.on('createAlbum',albumInfo => {
+
+  indexedDB.add('album',albumInfo).then(()=>{
+    getMyAlbumList();
+    ElMessage.success('歌单创建成功');
+  });
+});
 
 
 // 监听添加歌曲到歌单事件 

@@ -4,7 +4,7 @@
     <div class="flex-1 overflow-y-scroll">
       <div class="flex h-40 overflow-hidden">
         <el-image
-          :src="albumInfo.coverImg"
+          :src="albumInfo.coverImg || poster"
           class="w-40 h-40 rounded flex-shrink-0"
         />
         <div class="ml-4 text-gray-300 text-xl text-left flex flex-col">
@@ -30,9 +30,9 @@
               <i class="iconfont icon-botany2 mr-1" />
               播放全部
             </span>
-            <span class="w-24 flex items-center justify-center cursor-pointer hover:bg-gray-600 bg-gray-700 leading-6 mr-3 rounded-xl">
+            <span @click="addCollect" class="w-24 flex items-center justify-center cursor-pointer hover:bg-gray-600 bg-gray-700 leading-6 mr-3 rounded-xl">
               <i class="iconfont icon-icon-xian-" />
-              收藏
+              {{myCollect.some(ele=>ele.id == albumId) ? '取消收藏' :'收藏'}}
             </span>
             <span class="w-24 flex items-center justify-center cursor-pointer leading-6 mr-3 rounded-xl border border-gray-500 hover:border-gray-400">
               <i class="iconfont icon-download" />
@@ -48,6 +48,7 @@
         :header-cell-style="{backgroundColor: '#212121 !important'}"
         :data="songList"
         @row-dblclick="playSong"
+        :key="albumId"
       >
         <el-table-column
           label="歌曲"
@@ -70,12 +71,7 @@
           class="truncate"
         >
           <template #default="scope">
-            <!-- <span
-              v-for="art in scope.row.art"
-              :key="art.id"
-              class="truncate"
-            >{{ art.name }}</span> -->
-            <span>{{scope.row.art.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'')}}</span>
+            <span>{{scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'')}}</span>
           </template>
         </el-table-column>
         <el-table-column label="专辑">
@@ -118,6 +114,7 @@ import { ref, watchEffect, inject,toRaw, } from 'vue';
 import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute,useRouter } from 'vue-router';
+import poster from '@/../assets/poster.jpg';
 const $filters = inject('$filters');
 const $eventBus:any = inject('$eventBus');
 const loading = ref(false);
@@ -143,7 +140,7 @@ const songList = ref([]);
 const platform = ref(+route.query.type);
 const likeList = inject('likeList');
 const likeAlbum = inject('likeAlbum');
-
+const myCollect = inject('myCollect');
 // if(platform.value == 0 && ){
   
 // }
@@ -274,6 +271,18 @@ const unLike = (id:string) => {
   $eventBus.emit('unLike',id);
 };
 
+const addCollect = () => {
+  if(myCollect.value.some(ele=>ele.id == albumId.value)){
+    $eventBus.emit('unCollect',albumId.value);
+  }else{
+      $eventBus.emit('addCollect',{
+        id:albumId.value,
+        type:platform.value,
+        name:albumInfo.value.name,
+      });
+  }
+
+};
 
 </script>
 <style lang="less">

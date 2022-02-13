@@ -22,3 +22,41 @@
     top:50%;
     transform: translate(-50%,-50%);
 }
+
+
+.el-message{
+    border-radius:unset;
+    background-color: rgba(33,33,33,1) !important;
+    border:none !important;
+    position: fixed;
+    top: 0px !important;
+    left: 0;
+    width:100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 15px !important;
+  }
+  
+  .el-message-box{
+    background:#212121 !important;
+    border:none !important;
+  }
+  .el-message-box__header *{
+    color:#aaa !important;
+    font-size:16px;
+  }
+  .el-message-box__btns{
+    justify-content:center !important;
+  }
+
+  .custom-cancel-btn{
+      height:32px;
+      text-align:center !important;
+      background:#212121 !important;
+      border:1px solid rgb(72,72,72) !important;
+  }
+  .custom-cancel-btn:hover{
+    background:rgba(73, 63, 63, 0.2) !important;
+    color:#999 !important;
+  }

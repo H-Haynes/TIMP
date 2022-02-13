@@ -17,7 +17,7 @@ export default {
             request.onupgradeneeded = e => {
                 console.log('indexedDB onupgradeneeded',e);
                 this.db = e.target.result;
-                const initDBs = ['like','album'];
+                const initDBs = ['like','album','collect'];
 
 
                 // this.db.createObjectStore(objStoreName,{keyPath:'id'});
