@@ -30,7 +30,7 @@
             v-html="albumInfo.description ?albumInfo.description.replace(/\n/g,'<br/>') : '' "
           />
           <div class="mt-2 text-xs flex">
-            <span class="w-24 cursor-pointer bg-red-700 flex items-center justify-center hover:bg-red-600 leading-6 mr-3 rounded-xl">
+            <span @click="playAll" class="w-24 cursor-pointer bg-red-700 flex items-center justify-center hover:bg-red-600 leading-6 mr-3 rounded-xl">
               <i class="iconfont icon-botany2 mr-1" />
               播放全部
             </span>
@@ -324,6 +324,25 @@ const handleCollectClick = (song) =>{
   $eventBus.emit('triggerSongToAlbum',data);
 };
 
+const playAll = () => {
+  // 弹出提示框
+  ElMessageBox.confirm('播放全部将会清除当前播放列表，是否继续？', '播放全部',{
+    center:true,
+    confirmButtonText:'确定',
+    cancelButtonText:'取消',
+    confirmButtonClass:'custom-cancel-btn w-24',
+    cancelButtonClass:'custom-cancel-btn w-24',
+  }).then(() => {
+    // 将歌单歌曲整理成符合播放列表的格式传递，并触法playAll
+    const list = songList.value.map(ele=>({
+      id:ele.id,
+      type:ele.type || platform.value,
+      name:ele.name,
+      art:ele.art.map(ele=>({id:ele.id,name:ele.name})),
+    }));
+    $eventBus.emit('playAll',list);
+  });
+};
 
 /**
  * 删除自定义歌单

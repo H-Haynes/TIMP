@@ -207,7 +207,6 @@ $eventBus.on('delCustomAlbum',(id:string) => {
 });
 
 $eventBus.on('addPlayList',async (song:any) => {
-  console.log(toRaw(song));
   // 检查是否已存在播放列表中
   if(playList.value.some(ele=>ele.id === song.id)){
     // 如果存在则从播放列表中删除
@@ -217,6 +216,19 @@ $eventBus.on('addPlayList',async (song:any) => {
   await indexedDB.update('playlist',toRaw(song));
   // 重新获取列表
   await getPlayList();
+});
+
+$eventBus.on('playAll',async (list:any[]) => {
+  // 清空播放列表数据库
+  await indexedDB.clear('playlist');
+  
+  //播放第一首
+  $eventBus.emit('playSong',list[0]);
+  // 将所有数据添加到播放列表,反向添加顺序
+  for(var i =list.length-1;i>=0;i--){
+    list[i].timestamp = Date.now() - i;
+    $eventBus.emit('addPlayList',list[i]);
+  }
 });
 
 // 监听添加歌曲到歌单事件 
