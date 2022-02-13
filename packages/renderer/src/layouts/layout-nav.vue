@@ -1,5 +1,5 @@
 <template lang="">
-  <div class="w-48 h-full bg-primary-500">
+  <div class="w-48 h-full bg-primary-500 overflow-hidden flex flex-col">
     <div class="h-16 bg-primary-100  text-white flex items-center justify-end">
       <i
         class="iconfont icon-houtui mr-4 cursor-pointer text-xl"
@@ -7,7 +7,7 @@
       />
       <i class="iconfont icon-qianjin mr-4 cursor-pointer text-xl" />
     </div>
-    <div class="py-4 text-left">
+    <div class="py-4 text-left overflow-y-scroll hideScrollBar">
       <span class="text-sm text-gray-600 px-5">分类</span>
       <ul class="text-white-300 text-sm px-4 leading-8 text-left mt-2">
         <router-link

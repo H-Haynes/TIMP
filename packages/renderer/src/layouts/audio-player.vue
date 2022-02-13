@@ -1,16 +1,16 @@
 <template lang="">
   <div class="h-16 flex justify-between items-center bg-primary-100 border-t border-primary-500 px-5">
     <div class="flex text-gray-400 items-center h-full ">
-      <i class="iconfont icon-shangyishou mx-4  text-xl cursor-pointer" />
-      <i class="iconfont  mx-4 text-xl cursor-pointer" @click="toggleState" :class="{'icon-zantingtingzhi':audioState === 'play','icon-bofang':audioState === 'pause'}"/>
-      <i class="iconfont icon-xiayishou mx-4 text-xl cursor-pointer" />
+      <i @click="prevSong" class="iconfont icon-shangyishou mx-4  text-xl cursor-pointer" />
+      <i @click="toggleState" class="iconfont  mx-4 text-xl cursor-pointer"  :class="{'icon-zantingtingzhi':audioState === 'play','icon-bofang':audioState === 'pause'}"/>
+      <i @click="nextSong" class="iconfont icon-xiayishou mx-4 text-xl cursor-pointer" />
     </div>
     <div class="flex w-96  items-center text-sm text-gray-400 h-full">
       <el-avatar
         class="flex-shrink-0"
         shape="square"
         size="large" 
-        :src="playInfo.picUrl"
+        :src="playInfo.picUrl || poster"
       />
       <div class="flex overflow-hidden flex-1 flex-col w-full item-center mx-2">
         <div class="flex">
@@ -37,7 +37,7 @@
       </div>
     </div>
     <div class="flex text-gray-400">
-      <i class="iconfont icon-list mr-4 text-lg" />
+      <i class="iconfont icon-list mr-4 text-lg" @click="visiblePlayList = true"/>
       <div class="flex items-center">
         <i class="iconfont icon-yinliang mr-2 text-lg" />
         <drag-progress
@@ -50,18 +50,45 @@
     </div>
     <audio
       ref="audio"
-      autoplay
       :src="playSrc"
     ></audio>
+
+    <el-drawer v-model="visiblePlayList" :show-close="false" >
+      <template #title>
+        <div class="">播放列表</div>
+      </template>
+      <el-table :data="playList">
+        <el-table-column label="歌曲名">
+          <template #default="scope">
+            <span class="truncate" :class="{'text-red-500':curSongId == scope.row.id}">{{scope.row.name}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="歌手">
+          <template #default="scope">
+            <span class="truncate" :class="{'text-red-500':curSongId == scope.row.id}">
+              {{scope.row.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'')}}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!-- <ul>
+        <li v-for="item in playList" class="text-left flex text-gray-400 py-1 px-2 text-sm truncate cursor-pointer hover:bg-gray-700" :key="item.id">
+          <span class="flex-5 truncate">{{item.name}}</span> 
+          <span class="flex-1"> - </span>
+          <span class="flex-5 truncate">{{item.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'')}}</span>
+        </li>
+      </ul> -->
+    </el-drawer>
   </div>
 </template>
 <script lang="ts" setup>
-  import type {Ref} from 'vue';
+  import type {Ref } from 'vue';
   import { platform} from '../../typings/enum';
-  import {inject,ref,onMounted,watchEffect} from 'vue';
+  import {inject,ref,onMounted,watchEffect,toRaw} from 'vue';
   import { getSongUrlQQ, getSongPicQQ, getSongInfoQQ } from '../api/qq';
   import {getSongUrlWy,getSongDetailWy} from '/@/api/netease';
   import { ElMessage } from 'element-plus';
+  import poster from '@/../assets/poster.jpg';
   const $eventBus:any = inject('$eventBus');
   const $filters = inject('$filters');
   const playSrc = ref('');
@@ -69,6 +96,10 @@
   const currentTime = ref(0);
   const audioVolume = ref(1);
   const audioState = ref('pause');
+  const playList = inject('playList');
+  const curSongId = ref(localStorage.getItem('curSongId') || '');
+  const visiblePlayList = ref(true);
+  const appear = ref(true);
   const playInfo = ref({
     name:'',
     art:[],
@@ -123,27 +154,60 @@
       if(result.data.code == 200){
         return result.data.data[0].url;
       }else{
-        return ElMessage.error('暂无播放地址');
+        ElMessage.error('暂无播放地址');
+        return false;
       }
     }else if(platformType == platform.qq){
       const result = await getSongUrlQQ(id);
       if(!result.data.data.playUrl[id].error){
         return result.data.data.playUrl[id].url;
       }else{
-        return ElMessage.error(result.data.data.playUrl[id].error);
+        ElMessage.error(result.data.data.playUrl[id].error);
+        return false;
       }
     }
   };
 
-  
+  watchEffect(()=>{
+    if(curSongId.value){
+      localStorage.setItem('curSongId',curSongId.value);
+    }
+  });
+
+  watchEffect(async ()=>{
+    if(appear.value && playList.value.length){
+      let song = playList.value.find(ele=>ele.id == curSongId.value);
+
+      playSrc.value  = await getSongUrl(curSongId.value,song.type);
+
+      playInfo.value= await getSongInfo(curSongId.value,song.type);
+      appear.value = false;
+      audio.value?.pause();
+
+    }
+  });
 
 
   // 监听播放歌曲
-  $eventBus.on('playSong',async ({id:songId,type}:any)=>{
+  $eventBus.on('playSong',async ({id:songId,type,auto=false}:any)=>{
     const songUrl = await getSongUrl(songId,type);
+    if(!songUrl){
+      return;
+    }
     playSrc.value = songUrl;
     playInfo.value = await getSongInfo(songId,type);
-      
+    // 触发添加播放列表事件, 并传递当前播放歌曲信息:歌曲id,歌曲名称,歌手，歌曲平台
+    curSongId.value = songId;
+    audio.value?.play();
+    if(!auto){ // 如果不是自动切歌，则添加到播放列表
+      $eventBus.emit('addPlayList',{
+        id:songId,
+        type:type,
+        name:playInfo.value.name,
+        art:playInfo.value.art.map(ele=>({name:ele.name,id:ele.id})),
+        timestamp:Date.now()
+      });
+    }
   });
 
   // 监听暂停歌曲
@@ -151,6 +215,9 @@
     audio.value?.pause();
   });
   const setCurrentTime = (percent:number) =>{
+    if(!playInfo.value.time){
+      return currentTime.value= 0;
+    }
     console.log(percent,playInfo.value.time);
     currentTime.value = percent/100 * playInfo.value.time / 1000;
     if(audio.value){
@@ -162,6 +229,7 @@
   };
 
   onMounted(()=>{
+    
     if(audio.value){
       // 获取当前音量
       audioVolume.value = audio.value.volume * 100;
@@ -179,9 +247,11 @@
       });
 
       audio.value.addEventListener('ended',()=>{
-        // 将事件设置为0
+        // 将时间设置为0
         currentTime.value = 0;
         audioState.value = 'pause';
+        // 切换下一首
+        nextSong();
       });
     }
   });
@@ -200,8 +270,46 @@
     }
   };
   
+  const nextSong = () =>{
+    // 获取到当前索引;
+    const index = playList.value.findIndex(ele=>ele.id == curSongId.value);
+    let len = playList.value.length;
+    // TODO 播放模式功能在此处完成
+    // 如果是最后一首，则切换到第一首
+    $eventBus.emit('playSong',{
+      id:playList.value[index === len - 1 ? 0 : index + 1 ].id,
+      type:playList.value[index === len - 1 ? 0 : index + 1 ].type,
+      auto:true,
+    });
+  };
+
+  const prevSong = () =>{
+    const index = playList.value.findIndex(ele=>ele.id == curSongId.value);
+    let len = playList.value.length;
+    // TODO 播放模式功能在此处完成
+    $eventBus.emit('playSong',{
+      id:playList.value[index === 0 ? len - 1 : index- 1 ].id,
+      type:playList.value[index ===  0 ? len - 1 : index - 1  ].type,
+      auto:true,
+    });
+  };
 
 </script>
-<style lang="">
-    
+<style lang="less">
+    .el-drawer{
+      --el-drawer-bg-color: #212121 !important;
+    }
+    .el-table{
+      --el-table-bg-color: red !important;
+      --el-table-header-bg-color: #212121 !important;
+      --el-table-border-color: #333 !important;
+
+      --el-table-text-color: #aaa !important;
+      --el-table-header-text-color: #ccc !important;
+      --el-table-current-row-bg-color: purple !important;
+
+      --el-table-fixed-box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
+      --el-table-bg-color: cyan !important;
+      --el-table-tr-bg-color:#212121 !important; // 背景
+    }
 </style>

@@ -8,6 +8,7 @@ declare module 'vue' {
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElCarousel: typeof import('element-plus/es')['ElCarousel']
     ElCarouselItem: typeof import('element-plus/es')['ElCarouselItem']
+    ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElectronVersions: typeof import('./src/components/ElectronVersions.vue')['default']
     ElImage: typeof import('element-plus/es')['ElImage']
     ElTable: typeof import('element-plus/es')['ElTable']

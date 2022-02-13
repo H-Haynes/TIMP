@@ -87,7 +87,9 @@
             class="truncate"
           >
             <template #default="scope">
-              <span>{{ scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'') }}</span>
+              <el-tooltip placement="bottom" :content="scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'')">
+                <span class="truncate">{{ scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'') }}</span>
+              </el-tooltip>
             </template>
           </el-table-column>
           <el-table-column label="专辑">
@@ -137,31 +139,6 @@
         </el-table>
       </div>
     </div>
-  
-    <div
-      v-show="showAddDialog"
-      class="fixed left-0 top-0 w-full h-full  z-50"
-    >
-      <div
-        class="mask w-full h-full"
-        @click="showAddDialog = false"
-      ></div>
-      <div
-        class="addCustomDialog w-72 h-96 absolute-center fixed p-4 z-50 bg-primary-200 rounded"
-      >
-        <ul style="max-height:200px;overflow-y:scroll">
-          <li
-            v-for="item in myAlbum"
-            :key="item.id"
-            class="text-white cursor-pointer  px-4 truncate text-left text-sm leading-7 hover:bg-gray-700"
-            @click="handleAddCollect(item.id)"
-          >
-            <i class="iconfont icon-zhuanji text-xs mr-2" />
-            {{ item.name||item.title }}
-          </li>
-        </ul>
-      </div>
-    </div>
   </div>    
 </template>
 <script lang="ts" setup>
@@ -171,7 +148,7 @@ import { getAlbumDetailWy } from '../api/netease';
 import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute,useRouter } from 'vue-router';
 import poster from '@/../assets/poster.jpg';
-import { ElMessageBox,ElMessage } from 'element-plus';
+import { ElMessageBox } from 'element-plus';
 
 const $filters = inject('$filters');
 const $eventBus:any = inject('$eventBus');
@@ -200,8 +177,6 @@ const likeList:Ref<any[]> = inject('likeList') as Ref<any[]>;
 const likeAlbum = inject('likeAlbum');
 const myCollect = inject('myCollect');
 const myAlbum:Ref<any[]> = inject('myAlbum') as Ref<any[]>;
-const showAddDialog = ref(false);
-const currentSong = ref({});
 
 const getWyAlbum = async(id:string) =>{
   const res = await getAlbumDetailWy(id);
@@ -335,12 +310,9 @@ const addCollect = () => {
 };
 
 const handleCollectClick = (song) =>{
-  if(myAlbum.value.length ==0){
-    return ElMessage.warning('请先创建歌单');
-  }
-  // 存储歌曲的名称、歌手、专辑、时长、id
+  // 传递歌曲的名称、歌手、专辑、时长、id
   let info = toRaw(song);
-  currentSong.value = {
+  let data = {
     id:info.id,
     name:info.name,
     album:info.album,
@@ -348,22 +320,9 @@ const handleCollectClick = (song) =>{
     art:info.art,
     type:platform.value,
   };
-  // 显示添加歌单dialog
-  showAddDialog.value = true;
+  $eventBus.emit('triggerSongToAlbum',data);
 };
 
-/**
- * 添加歌曲到自定义歌单
- * @param albumId 歌单id
- */
-const handleAddCollect = (albumId:string) =>{
-
-  $eventBus.emit('addSongToAlbum',{
-    id:albumId,
-    song:toRaw(currentSong.value),
-  });
-  showAddDialog.value = false;
-};
 
 /**
  * 删除自定义歌单

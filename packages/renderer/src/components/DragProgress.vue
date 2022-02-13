@@ -19,8 +19,8 @@
 </template>
 <script lang="ts" setup>
     import type { Ref } from 'vue';
-import { onMounted } from 'vue';
-    import {ref,defineProps,defineEmits} from 'vue';
+
+    import {ref} from 'vue';
     const props = defineProps({
         width:{
             type:String,
@@ -47,9 +47,6 @@ import { onMounted } from 'vue';
             emit('update:value',percent);
         }
     };
-    onMounted(()=>{
-        console.log(props.value);
-    });
     
 </script>
 <style lang="less" scoped>  

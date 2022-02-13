@@ -126,7 +126,6 @@ onMounted(async () => {
   }
 });
 const bannerDetail = (type:number,id:number) =>{
-  console.log(type,id);
   if(type === 1){
     // 播放音乐
     $eventBus.emit('playSong',{
@@ -202,10 +201,9 @@ watchEffect(()=>{
   const fontSize = parseInt(document.documentElement.style.fontSize) || 16;
   const wrapWidth = listWrap.value?.offsetWidth || 0;
   const itemWidth = fontSize * 10; // w-40 等于 10rem
-  console.log(itemWidth,999,wrapWidth);
+
   // 一行多少个
   const singleLineNum = Math.floor(wrapWidth / (itemWidth + fontSize * 0.25* 2)) ; // mx-1 等于 0.25rem *2
-  console.log(singleLineNum);
   emptyNum.value =  playList.value.length % singleLineNum || 0;
 });
 </script>

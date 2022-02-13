@@ -12,6 +12,27 @@
       </div>
     </div>
     <audio-player />
+    <div v-show="showAddDialog" class="fixed left-0 top-0 w-full h-full  z-50">
+      <div
+        class="mask w-full h-full"
+        @click="showAddDialog = false"
+      ></div>
+      <div
+        class="addCustomDialog w-72  absolute-center fixed p-4 z-50 bg-primary-200 rounded"
+      >
+        <ul style="max-height:300px" class="overflow-y-scroll hideScrollBar">
+          <li
+            v-for="item in myAlbum"
+            :key="item.id"
+            class="text-white cursor-pointer py-1 px-4 truncate text-left text-sm leading-7 hover:bg-gray-700"
+            @click="handleAddCollect(item.id)"
+          >
+            <i class="iconfont icon-zhuanji text-xs mr-2" />
+            {{ item.name||item.title }}
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -19,10 +40,14 @@ import layoutNav from '@/layouts/layout-nav.vue';
 import AudioPlayer from '@/layouts/audio-player.vue';
 import nSearch from '../components/n-search.vue';
 import indexedDB from '/@/indexedDB';
+import type { Ref } from 'vue';
 import {ref,provide,inject,toRaw} from 'vue';
 import {useRoute} from 'vue-router';
 import { ElMessage } from 'element-plus';
 import poster from '../../assets/poster.jpg';
+
+const showAddDialog = ref(false);
+
 const dbOnline = ref(false); // 数据库是否在线;
 const likeAlbum = ref({
   title:"我喜欢",
@@ -47,41 +72,77 @@ const $eventBus:any = inject('$eventBus');
 
 const myCollect = ref([]);
 const myAlbum = ref([]);
-
+const operateSong = ref({});
+const playList:Ref<any[]> = ref([]);
 provide('likeAlbum',likeAlbum.value);
 provide('likeList',likeList);
 provide('myCollect',myCollect);
 provide('myAlbum', myAlbum);
+provide('playList',playList);
+
+
+/**
+ * 添加歌曲到自定义歌单
+ * @param albumId 歌单id
+ */
+const handleAddCollect = (albumId:string) =>{
+  $eventBus.emit('addSongToAlbum',{
+    id:albumId,
+    song:toRaw(operateSong.value),
+  });
+  showAddDialog.value = false;
+};
+
+// 监听添加歌曲事件，在这里弹窗
+$eventBus.on('triggerSongToAlbum',(song:any)=>{
+  if(myAlbum.value.length ==0){
+    return ElMessage.warning('请先创建歌单');
+  }
+  showAddDialog.value = true;
+  operateSong.value = song;
+});
 
 // 获取我喜欢
-const getLikeList = () => {
+const getLikeList = async () => {
   indexedDB.get('like').then(res=>{
     likeList.value = res;
   });
 };
 // 获取我收藏的歌单
-const getCollectList = () => {
+const getCollectList = async () => {
   indexedDB.get('collect').then(res=>{
     myCollect.value = res;
   });
 };
 
 // 获取自建歌单
-const getMyAlbumList = () => {
+const getMyAlbumList = async () => {
   indexedDB.get('album').then(res=>{
     myAlbum.value = res;
   });
 };
 
-indexedDB.openDB('TIMP',1).then(()=>{
+// 获取播放列表
+const getPlayList = async () => {
+  indexedDB.get('playlist').then(res=>{
+    playList.value = (res as any[]).sort((a,b)=>{
+      return  b.timestamp - a.timestamp;
+    });
+  });
+};
+
+indexedDB.openDB('TIMP',2).then(()=>{
   dbOnline.value = true;
   console.log('*****数据库已连接*****');
-}).then(()=>{
+}).then(async ()=>{
   // 从数据库获取数据
-  getLikeList();
-  getCollectList();
-  getMyAlbumList();
+  await getLikeList();
+  await getCollectList();
+  await getMyAlbumList();
+  await getPlayList();
 });
+
+
 
 $eventBus.on('addLike',song =>{
   indexedDB.update('like',song).then(()=>{
@@ -144,16 +205,26 @@ $eventBus.on('delCustomAlbum',(id:string) => {
     ElMessage.success('歌单删除成功');
   });
 });
+
+$eventBus.on('addPlayList',async (song:any) => {
+  console.log(toRaw(song));
+  // 检查是否已存在播放列表中
+  if(playList.value.some(ele=>ele.id === song.id)){
+    // 如果存在则从播放列表中删除
+    await indexedDB.remove('playlist',song.id);
+  }
+  //添加到播放列表中(顺序问题)
+  await indexedDB.update('playlist',toRaw(song));
+  // 重新获取列表
+  await getPlayList();
+});
+
 // 监听添加歌曲到歌单事件 
 
 
 // 监听从歌单删除歌曲事件《仅自建歌单有此功能》
-
 // 监听收藏歌单事件 【将歌单信息存入数据库: 歌单id,歌单名称】
-
 // 监听删除歌单事件 [分自建歌单与网路歌单]
-
-
 // 构建本地歌单
 
 

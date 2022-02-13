@@ -10,15 +10,14 @@ export default {
                 reject(e);
             };
             request.onsuccess = e => {
-                console.log('indexedDB open success',e);
+                console.log('indexedDB open success');
                 this.db = e.target.result;
                 resolve(request.result);
             };
             request.onupgradeneeded = e => {
-                console.log('indexedDB onupgradeneeded',e);
+                console.log('indexedDB onupgradeneeded');
                 this.db = e.target.result;
-                const initDBs = ['like','album','collect'];
-
+                const initDBs = ['like','album','collect','playlist'];
 
                 // this.db.createObjectStore(objStoreName,{keyPath:'id'});
 
@@ -35,13 +34,6 @@ export default {
                 
                 resolve('');
             };
-            // request.onupgradeneeded = e => {
-            //     console.log('indexedDB open onupgradeneeded',e);
-            //     this.db = e.target.result;
-            //     if(!this.db.objectStoreNames.contains(objStoreName)){
-            //         let objectStore = this.db.createObjectStore(objStoreName,{keyPath:'id',autoIncrement:true});
-            //     }
-            // }
         });
     },
     deleteDB(dbName:string){
@@ -110,5 +102,13 @@ export default {
             request.onerror = e => reject(e);
             request.onsuccess = () => resolve(request.result);
         });
-    }
+    },
+    clear(objStoreName){
+        return new Promise((resolve,reject)=>{
+            if(!this.db) reject('数据库未连接');
+            const request = this.db.transaction([objStoreName],'readwrite').objectStore(objStoreName).clear();
+            request.onerror = e => reject(e);
+            request.onsuccess = () => resolve(request.result);
+        });
+    },
 };
