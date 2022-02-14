@@ -87,3 +87,9 @@ export const getVideoUrlWy = (id) => {
 export const getRelatedVideoWy = (id) => {
     return axios.get(`${prefix}/related/allvideo?id=${id}`);
 };
+
+// 获取歌词
+
+export const getLyricWy = (id) => {
+    return axios.get(`${prefix}/lyric?id=${id}`);
+};

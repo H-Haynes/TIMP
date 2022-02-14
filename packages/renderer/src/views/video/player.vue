@@ -78,6 +78,7 @@
     import { getMvDataQQ } from '/@/api/qq';
     import {getSongDetailKW, getUrlKW} from '/@/api/kuwo';
 import { ElMessage } from 'element-plus';
+import { getMvDataKG } from '/@/api/kugou';
     const route = useRoute();
     const mvId = ref(route.query.id);
     const mvType = ref(route.query.type);
@@ -206,6 +207,30 @@ import { ElMessage } from 'element-plus';
       return videoInfo;
     };
 
+    const getMvKG = async (id) =>{
+      let videoInfo = {};
+      let url;
+      const res = await getMvDataKG(id);
+      console.log(res);
+
+      let {mvicon:pic,desc,songname:name,publish_date:publishTime,play_count:playCount} = res.data;
+      let art = [{
+        name:res.data.singer,
+        id:0,
+      }];
+      url = res.data.mvdata?.le?.downurl || res.data.mvdata?.rq?.downurl || res.data.mvdata?.sq?.downurl;
+      videoInfo = {
+          pic,
+          desc,
+          name,
+          art,
+          playCount,
+          url,
+          publishTime,
+      };
+      return videoInfo;
+    };
+
     watchEffect(async ()=>{
         if(mvType.value === '1'){
             if(isNaN(+mvId.value)){
@@ -215,6 +240,8 @@ import { ElMessage } from 'element-plus';
             }
         }else if(mvType.value === '2'){
            videoData.value =  await getMvQQ(mvId.value);
+        }else if(mvType.value === '3'){
+           videoData.value = await getMvKG(mvId.value);
         }else if(mvType.value === '4'){
           videoData.value =  await getVideoKW(mvId.value);
         }

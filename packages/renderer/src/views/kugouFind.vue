@@ -68,7 +68,7 @@
           :key="list.id||list.name"
           class="w-40 mb-4 flex mx-1 flex-col justify-center items-center"
         >
-          <router-link :to="{path:'/album',query:{type:4,id:list.id,isRank:list.isRank}}">
+          <router-link :to="{path:'/album',query:{type:3,id:list.id,isRank:list.isRank}}">
             <el-image
               lazy
               class="w-40 h-40"

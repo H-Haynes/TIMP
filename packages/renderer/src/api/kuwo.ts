@@ -58,3 +58,9 @@ export const getMusicUrlKW = (id:string|number,format='mp3') => {
 export const getSongDetailKW = (id:string|number) => {
     return axios.get(`${prefix}/kuwo/musicInfo?mid=${id}`);
 };
+
+// 搜索
+
+export const searchKW = (keyword:string) => {
+    return axios.get(`${prefix}/kuwo/search/searchMusicBykeyWord?key=${keyword}`);
+};

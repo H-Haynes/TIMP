@@ -151,6 +151,7 @@ import { useRoute,useRouter } from 'vue-router';
 import poster from '@/../assets/poster.jpg';
 import { ElMessageBox } from 'element-plus';
 import { getAlbumDetailKW, getRankListKW, getRankMusicListKW } from '../api/kuwo';
+import { getAlbumDetailKG, getRankMusicListKG } from '../api/kugou';
 
 const $filters = inject('$filters');
 const $eventBus:any = inject('$eventBus');
@@ -238,6 +239,32 @@ const getQQAlbum = async(id:string) => {
   }
 };
 
+const getKGAlbum = async (id:string) => {
+  const result = await getAlbumDetailKG(id);
+  console.log(result);
+  if(result.data.info?.list){
+    let {specialname:name,specialid:id,intro:description,collectcount:subscribedCount,commentcount:trackCount,imgurl:coverImg,publishtime:createTime,publishtime:updateTime,user_avatar:avatar,desc,nickname} = result.data.info.list;
+    coverImg = coverImg.replace('{size}', '400');
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname}};
+  }
+  if(result.data?.list?.list?.info){
+    songList.value = result.data.list.list.info.map(ele=>({
+      name:ele.filename.split('-')[1].trim(),
+      id:ele.hash,
+      mv:ele.mvhash || undefined,
+      time:ele.duration * 1000,
+      album:'',
+      picUrl:'',
+      art:[
+        {
+          name:ele.filename.split('-')[0],
+          id:0
+        }
+      ],
+    }));
+  }
+};
+
 const getQQRankDetail = async(id:number) => {
   const result = await getRankDetailQQ(id);
   console.log(result);
@@ -309,6 +336,33 @@ const getKWRankDetail = async(id:number|string) => {
   }
   
 };
+
+const getKGRankDetail = async(id:number|string) => {
+  const result = await getRankMusicListKG(id);
+  if(result.data.info){
+    let {rankname:name,rankid:id,intro:description,play_times:subscribedCount,play_times:trackCount,imgurl:coverImg,createTime,updateTime,img_cover:avatar,desc,nickname} = result.data.info;
+    coverImg = coverImg.replace('{size}', '400');
+    avatar = avatar.replace('{size}', '400');
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname}};
+    let list = [];
+    if(result.data.songs?.list){
+      list = result.data.songs.list.map(ele=>({
+        name:ele.filename.split('-')[1].trim(),
+        id:ele.hash,
+        mv:ele.mvhash || undefined,
+        time:ele.duration * 1000,
+        album:'',
+        picUrl:'',
+        art:[{
+          name:ele.filename.split('-')[0],
+          id:Math.random().toString(36).substr(2),
+        }],
+      }));
+    }
+    songList.value = list;
+  }
+};
+
 const getCustomAlbum = async (id:string|number) => {
   // 从本地歌单查找，将歌单信息和列表重新赋值
     if(!myAlbum.value) return;
@@ -420,6 +474,12 @@ watchEffect(async() => {
       await getQQAlbum(albumId.value); //歌单
     }else{
       await getQQRankDetail(+albumId.value); // 排行榜
+    }
+  }else if(platform.value == 3){
+    if(!route.query.isRank){
+      await getKGAlbum(albumId.value);
+    }else{
+      await getKGRankDetail(albumId.value);
     }
   }else if(platform.value == 4){ // 酷我平台
     if(!route.query.isRank){

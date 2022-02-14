@@ -40,7 +40,14 @@ const $filters = {
         if(value < 10000) return value;
         if(value < 100000000) return Math.floor(value / 10000) + '万';
         return Math.floor(value / 100000000) + '亿';
-    }
+    },
+    durationTransSec:(value) =>{
+        if(!value) return 0;
+        const temp = value.split(':');
+        const minute = temp[0];
+        const second = temp[1];
+        return (+minute) * 60 + (+second);
+    },
 };
 app.provide('$filters',$filters);
 app.provide('$eventBus',mitt());

@@ -1,9 +1,19 @@
 <template lang="">
   <div class="h-16 flex justify-between items-center bg-primary-100 border-t border-primary-500 px-5">
     <div class="flex text-gray-400 items-center h-full ">
-      <i @click="prevSong" class="iconfont icon-shangyishou mx-4  text-xl cursor-pointer" />
-      <i @click="toggleState" class="iconfont  mx-4 text-xl cursor-pointer"  :class="{'icon-zantingtingzhi':audioState === 'play','icon-bofang':audioState === 'pause'}"/>
-      <i @click="nextSong" class="iconfont icon-xiayishou mx-4 text-xl cursor-pointer" />
+      <i
+        class="iconfont icon-shangyishou mx-4  text-xl cursor-pointer"
+        @click="prevSong"
+      />
+      <i
+        class="iconfont  mx-4 text-xl cursor-pointer"
+        :class="{'icon-zantingtingzhi':audioState === 'play','icon-bofang':audioState === 'pause'}"
+        @click="toggleState"
+      />
+      <i
+        class="iconfont icon-xiayishou mx-4 text-xl cursor-pointer"
+        @click="nextSong"
+      />
     </div>
     <div class="flex w-96  items-center text-sm text-gray-400 h-full">
       <el-avatar
@@ -11,6 +21,7 @@
         shape="square"
         size="large" 
         :src="playInfo.picUrl || poster"
+        @click="showLyricPanel= !showLyricPanel"
       />
       <div class="flex overflow-hidden flex-1 flex-col w-full item-center mx-2">
         <div class="flex">
@@ -37,7 +48,10 @@
       </div>
     </div>
     <div class="flex text-gray-400">
-      <i class="iconfont icon-list mr-4 text-lg" @click="visiblePlayList = true"/>
+      <i
+        class="iconfont icon-list mr-4 text-lg"
+        @click="visiblePlayList = true"
+      />
       <div class="flex items-center">
         <i class="iconfont icon-yinliang mr-2 text-lg" />
         <drag-progress
@@ -53,20 +67,34 @@
       :src="playSrc"
     ></audio>
 
-    <el-drawer v-model="visiblePlayList" :show-close="false" >
+    <el-drawer
+      v-model="visiblePlayList"
+      :show-close="false"
+    >
       <template #title>
-        <div class="">播放列表</div>
+        <div class="">
+          播放列表
+        </div>
       </template>
-      <el-table :data="playList" @row-dblclick="toggleSong">
+      <el-table
+        :data="playList"
+        @row-dblclick="toggleSong"
+      >
         <el-table-column label="歌曲名">
           <template #default="scope">
-            <span class="truncate" :class="{'text-red-500':curSongId == scope.row.id}">{{scope.row.name}}</span>
+            <span
+              class="truncate"
+              :class="{'text-red-500':curSongId == scope.row.id}"
+            >{{ scope.row.name }}</span>
           </template>
         </el-table-column>
         <el-table-column label="歌手">
           <template #default="scope">
-            <span class="truncate" :class="{'text-red-500':curSongId == scope.row.id}">
-              {{scope.row.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'')}}
+            <span
+              class="truncate"
+              :class="{'text-red-500':curSongId == scope.row.id}"
+            >
+              {{ scope.row.art.reduce((prev,cur)=>{return prev + ' ' + cur.name},'') }}
             </span>
           </template>
         </el-table-column>
@@ -79,28 +107,35 @@
         </li>
       </ul> -->
     </el-drawer>
+    <div class="absolute  h-full border w-full bottom-0 left-0 bg-red-500">
+    
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
   import type {Ref } from 'vue';
   import { platform} from '../../typings/enum';
-  import {inject,ref,onMounted,watchEffect,toRaw} from 'vue';
+  import {inject,ref,onMounted,watchEffect,toRaw, nextTick} from 'vue';
   import { getSongUrlQQ, getSongPicQQ, getSongInfoQQ } from '../api/qq';
-  import {getSongUrlWy,getSongDetailWy} from '/@/api/netease';
+  import {getSongUrlWy,getSongDetailWy,getLyricWy} from '/@/api/netease';
   import { ElMessage } from 'element-plus';
   import poster from '@/../assets/poster.jpg';
   import { getMusicUrlKW,getSongDetailKW } from '../api/kuwo';
+  import { getSongDetailKG } from '../api/kugou';
   const $eventBus:any = inject('$eventBus');
-  const $filters = inject('$filters');
+  const $filters:any = inject('$filters');
   const playSrc = ref('');
   const audio:Ref<null|HTMLAudioElement> = ref(null);
   const currentTime = ref(0);
   const audioVolume = ref(1);
   const audioState = ref('pause');
   const playList = inject('playList');
-  const curSongId = ref(localStorage.getItem('curSongId') || '');
+  const curSongId = ref(localStorage.getItem('curSongId')||'');
   const visiblePlayList = ref(false);
   const appear = ref(true);
+  const lyric = ref([]);
+  const platformType = ref(0);
+  const showLyricPanel = ref(false);
   const playInfo = ref({
     name:'',
     art:[],
@@ -158,7 +193,20 @@
           picUrl:result.data.data.pic,
         };
       }
-
+    }else if(platformType === platform.kg){
+      const result = await getSongDetailKG(id);
+      songInfo = {
+        name:result.data.songName,
+        time:result.data.timeLength * 1000,
+        picUrl:result.data?.imgUrl?.replace('{size}','400'),
+        art:Array.isArray(result.data.authors)?result.data.authors?.map(ele=>({
+          name:ele.author_name,
+          id:ele.author_id,
+        })) : [{
+          name:result.data.singerName || result.data.author_name,
+          id: result.data.singerId,
+        }],
+      };
     }
     return songInfo;
   };
@@ -190,10 +238,34 @@
         ElMessage.error('暂无播放地址');
         return false;
       }
+    }else if(platformType == platform.kg){
+      const result = await getSongDetailKG(id);
+      return result.data.url || result.data.backup_url[0];
     }
   };
 
-  watchEffect(()=>{
+  // 获取歌词
+  const getLyric = async (id:string,platformType:platform) => {
+    let list = [];
+    if(platformType === platform.wy ){
+      const result = await getLyricWy(id);
+      if(result.data.code == 200){
+        let lyricArr = result.data.lrc.lyric.split('\n').filter(ele=>ele.trim()); // 去除空的
+        list = lyricArr.map(ele=>{
+          let temp = ele.split(']');
+          let words = temp[1].trim();
+          let time = temp[0].replace('[','').trim();
+          return {
+            time:$filters.durationTransSec(time),
+            words,
+          };
+        });
+      }
+    }
+    return list;
+  };
+
+  watchEffect(async()=>{
     if(curSongId.value){
       localStorage.setItem('curSongId',curSongId.value);
     }
@@ -202,9 +274,8 @@
   watchEffect(async ()=>{
     if(appear.value && playList.value.length){
       let song = playList.value.find(ele=>ele.id == curSongId.value);
-
+      lyric.value = await getLyric(curSongId.value,song.type);
       playSrc.value  = await getSongUrl(curSongId.value,song.type);
-
       playInfo.value= await getSongInfo(curSongId.value,song.type);
       appear.value = false;
       audio.value?.pause();
@@ -222,7 +293,9 @@
     }
     playSrc.value = songUrl;
     playInfo.value = await getSongInfo(songId,type);
+    
     // 触发添加播放列表事件, 并传递当前播放歌曲信息:歌曲id,歌曲名称,歌手，歌曲平台
+    platformType.value = type;
     curSongId.value = songId;
     audio.value?.play();
     if(!auto){ // 如果不是自动切歌，则添加到播放列表
@@ -231,7 +304,7 @@
         type:type,
         name:playInfo.value.name,
         art:playInfo.value.art.map(ele=>({name:ele.name,id:ele.id})),
-        timestamp:Date.now()
+        timestamp:Date.now(),
       });
     }
   });
@@ -255,7 +328,9 @@
   };
 
   onMounted(()=>{
-    
+    // nextTick(()=>{
+    //   curSongId.value =localStorage.getItem('curSongId')||'';
+    // });
     if(audio.value){
       // 获取当前音量
       audioVolume.value = audio.value.volume * 100;

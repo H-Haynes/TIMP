@@ -31,6 +31,8 @@
     import { searchWy } from '../api/netease';
     import { searchQQ } from '../api/qq';
     import {useRouter} from "vue-router";
+import { searchKG } from '../api/kugou';
+import { searchKW } from '../api/kuwo';
     const router = useRouter();
     const props = defineProps({
         keywords: {
@@ -78,6 +80,43 @@
         }
         return list;
     };
+
+    const getRelativeListKG = async(keywords:string) => {
+        const res = await searchKG(keywords);
+        let list = [];
+        if(res.data.errcode === 0){
+            list = res.data.data.info.map(ele=>({
+                id:ele.hash,
+                type:3,
+                name:ele.filename.split('-')[1].trim(),
+                mvid:ele.mvhash,
+                art:[{
+                    name:ele.singername,
+                    id:Math.random().toString(36).substr(2), //随机
+                }]
+            }));
+        }
+        return list;
+    };
+
+    const getRelativeListKW = async (keywords:string) => {
+        const res = await searchKW(keywords);
+        let list = [];
+        if(res.data.code === 200){
+            list = res.data.data.list.map(ele=>({
+                id:ele.musicrid,
+                type:4,
+                name:ele.name,
+                mv:ele.mvpayinfo.vid,
+                art:[{
+                    name:ele.artist,
+                    id:ele.artistid
+                }],
+            }));
+        }
+        return list;
+    };
+
     const playSong = (id:string,type:number) => {
         $eventBus.emit('playSong',{
             id,
@@ -106,6 +145,10 @@
                 relativeList.value = await getRelativeListWy(props.keywords);
             }else if(platform.value ===2){
                 relativeList.value = await getRelativeListQQ(props.keywords);
+            }else if(platform.value ===3){
+                relativeList.value =  await getRelativeListKG(props.keywords);
+            }else if(platform.value ===4){
+                relativeList.value =  await getRelativeListKW(props.keywords);
             }
             
         },1000);
