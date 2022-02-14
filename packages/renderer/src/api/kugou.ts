@@ -1,6 +1,5 @@
-
 import axios from '/@/api/http';
-const prefix = '/kuwo';
+const prefix = '/kugou';
 
 axios.defaults.headers.common['Accept'] = "application/json, text/plain, */*";
 
@@ -11,19 +10,20 @@ export const getAlbumDetailKW = (id:string|number) => {
 
 // 获取歌单分类
 
-export const getCategoryListKW = () => {
-    return axios.get(`${prefix}/kuwo/getTagList`); 
+export const getCategoryListKG = () => {
+    return axios.get(`http://127.0.0.1:7100/kugou/getTagList`); 
 };
 
 // 获取推荐歌单
-export const getRecommendKW = () => {
-    return axios.get(`${prefix}/kuwo/rec_gedan?pn=30`);
+export const getRecommendKG = (page=1) => {
+    return axios.get(`http://127.0.0.1:7100/kugou/getAlbumList?&page=${page}`);
 };
 
 // 获取歌单列表
-export const getAlbumListKW = (id:string|number,page = 1) => {
-    return axios.get(`${prefix}/kuwo/playList/getTagPlayList?id=${id}&pn=${page}`);
+export const getAlbumListKG = (id,page = 1) => {
+    return axios.get(`http://127.0.0.1:7100/kugou/albumList?tagid=${id}&page=${page}`);
 };
+
 
 // 获取banner
 
@@ -33,13 +33,13 @@ export const getBannerKW = () => {
 
 // 获取排行榜单列表
 
-export const getRankListKW = () => {
-    return axios.get(`${prefix}/kuwo/rank`);
+export const getRankListKG = () => {
+    return axios.get(`http://127.0.0.1:7100/kugou/rank/list`);
 };
 
 // 获取排行榜音乐列表
-export const getRankMusicListKW = (id:string|number) => {
-    return axios.get(`${prefix}/kuwo/rank/musicList?bangId=${id}&rn=100`);
+export const getRankMusicListKG = (id:string|number) => {
+    return axios.get(`http://127.0.0.1:7100/rank/info?rankid=${id}`);
 };
 
 // 获取播放地址

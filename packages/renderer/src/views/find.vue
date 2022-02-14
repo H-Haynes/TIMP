@@ -21,6 +21,7 @@
     import NeteaseFind from './NeteaseFind.vue';
     import QQFind from './QQFind.vue';
     import kuwoFind from './kuwoFind.vue';
+    import kugouFind from './kugouFind.vue';
     const platformList = ref([
         {
             name:'网易云音乐',
@@ -50,6 +51,7 @@
       switch(platformType.value){
         case 1: component = NeteaseFind;break;
         case 2: component = QQFind;break;
+        case 3: component = kugouFind;break;
         case 4: component = kuwoFind;break;
       }
       return component;

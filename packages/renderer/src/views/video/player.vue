@@ -76,6 +76,8 @@
     import {useRoute} from 'vue-router';
     import { getMvDataWy,getRelatedVideoWy,getVideoUrlWy,getVideoDataWy } from '/@/api/netease';
     import { getMvDataQQ } from '/@/api/qq';
+    import {getSongDetailKW, getUrlKW} from '/@/api/kuwo';
+import { ElMessage } from 'element-plus';
     const route = useRoute();
     const mvId = ref(route.query.id);
     const mvType = ref(route.query.type);
@@ -173,6 +175,37 @@
         return videoInfo;
     };
 
+    const getVideoKW = async (id) => {
+      let videoInfo = {};
+      let url;
+      const res = await getUrlKW(id,'mv');
+      if(res.data.code === 200){
+        url = res.data.url;
+      }else{
+        ElMessage.error(res.data.msg);
+      }
+      const dataResult = await getSongDetailKW(id);
+      if(res.data.code === 200){
+        let {pic,name,albuminfo:desc,releaseDate:publishTime,mvPlayCnt:playCount} = res.data.data;
+        let art = [{
+          name:res.data.data.artist,
+          id:res.data.data.artistid,
+          type:4,
+          headimg:res.data.data.pic120,
+        }];
+        videoInfo = {
+            pic,
+            desc,
+            name,
+            art,
+            playCount,
+            url,
+            publishTime,
+        };
+      }
+      return videoInfo;
+    };
+
     watchEffect(async ()=>{
         if(mvType.value === '1'){
             if(isNaN(+mvId.value)){
@@ -182,6 +215,8 @@
             }
         }else if(mvType.value === '2'){
            videoData.value =  await getMvQQ(mvId.value);
+        }else if(mvType.value === '4'){
+          videoData.value =  await getVideoKW(mvId.value);
         }
     });
 
