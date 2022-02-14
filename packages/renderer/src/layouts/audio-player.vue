@@ -89,6 +89,7 @@
   import {getSongUrlWy,getSongDetailWy} from '/@/api/netease';
   import { ElMessage } from 'element-plus';
   import poster from '@/../assets/poster.jpg';
+  import { getMusicUrlKW,getSongDetailKW } from '../api/kuwo';
   const $eventBus:any = inject('$eventBus');
   const $filters = inject('$filters');
   const playSrc = ref('');
@@ -143,6 +144,21 @@
       if(picResult.data.response.code === 0){
         songInfo.picUrl = picResult.data.response.data.imageUrl;
       }
+    }else if(platformType === platform.kw){
+      let mid = id.toString().match(/\d+/)?.[0];
+      const result = await getSongDetailKW(mid as string);
+      if(result.data.code === 200){
+        songInfo = {
+          name:result.data.data.name,
+          art:[{
+            name: result.data.data.artist,
+            id: result.data.data.artistid,
+          }],
+          time:result.data.data.duration * 1000,
+          picUrl:result.data.data.pic,
+        };
+      }
+
     }
     return songInfo;
   };
@@ -151,7 +167,7 @@
   const getSongUrl = async (id:string|number,platformType:platform)=>{
     if(platformType == platform.wy){
       const result = await getSongUrlWy(id);
-      if(result.data.code == 200){
+      if(result.data.code == 200 && result.data.data[0].url){
         return result.data.data[0].url;
       }else{
         ElMessage.error('暂无播放地址');
@@ -163,6 +179,15 @@
         return result.data.data.playUrl[id].url;
       }else{
         ElMessage.error(result.data.data.playUrl[id].error);
+        return false;
+      }
+    }else if(platformType == platform.kw){
+
+      const result = await getMusicUrlKW(id);
+      if(result.data.code === 200){
+        return result.data.data;
+      }else{
+        ElMessage.error('暂无播放地址');
         return false;
       }
     }
@@ -190,6 +215,7 @@
 
   // 监听播放歌曲
   $eventBus.on('playSong',async ({id:songId,type,auto=false}:any)=>{
+    if(curSongId.value == songId) return; // 当前歌曲不切换
     const songUrl = await getSongUrl(songId,type);
     if(!songUrl){
       return;

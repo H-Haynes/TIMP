@@ -1,15 +1,14 @@
 
 <template>
   <div class="flex flex-col h-full overflow-hidden">
-    <div
-      class="flex flex-1"
-      style="height:calc(100% - 16rem)"
-    >
+    <div class="flex flex-1 relative" style="height:calc(100% - 16rem)">
       <layout-nav />
       <div class="flex-1  bg-primary-100 overflow-hidden">
         <n-search />
         <router-view :key="route.query.type + route.query.id" />
       </div>
+
+      <!-- <div class="lyric absolute left-0 top-0 w-full h-full bg-red-500 z-50"></div> -->
     </div>
     <audio-player />
     <div v-show="showAddDialog" class="fixed left-0 top-0 w-full h-full  z-50">

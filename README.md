@@ -41,3 +41,23 @@ TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件，f
 - `npm run build` : 项目打包
 - `npm run test` : 本地测试
 - `npm run dist --平台 --架构`: 打包为对应系统安装包程序
+
+## mac logo生成
+
+```shell
+mkdir fan.iconset
+sips -z 16 16     ~/logo.png --out fan.iconset/icon_16x16.png
+sips -z 32 32     ~/logo.png --out fan.iconset/icon_16x16@2x.png
+sips -z 32 32     ~/logo.png --out fan.iconset/icon_32x32.png
+sips -z 64 64     ~/logo.png --out fan.iconset/icon_32x32@2x.png
+sips -z 64 64     ~/logo.png --out fan.iconset/icon_64x64.png
+sips -z 128 128     ~/logo.png --out fan.iconset/icon_64x64@2x.png
+sips -z 128 128   ~/logo.png --out fan.iconset/icon_128x128.png
+sips -z 256 256   ~/logo.png --out fan.iconset/icon_128x128@2x.png
+sips -z 256 256   ~/logo.png --out fan.iconset/icon_256x256.png
+sips -z 512 512   ~/logo.png --out fan.iconset/icon_256x256@2x.png
+sips -z 512 512   ~/logo.png --out fan.iconset/icon_512x512.png
+sips -z 1024 1024   ~/logo.png --out fan.iconset/icon_512x512@2x.png
+sips -z 1024 1024   ~/logo.png --out fan.iconset/icon_1024x1024.png
+iconutil -c icns fan.iconset -o logo.icns
+```

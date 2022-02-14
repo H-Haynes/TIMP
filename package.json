@@ -1,7 +1,8 @@
 {
-  "name": "vite-electron-builder",
+  "name": "TIMP-Music-Station",
   "private": true,
   "version": "1.0.0",
+  "ISC": "MIT",
   "engines": {
     "node": ">=v16.13",
     "npm": ">=8.1"
@@ -59,24 +60,26 @@
     "@types/node": "^17.0.17",
     "@typescript-eslint/parser": "^5.11.0",
     "axios": "^0.25.0",
+    "electron-log": "^4.4.6",
     "electron-updater": "4.6.5",
     "element-plus": "^2.0.1",
     "less": "^4.1.2",
     "mitt": "^3.0.0",
     "postcss-import": "^14.0.2",
     "source-map-support": "^0.5.21",
+    "update-electron-app": "^2.0.1",
     "vue": "3.2.29",
     "vue-router": "4"
   },
   "build": {
     "appId": "com.electron.app",
     "copyright": "CopyRight XingHe Team©️2022",
-    "productName": "TIMP音乐平台",
+    "productName": "TIMP Music",
     "files": [
       "!dist/**/*"
     ],
     "mac": {
-      "icon": "buildResources/icon.ins",
+      "icon": "buildResources/logo.icns",
       "category": "public.app-category.productivity",
       "artifactName": "${productName}v${version}.${ext}",
       "target": [
@@ -85,7 +88,7 @@
       ]
     },
     "win": {
-      "icon": "buildResources/icon.ins",
+      "icon": "buildResources/logo.icns",
       "artifactName": "${productName}_${version}.${ext}",
       "verifyUpdateCodeSignature": false,
       "target": [
@@ -102,5 +105,9 @@
       "createDesktopShortcut": false,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "repository":{
+    "type":"git",
+    "url":"git@preferyou.cn:root/timp.git"
   }
 }

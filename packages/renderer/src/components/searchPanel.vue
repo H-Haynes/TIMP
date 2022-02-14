@@ -19,7 +19,7 @@
           class="text-gray-500 text-sm text-left hover:bg-primary-100 hover:text-gray-300 py-1 px-5 truncate cursor-pointer"
         >
           {{ item.name }} 
-          <i class="iconfont icon-mv text-red-500" v-if="item.mvid" /> - {{ item.art.map(e=>e.name).join('/') }}
+          <i @click.stop="toMv(item.mvid)" class="iconfont icon-mv text-red-500" v-if="item.mvid" /> - {{ item.art.map(e=>e.name).join('/') }}
         </li>
       </ul>
     </div>
@@ -30,6 +30,8 @@
     import { defineProps,ref ,watch,inject} from 'vue';
     import { searchWy } from '../api/netease';
     import { searchQQ } from '../api/qq';
+    import {useRouter} from "vue-router";
+    const router = useRouter();
     const props = defineProps({
         keywords: {
             type: String,
@@ -83,6 +85,16 @@
         });
     };
 
+    const toMv = (mvid:string) => {
+        router.push({
+            path:'/video/player',
+            query:{
+                id:mvid,
+                type:platform.value
+            }
+        });
+    };
+
     watch(()=>[props.keywords,platform.value], async ()=>{
         clearTimeout(timer.value);
         if(!props.keywords.trim()){
@@ -99,3 +111,6 @@
         },1000);
     });
 </script>
+
+
+

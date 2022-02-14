@@ -1,7 +1,11 @@
 import {app} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
-
+require('update-electron-app')({
+  // repo: 'http://preferyou.cn/gitlab/root/timp', // 仓库地址,默认为package.json中的repository
+  updateInterval: '1 hour',
+  logger: require('electron-log'),
+}); // 自动更新服务
 /**
  * Prevent multiple instances
  */

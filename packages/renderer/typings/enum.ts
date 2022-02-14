@@ -2,5 +2,6 @@ export enum platform {
     wy = 1,
     qq = 2,
     kg = 3,
-    mg = 4
+    kw = 4,
+    mg = 5
 }

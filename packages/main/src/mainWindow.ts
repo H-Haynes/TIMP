@@ -10,7 +10,9 @@ async function createWindow() {
       webviewTag: false, // The webview tag is not recommended. Consider alternatives like iframe or Electron's BrowserView. https://www.electronjs.org/docs/latest/api/webview-tag#warning
       preload: join(__dirname, '../../preload/dist/index.cjs'),
     },
-    minWidth:1200
+    minWidth:900,
+    // frame: false, //无边框窗口
+    titleBarStyle: 'hidden', // 隐藏标题栏
   });
 
   /**
@@ -19,6 +21,7 @@ async function createWindow() {
    *
    * @see https://github.com/electron/electron/issues/25012
    */
+
   browserWindow.on('ready-to-show', () => {
     browserWindow?.show();
 
@@ -38,7 +41,7 @@ async function createWindow() {
 
 
   await browserWindow.loadURL(pageUrl);
-  browserWindow.webContents.openDevTools();
+  // browserWindow.webContents.openDevTools();
   return browserWindow;
 }
 

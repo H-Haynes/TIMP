@@ -60,4 +60,10 @@
     background:rgba(73, 63, 63, 0.2) !important;
     color:#999 !important;
   }
+  body,html{
+    -webkit-app-region:drag;
+  }
+  section{
+    -webkit-app-region:no-drag;
+  }
   

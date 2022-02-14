@@ -150,6 +150,7 @@ import {getAlbumDetailQQ, getRankDetailQQ} from '../api/qq';
 import { useRoute,useRouter } from 'vue-router';
 import poster from '@/../assets/poster.jpg';
 import { ElMessageBox } from 'element-plus';
+import { getAlbumDetailKW, getRankListKW, getRankMusicListKW } from '../api/kuwo';
 
 const $filters = inject('$filters');
 const $eventBus:any = inject('$eventBus');
@@ -193,6 +194,24 @@ const getWyAlbum = async(id:string) =>{
                       id:el.id,
                   };
               }),
+              
+          };
+    });
+  }
+};
+
+const getKwAlbum = async(id:string) =>{
+  const res = await getAlbumDetailKW(id);
+  if(res.data.code === 200){
+    const {name,id,info:description,listencnt:subscribedCount,listencnt:trackCount,img: coverImg,createTime,updateTime} = res.data.data;
+    const {uPic: avatar, desc='',userName:nickname} = res.data.data;
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname}};
+    songList.value = res.data.data.musicList.map((ele:any)=>{
+          return {name:ele.name,id:ele.rid,mv:ele.mvpayinfo.vid,time:ele.duration*1000,album:ele.album,picUrl:ele.pic,
+              art:[{
+                      name:ele.artist,
+                      id:ele.artistid,
+                }],
               
           };
     });
@@ -260,7 +279,36 @@ const getQQRankDetail = async(id:number) => {
     songList.value = list;
   }
 };
+const getKWRankDetail = async(id:number|string) => {
+  const result = await getRankMusicListKW(id);
+  if(result.data.code === 200){
+    songList.value = result.data.data.musicList.map(ele=>({
+      name:ele.name,
+      id:ele.musicrid,
+      mv:ele.mvpayinfo.vid,
+      time:ele.duration*1000,
+      album:ele.album,
+      picUrl:ele.pic,
+      art:[{
+        name:ele.artist,
+        id:ele.artistid,
+      }],
+    }));
+  }
 
+  // 从排行榜列表获取到相关描述
+  const rankListResult = await getRankListKW();
+  if(rankListResult.data.code === 200){
+    let rankList = rankListResult.data.data.reduce((prev,cur)=>{
+        return prev.concat(cur.list);
+    },[]);
+    let rank = rankList.find(ele=>ele.sourceid === id);
+    let {name,intro:description,subscribedCount=0,trackCount=0,pic: coverImg,createTime,updateTime,pic:avatar,pub:desc,nickname} = rank;
+    albumInfo.value = {name,id,description,subscribedCount,trackCount,coverImg,createTime,updateTime,creator: {avatar,desc,nickname}};
+
+  }
+  
+};
 const getCustomAlbum = async (id:string|number) => {
   // 从本地歌单查找，将歌单信息和列表重新赋值
     if(!myAlbum.value) return;
@@ -372,6 +420,12 @@ watchEffect(async() => {
       await getQQAlbum(albumId.value); //歌单
     }else{
       await getQQRankDetail(+albumId.value); // 排行榜
+    }
+  }else if(platform.value == 4){ // 酷我平台
+    if(!route.query.isRank){
+      await getKwAlbum(albumId.value); //歌单
+    }else{
+      await getKWRankDetail(albumId.value);
     }
   }else if(platform.value == 0){ //自建歌单
     await getCustomAlbum(albumId.value);
