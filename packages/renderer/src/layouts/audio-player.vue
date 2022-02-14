@@ -1,5 +1,8 @@
 <template lang="">
-  <div class="h-16 flex justify-between items-center bg-primary-100 border-t border-primary-500 px-5">
+  <div
+    style="z-index:4000"
+    class="h-16 flex justify-between items-center bg-primary-100 border-t border-primary-500 px-5"
+  >
     <div class="flex text-gray-400 items-center h-full ">
       <i
         class="iconfont icon-shangyishou mx-4  text-xl cursor-pointer"
@@ -107,21 +110,51 @@
         </li>
       </ul> -->
     </el-drawer>
-    <div class="absolute  h-full border w-full bottom-0 left-0 bg-red-500">
-    
+  </div>
+  <div
+    v-show="showLyricPanel"
+    style="z-index:3400"
+    class="flex justify-around absolute py-16 h-full  w-full bottom-0 left-0 bg-primary-500"
+  >
+    <el-avatar
+      :size="240"
+      shape="square"
+      :src="playInfo.picUrl||poster"
+    ></el-avatar>
+
+    <div
+      class="w-96  mb-10 flex flex-col"
+      style="min-height:300px"
+    >
+      <strong class="text-2xl text-white">{{ playInfo.name }}</strong>
+      <span class="text-white leading-8">{{ playInfo.art.map(ele=>ele.name).join('/') }}</span>
+      <ul
+        ref="lyricWrap"
+        class="overflow-y-scroll flex-1 lyric-wrap"
+      >
+        <li
+          v-for="(item,index) in lyric" 
+          :key="index" 
+          :class="{'lyric-highlight': highlightLine === index }"
+          class="leading-8 text-gray-500"
+        >
+          {{ item.words }}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import type {Ref } from 'vue';
+  import type { Ref} from 'vue';
+import { watch } from 'vue';
   import { platform} from '../../typings/enum';
-  import {inject,ref,onMounted,watchEffect,toRaw, nextTick} from 'vue';
-  import { getSongUrlQQ, getSongPicQQ, getSongInfoQQ } from '../api/qq';
+  import {inject,ref,onMounted,watchEffect,computed,toRaw, nextTick} from 'vue';
+  import { getSongUrlQQ, getSongPicQQ, getSongInfoQQ, getLyricQQ } from '../api/qq';
   import {getSongUrlWy,getSongDetailWy,getLyricWy} from '/@/api/netease';
   import { ElMessage } from 'element-plus';
-  import poster from '@/../assets/poster.jpg';
-  import { getMusicUrlKW,getSongDetailKW } from '../api/kuwo';
+  import { getLyricKW, getMusicUrlKW,getSongDetailKW } from '../api/kuwo';
   import { getSongDetailKG } from '../api/kugou';
+  import poster from '/@/../assets/poster.jpg';
   const $eventBus:any = inject('$eventBus');
   const $filters:any = inject('$filters');
   const playSrc = ref('');
@@ -136,6 +169,9 @@
   const lyric = ref([]);
   const platformType = ref(0);
   const showLyricPanel = ref(false);
+  const lyricWrap:Ref<null|HTMLUListElement> = ref(null);
+  const lyricWrapHeight = ref(0);
+  const timer = ref(0);
   const playInfo = ref({
     name:'',
     art:[],
@@ -261,6 +297,30 @@
           };
         });
       }
+    }else if(platformType === platform.qq){
+      const result = await getLyricQQ(id);
+      if(result.data.response.code === 0){
+        let lyricArr = result.data.response.lyric.split('\n').filter(ele=>ele.trim());
+        list = lyricArr.map(ele=>{
+          let temp = ele.split(']');
+          let words = temp[1].trim();
+          let time = temp[0].replace('[','').trim();
+          return {
+            time:$filters.durationTransSec(time),
+            words,
+          };
+        });
+      }
+    }else if(platformType === platform.kw){
+      const result = await getLyricKW(id);
+      if(result.data.status === 200){
+        list = result.data.data.lrclist.map(ele=>{
+          return {
+            time:+ele.time,
+            words:ele.lineLyric,
+          };
+        });
+      }
     }
     return list;
   };
@@ -293,7 +353,7 @@
     }
     playSrc.value = songUrl;
     playInfo.value = await getSongInfo(songId,type);
-    
+    lyric.value = await getLyric(songId,type);
     // 触发添加播放列表事件, 并传递当前播放歌曲信息:歌曲id,歌曲名称,歌手，歌曲平台
     platformType.value = type;
     curSongId.value = songId;
@@ -327,10 +387,18 @@
     }
   };
 
+  watchEffect(()=>{
+    if(showLyricPanel.value){
+      nextTick(()=>{
+        lyricWrapHeight.value = lyricWrap.value?.offsetHeight ?? 0;
+      });
+    }
+  });
+
   onMounted(()=>{
-    // nextTick(()=>{
-    //   curSongId.value =localStorage.getItem('curSongId')||'';
-    // });
+    window.onresize = () => {
+      lyricWrapHeight.value = lyricWrap.value?.offsetHeight ?? 0;
+    };
     if(audio.value){
       // 获取当前音量
       audioVolume.value = audio.value.volume * 100;
@@ -402,8 +470,58 @@
     });
   };
 
+  // 计算高亮行
+  const highlightLine = computed(()=>{
+    let index = lyric.value.findIndex((ele:any,index)=>{
+      return currentTime.value > ele.time && (lyric.value[index+1] ? currentTime.value < lyric.value[index+1].time : true);
+    });
+    return index;
+  });
+
+  watch([()=>highlightLine.value,()=>lyricWrapHeight.value],()=>{
+      // 获取当前highlight，设置滚动条位置到highlight
+      // 如果当前highlight位置小于ul一半位置，则滚动到0，否则滚动到highlight - ul/2 的位置
+
+      // 滚动动画
+      function scrollAnimation(target){
+          let times = 20;
+          timer.value = requestAnimationFrame(function fn(){
+            let speed = (target - lyricWrap.value.scrollTop) / times; // 约320毫秒执行完
+            if(lyricWrap.value){
+              // if(Math.abs(target - lyricWrap.value.scrollTop) > speed){
+              if(times > 1){
+                lyricWrap.value.scrollTop += speed;
+                times -- ;
+                timer.value=requestAnimationFrame(fn);
+              }else{
+                lyricWrap.value.scrollTop = target;
+                cancelAnimationFrame(timer.value);
+              }
+            }else{
+                cancelAnimationFrame(timer.value);
+            }
+          });
+      }
+      if(showLyricPanel.value && highlightLine.value && lyricWrap.value){
+          let highlightDOM = document.getElementsByClassName('lyric-highlight')[0];
+          if(highlightDOM && lyricWrapHeight.value){
+            cancelAnimationFrame(timer.value);
+            let target;
+            if(highlightDOM.offsetTop < lyricWrapHeight.value/2){
+              // lyricWrap.value?.scrollTo(0,0);
+              target = 0;
+            }else{
+              target = highlightDOM.offsetTop  - lyricWrapHeight.value/2;
+              // lyricWrap.value?.scrollTo(0,highlightDOM.offsetTop - lyricWrapHeight.value/2);
+            }
+            scrollAnimation(target);
+          }
+      }
+
+  });
+
 </script>
-<style lang="less">
+<style lang="less" >
     .el-drawer{
       --el-drawer-bg-color: #212121 !important;
     }
@@ -420,4 +538,13 @@
       --el-table-bg-color: cyan !important;
       --el-table-tr-bg-color:#212121 !important; // 背景
     }
+
+    .lyric-highlight{
+      font-size:18px;
+      font-weight:bold;
+      background-image:-webkit-linear-gradient(right,#f40,orange,yellow,green,skyblue,cyan,purple); 
+        -webkit-background-clip:text; 
+        -webkit-text-fill-color:transparent;
+    }
+
 </style>

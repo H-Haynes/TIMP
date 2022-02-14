@@ -74,3 +74,9 @@ export const getMvQQ = (page=1) => {
 export const getMvDataQQ = (id:number|string) => {
     return axios.get(`${prefix}/getMvPlay?vid=${id}`);
 };
+
+// 获取歌词
+
+export const getLyricQQ = (id:number|string) => {
+    return axios.get(`${prefix}/getLyric?songmid=${id}`);
+};
