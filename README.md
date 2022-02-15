@@ -4,8 +4,8 @@ TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件，f
 
 - 网易云音乐: [网易云音乐API](https://github.com/Binaryify/NeteaseCloudMusicApi)
 - QQ音乐API: [QQ音乐API](https://github.com/Rain120/qq-music-api)
-- 酷狗音乐API: [酷狗音乐API](http://127.0.0.1)
-- 咪咕音乐API: [咪咕音乐API](http://127.0.0.1)
+- 酷狗音乐API: [酷狗音乐API](https://github.com/H-Haynes/kuwoMusicApi)
+- 酷我音乐API: [酷我与酷狗同项目](https://github.com/H-Haynes/kuwoMusicApi)
 
 ## 项目开发运行环境
 
@@ -61,3 +61,11 @@ sips -z 1024 1024   ~/logo.png --out fan.iconset/icon_512x512@2x.png
 sips -z 1024 1024   ~/logo.png --out fan.iconset/icon_1024x1024.png
 iconutil -c icns fan.iconset -o logo.icns
 ```
+
+## 应用程序功能展示
+
+![首页](./desc/desc1.png)
+![歌单详情](./desc/desc2.png)
+![视频](./desc/desc3.png)
+![视频播放](./desc/desc4.png)
+![歌词](./desc/desc5.png)
