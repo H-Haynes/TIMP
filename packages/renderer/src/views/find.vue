@@ -39,10 +39,10 @@
             name:'酷我音乐',
             type:4,
         },
-        {
-            name:'咪咕音乐',
-            type:5,
-        },
+        // {
+        //     name:'咪咕音乐',
+        //     type:5,
+        // },
     ]);
     const platformType = ref(Number(sessionStorage.getItem('platformType') || 1));
    

@@ -63,7 +63,10 @@
           @update:value="e=>audioVolume = e"
         />
       </div>
-      <i class="iconfont icon-ci ml-2 text-lg" />
+      <i class="iconfont icon-ci ml-2 text-lg cursor-pointer" 
+        @click="showLyricPanel = !showLyricPanel"
+        :class="{'text-orange-400':showLyricPanel}"
+        />
     </div>
     <audio
       ref="audio"
@@ -112,9 +115,9 @@
     </el-drawer>
   </div>
   <div
-    v-show="showLyricPanel"
     style="z-index:3400"
-    class="flex justify-around absolute py-16 h-full  w-full bottom-0 left-0 bg-primary-500"
+    :style="{top:showLyricPanel ? '0' : '100%'}"
+    class="flex justify-around transition-all duration-500 absolute py-16 h-full  w-full  left-0 bg-primary-500"
   >
     <el-avatar
       :size="240"
@@ -153,7 +156,7 @@ import { watch } from 'vue';
   import {getSongUrlWy,getSongDetailWy,getLyricWy} from '/@/api/netease';
   import { ElMessage } from 'element-plus';
   import { getLyricKW, getMusicUrlKW,getSongDetailKW } from '../api/kuwo';
-  import { getSongDetailKG } from '../api/kugou';
+  import { getSongDetailKG,getKGLyric } from '../api/kugou';
   import poster from '/@/../assets/poster.jpg';
   const $eventBus:any = inject('$eventBus');
   const $filters:any = inject('$filters');
@@ -320,6 +323,21 @@ import { watch } from 'vue';
             words:ele.lineLyric,
           };
         });
+      }
+    }else if(platformType === platform.kg){
+      const result = await getKGLyric(id);
+      if(result.data.code === 200){
+        let lyricArr = result.data.result.split('\r\n').filter(ele=>ele[ele.length-1]!==']' && ele.trim());
+        list = lyricArr.map(ele=>{
+          let temp = ele.split(']');
+          let words = temp[1].trim();
+          let time = temp[0].replace('[','').trim();
+          return {
+            time:$filters.durationTransSec(time),
+            words,
+          };
+        });
+
       }
     }
     return list;

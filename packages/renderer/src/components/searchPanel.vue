@@ -9,7 +9,7 @@
           <li :class="{'bg-primary-500 text-orange-500':platform === 2}" @click="platform=2" class="flex-1 border-r py-1  cursor-pointer  border-gray-800">QQ</li>
           <li :class="{'bg-primary-500 text-orange-500':platform === 3}" @click="platform=3" class="flex-1 border-r py-1 cursor-pointer  border-gray-800">酷狗</li>
           <li :class="{'bg-primary-500 text-orange-500':platform === 4}" @click="platform=4" class="flex-1 border-r py-1 cursor-pointer  border-gray-800">酷我</li>
-          <li :class="{'bg-primary-500 text-orange-500':platform === 5}" @click="platform=5" class="flex-1 border-r py-1 cursor-pointer  border-gray-800">咪咕</li>
+          <!-- <li :class="{'bg-primary-500 text-orange-500':platform === 5}" @click="platform=5" class="flex-1 border-r py-1 cursor-pointer  border-gray-800">咪咕</li> -->
       </ol>
       <ul class="my-4 flex-1 flex-grow-0 overflow-y-scroll">
         <li

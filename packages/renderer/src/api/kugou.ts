@@ -1,7 +1,7 @@
 import axios from '/@/api/http';
 const prefix = '/kuwo';
 
-axios.defaults.headers.common['Accept'] = "application/json, text/plain, */*";
+axios.defaults.headers.common['Accept'] = 'application/json, text/plain, */*';
 
 // 获取歌单详情
 export const getAlbumDetailKG = (id:string|number) => {
@@ -66,3 +66,8 @@ export const getMvDataKG = (id) => {
     return axios.get(`${prefix}/kugou/mvInfo?id=${id}`);
 };
 
+// 获取歌词
+
+export const getKGLyric = (id:string) =>{
+    return axios.get(`${prefix}/kugou/lyric?id=${id}`);
+};
