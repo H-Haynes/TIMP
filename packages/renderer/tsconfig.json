@@ -26,7 +26,7 @@
     "types/**/*.d.ts",
     "../../types/**/*.d.ts",
     "../preload/exposedInMainWorld.d.ts"
-  ],
+, "src/base64.js"  ],
   "exclude": [
     "**/*.spec.ts",
     "**/*.test.ts",
