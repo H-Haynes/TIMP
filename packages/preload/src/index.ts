@@ -2,7 +2,7 @@
  * @module preload
  */
 
-import {contextBridge} from 'electron';
+import {contextBridge,ipcRenderer} from 'electron';
 import {sha256sum} from '/@/sha256sum';
 
 /**
@@ -34,3 +34,26 @@ contextBridge.exposeInMainWorld('versions', process.versions);
  * window.nodeCrypto('data')
  */
 contextBridge.exposeInMainWorld('nodeCrypto', {sha256sum});
+
+
+
+
+
+contextBridge.exposeInMainWorld('api',{
+    send: (channel:string, data?:any) => {
+        // whitelist channels
+        // let validChannels = ["toMain"];
+        // if (validChannels.includes(channel)) {
+            ipcRenderer.send(channel, data);
+        // }
+    },
+    receive: (channel:string, func:() =>void) => {
+        // let validChannels = ["fromMain"];
+        // if (validChannels.includes(channel)) {
+            // Deliberately strip event as it includes `sender` 
+            // ipcRenderer.on(channel, (event, ...args) => func(...args));
+                ipcRenderer.on(channel, func);
+        // }
+    },
+
+});

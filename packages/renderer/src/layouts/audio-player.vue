@@ -64,7 +64,7 @@
         />
       </div>
       <i class="iconfont icon-ci ml-2 text-lg cursor-pointer" 
-        @click="showLyricPanel = !showLyricPanel"
+        @click="lyricWindow"
         :class="{'text-orange-400':showLyricPanel}"
         />
     </div>
@@ -149,7 +149,7 @@
 </template>
 <script lang="ts" setup>
   import type { Ref} from 'vue';
-import { watch } from 'vue';
+  import { watch } from 'vue';
   import { platform} from '../../typings/enum';
   import {inject,ref,onMounted,watchEffect,computed,toRaw, nextTick} from 'vue';
   import { getSongUrlQQ, getSongPicQQ, getSongInfoQQ, getLyricQQ } from '../api/qq';
@@ -158,6 +158,7 @@ import { watch } from 'vue';
   import { getLyricKW, getMusicUrlKW,getSongDetailKW } from '../api/kuwo';
   import { getSongDetailKG,getKGLyric } from '../api/kugou';
   import poster from '/@/../assets/poster.jpg';
+
   const $eventBus:any = inject('$eventBus');
   const $filters:any = inject('$filters');
   const playSrc = ref('');
@@ -182,6 +183,7 @@ import { watch } from 'vue';
     picUrl:'',
     albumId:'',
   });
+  const showLyricWindow = ref(false);
 
   // 获取歌曲信息，包含:name,time,picUrl,art
   const getSongInfo = async (id:string|number,platformType:platform) =>{
@@ -414,6 +416,9 @@ import { watch } from 'vue';
   });
 
   onMounted(()=>{
+    window.api.receive('hhh',()=>{
+      console.log('9999')
+    });
     window.onresize = () => {
       lyricWrapHeight.value = lyricWrap.value?.offsetHeight ?? 0;
     };
@@ -535,9 +540,23 @@ import { watch } from 'vue';
             scrollAnimation(target);
           }
       }
-
   });
 
+  watch(highlightLine, ()=>{
+    // 将当前行歌词，发送到主进程
+    window.api.send('lyric',lyric.value[highlightLine.value].words);
+  });
+
+  const lyricWindow = () =>{
+    console.log(6666);
+    if(!showLyricWindow.value){
+      showLyricWindow.value = true;
+      window.api.send('openLyric');
+    }else{
+      showLyricWindow.value = false;
+      window.api.send('closeLyric');
+    }
+  };
 </script>
 <style lang="less" >
     .el-drawer{
@@ -553,7 +572,7 @@ import { watch } from 'vue';
       --el-table-current-row-bg-color: purple !important;
 
       --el-table-fixed-box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
-      --el-table-bg-color: cyan !important;
+      --el-table-bg-color: #212121 !important;
       --el-table-tr-bg-color:#212121 !important; // 背景
     }
 

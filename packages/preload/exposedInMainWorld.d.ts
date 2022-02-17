@@ -11,4 +11,5 @@ interface Window {
      * window.nodeCrypto('data')
      */
     readonly nodeCrypto: { sha256sum: any; };
+    readonly api: { send: (channel: string, data?: any) => void; receive: (channel: string, func: () => void) => void; };
 }

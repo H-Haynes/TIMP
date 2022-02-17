@@ -1,4 +1,4 @@
-import {BrowserWindow} from 'electron';
+import {BrowserWindow,ipcMain,screen } from 'electron';
 import {join} from 'path';
 import {URL} from 'url';
 
@@ -9,6 +9,8 @@ async function createWindow() {
       nativeWindowOpen: true,
       webviewTag: false, // The webview tag is not recommended. Consider alternatives like iframe or Electron's BrowserView. https://www.electronjs.org/docs/latest/api/webview-tag#warning
       preload: join(__dirname, '../../preload/dist/index.cjs'),
+      // nodeIntegration: true,
+      // contextIsolation: false,
     },
     minWidth:900,
     // frame: false, //无边框窗口
@@ -41,7 +43,65 @@ async function createWindow() {
 
 
   await browserWindow.loadURL(pageUrl);
-  // browserWindow.webContents.openDevTools();
+  browserWindow.webContents.openDevTools();
+
+  let lyricWindow:null|BrowserWindow = null;
+  const  openLyric = () => {
+
+    if(lyricWindow){
+      // 显示
+      lyricWindow.show();
+      return;
+    }
+
+    lyricWindow = new BrowserWindow({
+      width:800,
+      height:100,
+      // parent: browserWindow,
+      transparent:true,
+      webPreferences: {
+        preload: join(__dirname, '../../preload/dist/index.cjs'),
+        nodeIntegration: true,
+        contextIsolation:true,
+      },
+      x:(screen.getPrimaryDisplay().workArea.width-800) /2,
+      y:screen.getPrimaryDisplay().workArea.height-100,
+      frame:false,
+      backgroundColor:'#00000000',
+    });
+    browserWindow.show(); // 不让焦点在子窗口
+    lyricWindow.loadURL(pageUrl + '#/lyric');
+    lyricWindow.on('close',()=>{
+      lyricWindow && lyricWindow.destroy();
+      lyricWindow = null;
+    });
+    
+  };
+
+  ipcMain.on('openLyric', () => openLyric());
+  ipcMain.on('closeLyric', () => {
+    // lyricWindow && lyricWindow.close();
+    // 隐藏窗口
+    lyricWindow && lyricWindow.hide();
+  });
+
+  ipcMain.on('lyric',(e,lyric) => {
+    // 监听到歌词信息，通过事件传出去
+    console.log(lyric);
+    lyricWindow && lyricWindow.webContents.send('lyric',lyric);
+
+  });
+
+  ipcMain.on('fixed',() => {
+    lyricWindow && lyricWindow.setAlwaysOnTop(true);
+    lyricWindow && lyricWindow.setMovable(false);
+  });
+
+  ipcMain.on('unfixed',() => {
+    lyricWindow && lyricWindow.setAlwaysOnTop(false);
+    lyricWindow && lyricWindow.setMovable(true);
+  });
+
   return browserWindow;
 }
 

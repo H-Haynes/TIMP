@@ -83,8 +83,7 @@
       "category": "public.app-category.productivity",
       "artifactName": "${productName}v${version}.${ext}",
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ]
     },
     "win": {

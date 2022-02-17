@@ -44,6 +44,11 @@ const router = createRouter({
                 },
             ],
         },
+        {
+            path:'/lyric',
+            name:'lyric',
+            component: () => import('/@/views/lyric.vue'),
+        },
     ],
 });
 
