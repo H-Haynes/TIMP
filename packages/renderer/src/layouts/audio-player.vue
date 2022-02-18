@@ -142,8 +142,9 @@
           :key="index" 
           :class="{'lyric-highlight': highlightLine === index }"
           class="leading-8 text-gray-500"
+          v-html="item.words"
         >
-          {{ item.words }}
+          
         </li>
       </ul>
     </div>

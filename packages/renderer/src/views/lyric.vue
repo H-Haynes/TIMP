@@ -52,8 +52,8 @@
     <p
       class="font-bold mt-4"
       :style="{fontSize:fontSize + 'px',color:color}"
+      v-html="lyric"
     >
-      {{ lyric }}
     </p>
   </div>
 </template>
