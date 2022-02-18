@@ -143,14 +143,13 @@
           :class="{'lyric-highlight': highlightLine === index }"
           class="leading-8 text-gray-500"
         >
-          {{ item }}
+          {{ item.words }}
         </li>
       </ul>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import cookie from 'js-cookie';
   import type { Ref} from 'vue';
   import { watch } from 'vue';
   import { platform} from '../../typings/enum';
@@ -448,6 +447,7 @@
     window.onresize = () => {
       lyricWrapHeight.value = lyricWrap.value?.offsetHeight ?? 0;
     };
+    document.title='桌面歌词';
     if(audio.value){
       // 获取当前音量
       audioVolume.value = audio.value.volume * 100;

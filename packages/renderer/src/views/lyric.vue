@@ -58,11 +58,11 @@
   </div>
 </template>
 <script setup lang="ts">
-    import {ref,onMounted} from 'vue';
+    import {ref,onMounted,watch} from 'vue';
     const isLock = ref(false);
     const lyric = ref('TIMP，你想听的都在这里!');
-    const fontSize = ref(20);
-    const color = ref('#f40');
+    const fontSize = ref(+(localStorage.getItem('fontSize')||20));
+    const color = ref(localStorage.getItem('color')||'#f40');
     const focus = ref(false);
     const showColorList = ref(false);
     const colorList = ['#f40','#FF6633','#FFFF33','#66FF00','#66FFFF','#3366FF','#6600FF'];
@@ -95,6 +95,12 @@
       window.api.send('unlock');
       isLock.value = false;
     };
+
+    watch([()=>color.value,()=>fontSize.value],()=>{
+      // 存储用户设置
+      localStorage.setItem('color',color.value);
+      localStorage.setItem('fontSize',fontSize.value.toString());
+    });
 
 </script>
 <style lang="less">
