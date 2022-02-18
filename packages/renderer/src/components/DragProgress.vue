@@ -18,8 +18,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-    import type { Ref } from 'vue';
-
+    import type { Ref, } from 'vue';
+    import {defineProps,defineEmits} from 'vue';
     import {ref} from 'vue';
     const props = defineProps({
         width:{

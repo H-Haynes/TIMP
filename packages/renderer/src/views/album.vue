@@ -30,7 +30,10 @@
             v-html="albumInfo.description ?albumInfo.description.replace(/\n/g,'<br/>') : '' "
           />
           <div class="mt-2 text-xs flex">
-            <span @click="playAll" class="w-24 cursor-pointer bg-red-700 flex items-center justify-center hover:bg-red-600 leading-6 mr-3 rounded-xl">
+            <span
+              class="w-24 cursor-pointer bg-red-700 flex items-center justify-center hover:bg-red-600 leading-6 mr-3 rounded-xl"
+              @click="playAll"
+            >
               <i class="iconfont icon-botany2 mr-1" />
               播放全部
             </span>
@@ -88,7 +91,10 @@
             class="truncate"
           >
             <template #default="scope">
-              <el-tooltip placement="bottom" :content="scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'')">
+              <el-tooltip
+                placement="bottom"
+                :content="scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'')"
+              >
                 <span class="truncate">{{ scope.row.art?.reduce((prev,cur)=> prev + (prev ? '/'+cur.name : cur.name),'') }}</span>
               </el-tooltip>
             </template>
@@ -258,8 +264,8 @@ const getKGAlbum = async (id:string) => {
       art:[
         {
           name:ele.filename.split('-')[0],
-          id:0
-        }
+          id:0,
+        },
       ],
     }));
   }

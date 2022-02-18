@@ -43,7 +43,7 @@ async function createWindow() {
 
 
   await browserWindow.loadURL(pageUrl);
-  browserWindow.webContents.openDevTools();
+  // browserWindow.webContents.openDevTools();
 
   let lyricWindow:null|BrowserWindow = null;
   const  openLyric = () => {
@@ -100,6 +100,12 @@ async function createWindow() {
   ipcMain.on('unfixed',() => {
     lyricWindow && lyricWindow.setAlwaysOnTop(false);
     lyricWindow && lyricWindow.setMovable(true);
+  });
+
+  browserWindow.on('closed', () => {
+    // 销毁歌词窗口
+    lyricWindow && lyricWindow.destroy();
+    lyricWindow = null;
   });
 
   return browserWindow;

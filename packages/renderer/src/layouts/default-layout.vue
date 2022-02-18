@@ -5,10 +5,8 @@
       <layout-nav />
       <div class="flex-1  bg-primary-100 overflow-hidden">
         <n-search />
-        <router-view :key="route.query.type + route.query.id" />
+        <router-view />
       </div>
-
-      <!-- <div class="lyric absolute left-0 top-0 w-full h-full bg-red-500 z-50"></div> -->
     </div>
     <audio-player />
     <div v-show="showAddDialog" class="fixed left-0 top-0 w-full h-full  z-50">

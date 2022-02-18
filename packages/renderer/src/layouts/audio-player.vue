@@ -141,7 +141,7 @@
           :class="{'lyric-highlight': highlightLine === index }"
           class="leading-8 text-gray-500"
         >
-          {{ item.words }}
+          {{ item }}
         </li>
       </ul>
     </div>
@@ -287,7 +287,10 @@
 
   // 获取歌词
   const getLyric = async (id:string,platformType:platform) => {
-    let list = [];
+    let list = [{
+      time:0,
+      words:'歌词获取失败!',
+    }];
     if(platformType === platform.wy ){
       const result = await getLyricWy(id);
       if(result.data.code == 200){
@@ -544,7 +547,7 @@
 
   watch(highlightLine, ()=>{
     // 将当前行歌词，发送到主进程
-    window.api.send('lyric',lyric.value[highlightLine.value].words);
+    window.api.send('lyric',lyric.value?.[highlightLine.value]?.words);
   });
 
   const lyricWindow = () =>{
