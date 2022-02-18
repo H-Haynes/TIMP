@@ -131,10 +131,7 @@
                 class="iconfont icon-icon-xian- cursor-pointer ml-2"
                 @click="handleCollectClick(scope.row)"
               />
-              <i
-                v-show="+albumId==0"
-                class="iconfont icon-delete cursor-pointer ml-2"
-              />
+            
             </template>
           </el-table-column>
           <template #empty>

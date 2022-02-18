@@ -57,12 +57,14 @@
     "windicss": "^3.4.3"
   },
   "dependencies": {
+    "@types/js-cookie": "^3.0.1",
     "@types/node": "^17.0.17",
     "@typescript-eslint/parser": "^5.11.0",
     "axios": "^0.25.0",
     "electron-log": "^4.4.6",
     "electron-updater": "4.6.5",
     "element-plus": "^2.0.1",
+    "js-cookie": "^3.0.1",
     "less": "^4.1.2",
     "mitt": "^3.0.0",
     "postcss-import": "^14.0.2",
@@ -82,9 +84,9 @@
       "icon": "buildResources/logo.icns",
       "category": "public.app-category.productivity",
       "artifactName": "${productName}_${arch}_v${version}.${ext}",
-      "target":{
+      "target": {
         "target": "dmg",
-        "arch":[
+        "arch": [
           "x64",
           "arm64"
         ]
@@ -94,9 +96,9 @@
       "icon": "buildResources/logo.icns",
       "artifactName": "${productName}_${version}_${arch}.${ext}",
       "verifyUpdateCodeSignature": false,
-      "target":{
-        "target":"nsis",
-        "arch":[
+      "target": {
+        "target": "nsis",
+        "arch": [
           "ia32"
         ]
       }
@@ -107,8 +109,8 @@
       "allowToChangeInstallationDirectory": true
     }
   },
-  "repository":{
-    "type":"git",
-    "url":"git@preferyou.cn:root/timp.git"
+  "repository": {
+    "type": "git",
+    "url": "git@preferyou.cn:root/timp.git"
   }
 }

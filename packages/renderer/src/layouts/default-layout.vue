@@ -5,7 +5,7 @@
       <layout-nav />
       <div class="flex-1  bg-primary-100 overflow-hidden">
         <n-search />
-        <router-view />
+        <router-view :key="route.query.type + route.query.id||'0'"/>
       </div>
     </div>
     <audio-player />

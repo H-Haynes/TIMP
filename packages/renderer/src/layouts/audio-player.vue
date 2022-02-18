@@ -6,7 +6,7 @@
     <div class="flex text-gray-400 items-center h-full ">
       <i
         class="iconfont icon-shangyishou mx-4  text-xl cursor-pointer"
-        @click="prevSong"
+        @click="prevSong(false)"
       />
       <i
         class="iconfont  mx-4 text-xl cursor-pointer"
@@ -15,7 +15,7 @@
       />
       <i
         class="iconfont icon-xiayishou mx-4 text-xl cursor-pointer"
-        @click="nextSong"
+        @click="nextSong(false)"
       />
     </div>
     <div class="flex w-96  items-center text-sm text-gray-400 h-full">
@@ -31,8 +31,10 @@
           <p class="flex-1 truncate">
             {{ playInfo.name || "TIMP，随心听曲" }}
           </p>
-          <i class="iconfont icon-icon-xian- text-sm ml-2 cursor-pointer" />
-          <i class="iconfont icon-xunhuan text--sm ml-2 cursor-pointer" />
+          <i @click="unlike" v-if="likeList.some(ele=>ele.id == curSongId)" class="iconfont icon-chuangyikongjianICON_fuzhi- text-red-500 ml-2 cursor-pointer"></i>
+          <i @click="addLike" v-else class="iconfont icon-xihuan cursor-pointer"></i>
+          <i @click="handleCollectClick" class="iconfont icon-icon-xian- text-sm ml-2 cursor-pointer" />
+          <i @click="mode = (mode + 1) % playModeList.length" class="iconfont  text--sm ml-2 cursor-pointer" :class="playModeList[mode].icon" />
         </div>
         <p class="flex justify-between items-ceter text-xs mt-1 text-gray-500">
           <span>{{ $filters.secToMin(currentTime) }}</span>
@@ -148,6 +150,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+  import cookie from 'js-cookie';
   import type { Ref} from 'vue';
   import { watch } from 'vue';
   import { platform} from '../../typings/enum';
@@ -163,10 +166,10 @@
   const $filters:any = inject('$filters');
   const playSrc = ref('');
   const audio:Ref<null|HTMLAudioElement> = ref(null);
-  const currentTime = ref(0);
+  const currentTime = ref(+(localStorage.getItem('currentTime') || 0));
   const audioVolume = ref(1);
   const audioState = ref('pause');
-  const playList = inject('playList');
+  const playList:Ref<any[]> = inject('playList') as Ref<any[]>;
   const curSongId = ref(localStorage.getItem('curSongId')||'');
   const visiblePlayList = ref(false);
   const appear = ref(true);
@@ -176,6 +179,25 @@
   const lyricWrap:Ref<null|HTMLUListElement> = ref(null);
   const lyricWrapHeight = ref(0);
   const timer = ref(0);
+  const likeList = inject('likeList');
+  const playModeList = ref([
+    {
+      name:'循环模式',
+      value:0,
+      icon:'icon-xunhuan',
+    },
+    {
+      name:'随机模式',
+      value:1,
+      icon:'icon-suijibofang',
+    },
+    {
+      name:'单曲循环',
+      value:2,
+      icon:'icon-danquxunhuan',
+    },
+  ]);
+  const mode = ref(+(localStorage.getItem('mode')||0));
   const playInfo = ref({
     name:'',
     art:[],
@@ -368,8 +390,8 @@
 
 
   // 监听播放歌曲
-  $eventBus.on('playSong',async ({id:songId,type,auto=false}:any)=>{
-    if(curSongId.value == songId) return; // 当前歌曲不切换
+  $eventBus.on('playSong',async ({id:songId,type,auto=false,force=false}:any)=>{
+    if(curSongId.value == songId && !force) return; // 当前歌曲不切换
     const songUrl = await getSongUrl(songId,type);
     if(!songUrl){
       return;
@@ -419,9 +441,10 @@
   });
 
   onMounted(()=>{
-    window.api.receive('hhh',()=>{
-      console.log('9999')
-    });
+    // 获取播放模式
+    // mode.value = Number(localStorage.getItem('mode')||0);
+    // 获取播放进度
+    // currentTime.value = Number(localStorage.getItem('currentTime')||0);
     window.onresize = () => {
       lyricWrapHeight.value = lyricWrap.value?.offsetHeight ?? 0;
     };
@@ -449,6 +472,11 @@
         nextSong();
       });
     }
+
+    // 监听页面卸载，存储播放位置
+    window.onunload = ()=>{
+      localStorage.setItem('currentTime',currentTime.value.toString());
+    };
   });
   watchEffect(()=>{
     if(audio.value){
@@ -465,27 +493,66 @@
     }
   };
   
-  const nextSong = () =>{
+  const nextSong = (auto=true) =>{
     // 获取到当前索引;
     const index = playList.value.findIndex(ele=>ele.id == curSongId.value);
+    console.log(index);
     let len = playList.value.length;
     // TODO 播放模式功能在此处完成
+    let targetIndex;
+    if(mode.value === 0){ // 顺序播放循环
+      targetIndex = index + 1;
+      if(targetIndex >= len){
+        targetIndex = 0;
+      }
+    }else if(mode.value === 1){ // 随机播放
+      targetIndex = Math.floor(Math.random() * len);
+    }else if(mode.value === 2){ // 单曲循环
+      if(!auto){ // 用户手动切歌的，按顺序列表
+          targetIndex = index + 1;
+          if(targetIndex >= len){
+            targetIndex = 0;
+          }
+      }else{ // 自动切换的
+        targetIndex = index;
+      }
+    }
     // 如果是最后一首，则切换到第一首
     $eventBus.emit('playSong',{
-      id:playList.value[index === len - 1 ? 0 : index + 1 ].id,
-      type:playList.value[index === len - 1 ? 0 : index + 1 ].type,
+      id:playList.value[targetIndex].id,
+      type:playList.value[targetIndex].type,
       auto:true,
+      force:true, // 强制切换，用于单曲循环
     });
   };
 
-  const prevSong = () =>{
+  const prevSong = (auto=true) =>{
     const index = playList.value.findIndex(ele=>ele.id == curSongId.value);
     let len = playList.value.length;
+    let targetIndex;
     // TODO 播放模式功能在此处完成
+    if(mode.value === 0){ //列表循环
+      targetIndex = index - 1;
+      if(targetIndex < 0){
+        targetIndex = len - 1;
+      }
+    }else if(mode.value === 1){ // 随机播放
+      targetIndex = Math.floor(Math.random() * len);
+    }else if( mode.value === 2){ // 单曲循环
+      if(!auto){
+        targetIndex = index - 1;
+        if(targetIndex < 0){
+          targetIndex = len - 1;
+        }
+      }else{ // 自动切换的
+        targetIndex = index;
+      }
+    }
     $eventBus.emit('playSong',{
-      id:playList.value[index === 0 ? len - 1 : index- 1 ].id,
-      type:playList.value[index ===  0 ? len - 1 : index - 1  ].type,
+      id:playList.value[targetIndex].id,
+      type:playList.value[targetIndex].type,
       auto:true,
+      force:true, // 强制切换，用于单曲循环
     });
   };
   const toggleSong = (song) =>{
@@ -551,7 +618,6 @@
   });
 
   const lyricWindow = () =>{
-    console.log(6666);
     if(!showLyricWindow.value){
       showLyricWindow.value = true;
       window.api.send('openLyric');
@@ -559,6 +625,39 @@
       showLyricWindow.value = false;
       window.api.send('closeLyric');
     }
+  };
+
+  const addLike = () => {
+    $eventBus.emit('addLike',{
+      album:'',
+      art:toRaw(playInfo.value.art),
+      id:curSongId.value,
+      mv:'',
+      name:playInfo.value.name,
+      picUrl:playInfo.value.picUrl,
+      time:playInfo.value.time,
+    });
+  };
+
+  const unlike = () =>{
+    $eventBus.emit('unLike',curSongId.value);
+  };
+
+  watch(()=>mode.value,()=>{
+    localStorage.setItem('mode',mode.value.toString()); // 缓存播放模式
+  });
+
+  const handleCollectClick = () =>{
+    // 传递歌曲的名称、歌手、专辑、时长、id
+    let data = {
+      id:curSongId.value,
+      name:playInfo.value.name,
+      album:'',
+      time:playInfo.value.time,
+      art:toRaw(playInfo.value.art),
+      type:platformType.value,
+    };
+    $eventBus.emit('triggerSongToAlbum',data);
   };
 </script>
 <style lang="less" >
