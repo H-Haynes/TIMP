@@ -1,0 +1,25 @@
+{
+  "common": {
+    "light": "明亮",
+    "dark": "黑暗",
+    "theme": "主题",
+    "language": "语言"
+  },
+  "pageTitles": {
+    "home": "首页",
+    "about": "关于"
+  },
+  "homepage": {
+    "goToHome": "前往首页",
+    "recommendedIdeSetup": "推荐开发IDE",
+    "seeForMoreInfo": "查看 <code>README.md</code> 获取更多信息",
+    "countIs": "自增",
+    "toTestHotModule": "编辑 <code>components/HelloWorld.vue</code> 以测试热更新模块"
+  },
+  "aboutPage": {
+    "goToAbout": "前往关于页面"
+  },
+  "footer": {
+    "placeStaticFiles": "静态资源空间位于 <code>/public</code> 目录"
+  }
+}

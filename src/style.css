@@ -1,0 +1,13 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+/* @layer base {
+  code {
+    @apply bg-gray-200 px-1 mx-2 py-0.5 rounded dark:bg-gray-700;
+  }
+
+  a {
+    @apply text-[#42b983];
+  }
+} */

@@ -1,0 +1,31 @@
+@import "./iconfont.css";
+html,
+body {
+  padding: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+// ul,ol{
+
+// }
+#app {
+  width: 100vw;
+  height: 100vh;
+}
+
+.glass {
+  background: rgba(99, 96, 96, 0.2);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 25px;
+  box-shadow: inset 0 0 6px rgba(111, 108, 108, 0.2);
+}
