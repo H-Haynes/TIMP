@@ -1,112 +1,71 @@
-# Electron-Vite-TS-Stackter
+# TIMP音乐聚合平台
 
-An Electron + Vue 3 starter project setup with Vite, Typescript, Vue-Router, Pinia, Eslint, Prettier, Tailwind CSS, and some custom preferences.
+TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件，fork了vite-electron-builder仓库作为项目框架，项目采用vue3 + vite + electron + windicss进行开发，数据来源于github开源项目.
 
-This repository is an extended version of [the simple one](https://github.com/electron-vite/electron-vite-vue).
+- 网易云音乐: [网易云音乐API](https://github.com/Binaryify/NeteaseCloudMusicApi)
+- QQ音乐API: [QQ音乐API](https://github.com/Rain120/qq-music-api)
+- 酷狗音乐API: [酷狗音乐API](https://github.com/H-Haynes/kuwoMusicApi)
+- 酷我音乐API: [酷我与酷狗同项目](https://github.com/H-Haynes/kuwoMusicApi)
 
-![electron-vite-vue.gif](/public/electron-stackter.gif)
+## 项目开发运行环境
 
-## Features
+[![Required Node.JS >= v16.13](https://img.shields.io/static/v1?label=node&message=%3E=16.13&logo=node.js&color)](https://nodejs.org/about/releases/)
+[![Required npm >= v8.1](https://img.shields.io/static/v1?label=npm&message=%3E=8.1&logo=npm&color)](https://github.com/npm/cli/releases)
 
-📦 Out of the box
+## 设置环境变量
 
-🎯 Based on the official [template-vue-ts](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-vue-ts), less invasive
+所有环境变量均在`import.meta`,你可以使用`import.meta.env`进行访问
 
-🌱 Extensible, really simple directory structure
+如果使用`Typescript`，你需要在`types/env.d.ts`文件中添加所有环境变量到`importMetaEnv`
 
-💪 Support using Node.js API in Electron-Renderer
+`mode`设置应在`import.meta.env.MODE`设置一个特殊值，环境变量文件加载时，该变量会被解析
 
-🔩 Support C/C++ native addons
+默认情况下，有两种模式：
 
-🖥 It's easy to implement multiple windows
+- `production`, 默认使用该值
+- `development`，当使用`npm run watch`时，使用该值
 
-🚀 configured with Eslint & Prettier
+当使用build命令时，从根目录的对一个的env环境加载环境变量:
 
-🚀 Vue router support
-
-🚀 Pinia state management
-
-🚀 TailwindCSS (Dark mode support)
-
-🚀 VueUse
-
-🚀 Easy dependency update with taze
-
-🚀 I18n support - multiple locales
-
-## Get Started
-
-### 1. Install packages
-
-```bash
-npm i
-or,
-pnpm i --shamefully-hoist
+```yml
+.env                # 所有环境都会加载
+.env.local          # 所有环境都会加载，但git提交时会被忽略
+.env.[mode]         # 仅在对应mode时才会加载
+.env.[mode].local   # 仅在对应mode时才会加载，git提交时会被忽略
 ```
 
-### 2. Run
+## 开发命令
 
-In development mode,
+- `npm run app:dev` : 本地开发并开启热更新
+- `npm run compile`: 编译为桌面应用程序
+- `npm run build` : 项目打包
+- `npm run test` : 本地测试
+- `npm run dist --平台 --架构`: 打包为对应系统安装包程序
 
-```bash
-npm run app:dev
-or,
-pnpm run app:dev
+## mac logo生成
+
+```shell
+mkdir fan.iconset
+sips -z 16 16     ~/logo.png --out fan.iconset/icon_16x16.png
+sips -z 32 32     ~/logo.png --out fan.iconset/icon_16x16@2x.png
+sips -z 32 32     ~/logo.png --out fan.iconset/icon_32x32.png
+sips -z 64 64     ~/logo.png --out fan.iconset/icon_32x32@2x.png
+sips -z 64 64     ~/logo.png --out fan.iconset/icon_64x64.png
+sips -z 128 128     ~/logo.png --out fan.iconset/icon_64x64@2x.png
+sips -z 128 128   ~/logo.png --out fan.iconset/icon_128x128.png
+sips -z 256 256   ~/logo.png --out fan.iconset/icon_128x128@2x.png
+sips -z 256 256   ~/logo.png --out fan.iconset/icon_256x256.png
+sips -z 512 512   ~/logo.png --out fan.iconset/icon_256x256@2x.png
+sips -z 512 512   ~/logo.png --out fan.iconset/icon_512x512.png
+sips -z 1024 1024   ~/logo.png --out fan.iconset/icon_512x512@2x.png
+sips -z 1024 1024   ~/logo.png --out fan.iconset/icon_1024x1024.png
+iconutil -c icns fan.iconset -o logo.icns
 ```
 
-In preview mode,
+## 应用程序功能展示
 
-```bash
-npm run app:preview
-or,
-pnpm run app:preview
-```
-
-To build for production,
-
-```bash
-npm run app:build
-or,
-pnpm run app:build
-```
-
-## Debug
-
-![electron-vite-react-debug.gif](https://github.com/electron-vite/electron-vite-react/blob/main/public/electron-vite-react-debug.gif?raw=true)
-
-## Directory
-
-```diff
-+ ├─┬ electron
-+ │ ├─┬ main
-+ │ │ └── index.ts    entry of Electron-Main
-+ │ └─┬ preload
-+ │   └── index.ts    entry of Preload-Scripts
-  ├─┬ src
-  │ └── main.ts       entry of Electron-Renderer
-  ├── index.html
-  ├── package.json
-  └── vite.config.ts
-```
-
-## Be aware
-
-🚨 By default, this template integrates Node.js in the Renderer process. If you don't need it, you just remove the option below. [Because it will modify the default config of Vite](https://github.com/electron-vite/vite-plugin-electron-renderer#config-presets-opinionated).
-
-```diff
-# vite.config.ts
-
-export default {
-  plugins: [
--   // Use Node.js API in the Renderer-process
--   renderer({
--     nodeIntegration: true,
--   }),
-  ],
-}
-```
-
-## FAQ
-
-- [dependencies vs devDependencies](https://github.com/electron-vite/vite-plugin-electron-renderer#dependencies-vs-devdependencies)
-- [C/C++ addons, Node.js modules - Pre-Bundling](https://github.com/electron-vite/vite-plugin-electron-renderer#dependency-pre-bundling)
+![首页](./desc/desc1.png)
+![歌单详情](./desc/desc2.png)
+![视频](./desc/desc3.png)
+![视频播放](./desc/desc4.png)
+![歌词](./desc/desc5.png)
