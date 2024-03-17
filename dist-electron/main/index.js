@@ -71,8 +71,8 @@ async function createWindow() {
     return { action: "deny" };
   });
   {
-    import("electron-devtools-installer").then(({ default: installExtension2, VUEJS3_DEVTOOLS }) => {
-      installExtension2(VUEJS3_DEVTOOLS, {
+    import("electron-devtools-installer").then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
+      installExtension(VUEJS3_DEVTOOLS, {
         loadExtensionOptions: {
           allowFileAccess: true
         }
@@ -101,7 +101,8 @@ electron.app.on("second-instance", () => {
 electron.app.on("activate", () => {
   const allWindows = electron.BrowserWindow.getAllWindows();
   if (allWindows.length) {
-    allWindows[0].focus();
+    win.show();
+    win.focus();
   } else {
     createWindow();
   }
@@ -114,7 +115,7 @@ const openLyric = () => {
   lyricWindow = new electron.BrowserWindow({
     width: 800,
     height: 100,
-    // parent:win,
+    // parent: win,
     transparent: true,
     // 透明窗口
     // transparent: false, // 透明窗口
@@ -126,9 +127,10 @@ const openLyric = () => {
     x: (electron.screen.getPrimaryDisplay().workArea.width - 800) / 2,
     y: electron.screen.getPrimaryDisplay().workArea.height - 100,
     frame: false,
-    backgroundColor: "#00000000"
+    backgroundColor: "#00000000",
+    alwaysOnTop: true
+    // 设置为总是置顶
   });
-  global.lyricWindow = lyricWindow;
   win.show();
   if (process.env.VITE_DEV_SERVER_URL) {
     lyricWindow.loadURL(`${url}#/lyric`);

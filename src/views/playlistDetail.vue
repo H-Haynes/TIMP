@@ -57,7 +57,7 @@
                 <i class="icon-bofang mr-1"></i>
                 播放全部
               </el-button>
-              <el-button color="#2a3240" round>
+              <el-button @click="handleAddCollect" color="#2a3240" round>
                 <i class="icon-icon-xian- mr-1"></i>
                 收藏歌单
               </el-button>
@@ -175,6 +175,9 @@ const loading = ref(true)
 
 const route = useRoute()
 
+const { albumList, likeList, addCollect } = useStore("db")
+
+// 下载歌曲
 const download = (song: ISong) => {
   getSongPlayUrl({
     id: song.id,
@@ -192,13 +195,14 @@ const download = (song: ISong) => {
   })
 }
 
-const { albumList, likeList } = useStore("db")
+// 查询参数
 const query = ref({
   id: route.params.id,
   platform: Number(route.query.platform),
   isRank: route.query.isRank as string
 })
 
+// 歌单详情
 const playlistDetail = ref<IPlaylistDetail>({
   songList: likeList.value,
   name: "我喜欢",
@@ -210,6 +214,7 @@ const playlistDetail = ref<IPlaylistDetail>({
   createTime: ""
 })
 
+// 获取歌单详情
 const getDetail = () => {
   if (+query.value.platform === EPlatform.自建) {
     getLocalDetail()
@@ -227,6 +232,7 @@ const getDetail = () => {
     })
 }
 
+// 获取自建歌单详情
 const getLocalDetail = () => {
   console.log(+query.value.id === 0)
   if (+query.value.id === 0) {
@@ -258,11 +264,21 @@ const getLocalDetail = () => {
   }
 }
 
+// 双击播放
 const handleDbClick = (row: ISong) => {
   eventBus.emit("playSong", row)
 }
 
+// 添加到收藏
+const handleAddCollect = () => {
+  const { name, id, pic, platform } = playlistDetail.value
+  addCollect({
+    name,
+    id,
+    pic,
+    platform
+  })
+}
+
 getDetail()
 </script>
-
-<style scoped></style>

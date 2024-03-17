@@ -26,11 +26,11 @@
             {{ playInfo.name || "TIMP，随心听曲" }}
           </p>
           <i
-            @click="unlike"
+            @click="removeLike(playInfo.id, playInfo.platform)"
             v-if="likeList.some((ele) => ele.id == curSongId)"
             class="iconfont icon-chuangyikongjianICON_fuzhi- text-red-500 ml-2 cursor-pointer"
           ></i>
-          <i @click="addToLike" v-else class="iconfont icon-xihuan cursor-pointer"></i>
+          <i @click="() => playInfo.id && addLike(playInfo)" v-else class="iconfont icon-xihuan cursor-pointer"></i>
           <i @click="handleCollectSongClick(playInfo)" class="iconfont icon-icon-xian- text-sm ml-2 cursor-pointer" />
           <i @click="updateMode((mode + 1) % playModeList.length)" class="iconfont text--sm ml-2 cursor-pointer" :class="playModeList[mode].icon" />
         </div>
@@ -70,7 +70,7 @@
 
   <!-- 侧边播放列表 -->
   <el-drawer v-model="isShowPlayList" :show-close="false">
-    <template #title>
+    <template #header>
       <div class="">播放列表</div>
     </template>
     <el-table :data="playlist" @row-dblclick="toggleSong">
@@ -83,7 +83,7 @@
         <template #default="scope">
           <span class="truncate" :class="{ 'text-red-500': curSongId == scope.row.id }">
             {{
-              scope.row.art.reduce((prev, cur) => {
+              scope.row.artists.reduce((prev, cur) => {
                 return prev + " " + cur.name
               }, "")
             }}
@@ -154,6 +154,8 @@ const {
   updatePlayInfo
 } = useStore("playSetting")
 
+const { addPlaylist } = useStore("db")
+
 watch(
   () => url.value,
   (val) => {
@@ -170,8 +172,6 @@ const isShowPlayList = ref(false)
 
 // 是否首次加载
 const appear = ref(true)
-
-const platformType = ref(0)
 
 // 是否显示歌词面板
 const showLyricPanel = ref(false)
@@ -282,7 +282,7 @@ interface PlayParam {
 //   audio.value?.play()
 //   if (!auto) {
 //     // 如果不是自动切歌，则添加到播放列表
-//     eventBus.emit("addPlayList", {
+//     addPlayList({
 //       id: songId,
 //       type: type,
 //       name: playInfo.value.name,
@@ -448,18 +448,6 @@ const lyricWindow = () => {
   }
 }
 
-// 添加到我喜欢
-const addToLike = () => {
-  if (playInfo.value.id) {
-    addLike(playInfo.value)
-  }
-}
-
-// 取消喜欢
-const unlike = () => {
-  removeLike(playInfo.value.id, playInfo.value.platform)
-}
-
 // 当前操作歌曲
 const operatingSong = ref<ISong>({} as ISong)
 
@@ -471,7 +459,6 @@ const addSongTargetAlbumId = ref("")
 
 // 添加到歌单
 const handleCollectSongClick = (song: ISong) => {
-  console.log("song", song)
   if (!song?.id) {
     return
   }
@@ -526,15 +513,19 @@ const playSong = (songInfo: ISong, auto = false, force = false) => {
 
       // 触发添加播放列表事件, 并传递当前播放歌曲信息:歌曲id,歌曲名称,歌手，歌曲平台
       // 如果不是自动切歌，则添加到播放列表
-      //   if (!auto) {
-      //     eventBus.emit("addPlayList", {
-      //       id: songId,
-      //       type: type,
-      //       name: playInfo.value.name,
-      //       art: playInfo.value.art.map((ele) => ({ name: ele.name, id: ele.id })),
-      //       timestamp: Date.now()
-      //     })
-      //   }
+      if (!auto) {
+        addPlaylist({
+          name: playInfo.value.name,
+          timestamp: Date.now(),
+          artists: playInfo.value.artists.map((e) => ({ name: e.name, id: e.id })),
+          // artists: playInfo.value.artists,
+
+          duration: playInfo.value.duration,
+          id: songInfo.id,
+          platform: playInfo.value.platform
+          //video: playInfo.value.video
+        })
+      }
     }
   })
 }

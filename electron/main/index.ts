@@ -1,6 +1,7 @@
-import { app, BrowserWindow, shell, ipcMain, screen } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, screen, globalShortcut } from 'electron';
 import { release } from 'node:os';
 import { join } from 'node:path';
+
 
 
 
@@ -123,7 +124,10 @@ app.on('second-instance', () => {
 app.on('activate', () => {
   const allWindows = BrowserWindow.getAllWindows();
   if (allWindows.length) {
-    allWindows[0].focus();
+    // allWindows[0].focus();
+    // 显示时，让主窗口显示并聚焦
+    win.show()
+    win.focus()
   } else {
     createWindow();
   }
@@ -142,7 +146,7 @@ const openLyric = () => {
   lyricWindow = new BrowserWindow({
     width: 800,
     height: 100,
-    // parent:win,
+    // parent: win,
     transparent: true, // 透明窗口
     // transparent: false, // 透明窗口
 
@@ -155,13 +159,13 @@ const openLyric = () => {
     y: screen.getPrimaryDisplay().workArea.height - 100,
     frame: false,
     backgroundColor: '#00000000',
+    alwaysOnTop: true, // 设置为总是置顶
   })
-  global.lyricWindow = lyricWindow
+
+  // 设置窗口忽略鼠标事件
+  // lyricWindow.setIgnoreMouseEvents(true);
 
   win.show(); // 不让焦点自动聚焦到子窗口
-  // lyricWindow.loadURL(indexHtml + '#/lyric') // 加载子窗口页面内容
-
-
   if (process.env.VITE_DEV_SERVER_URL) {
     lyricWindow.loadURL(`${url}#/lyric`);
     console.log('here', `${url}#/lyric`)
