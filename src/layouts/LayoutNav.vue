@@ -1,13 +1,13 @@
 <template>
-  <div class="w-64 h-full bg-primary-500 overflow-hidden flex flex-col bg-gray-900">
-    <div class="h-16 bg-primary-100 text-white flex items-center justify-between pl-8">
+  <div class="w-64 h-full bg-primary-500 overflow-hidden flex flex-col dark:bg-gray-900">
+    <div class="h-16 bg-primary-100 dark:text-white flex items-center justify-between pl-8">
       <el-avatar :src="posterJpg"></el-avatar>
       <div>
         <i class="icon-houtui mr-4 cursor-pointer text-xl" @click="router.back()" />
         <i class="icon-qianjin mr-4 cursor-pointer text-xl" />
       </div>
     </div>
-    <div class="py-4 text-left overflow-y-scroll scrollbar-none text-white text-sm">
+    <div class="py-4 text-left overflow-y-scroll scrollbar-none dark:text-white text-sm">
       <div v-for="(menu, menuIndex) in menus" :key="menuIndex" class="px-8">
         <div class="leading-12 text-gray-400 font-bold flex items-center">
           <span>{{ menu.name }}</span>
@@ -63,7 +63,7 @@ const createAlbum = () => {
 // 分类菜单
 const categoryMenus = ref([
   { name: "排行榜", path: "rank" },
-  { name: "歌单", path: "playlist" },
+  { name: "歌单", path: "songList" },
   { name: "视频", path: "video" }
 ])
 

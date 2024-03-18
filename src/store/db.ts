@@ -140,7 +140,6 @@ export default defineStore({
         await indexedDB.remove("playlist", song.id)
       }
       //添加到播放列表中(顺序问题)
-      console.log(toRaw(song), '要添加的歌曲')
       await indexedDB.update("playlist", toRaw(song))
       // 重新获取列表
       await this.getPlayList()

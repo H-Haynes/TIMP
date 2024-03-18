@@ -1,5 +1,6 @@
 <template lang="">
-  <div style="z-index: 4000" class="h-16 flex justify-between items-center bg-gray-800 border-t border-gray-900 px-5">
+  <!-- bg-gray-800 -->
+  <div style="z-index: 4000" class="h-16 flex justify-between items-center border-t border-gray-900 px-5">
     <!-- 切歌、播放控制器 -->
     <div class="flex text-gray-400 items-center h-full">
       <i class="iconfont icon-shangyishou mx-4 text-xl cursor-pointer" @click="prevSong(false)" />
@@ -519,7 +520,7 @@ const playSong = (songInfo: ISong, auto = false, force = false) => {
           timestamp: Date.now(),
           artists: playInfo.value.artists.map((e) => ({ name: e.name, id: e.id })),
           // artists: playInfo.value.artists,
-
+          pic: playInfo.value.pic,
           duration: playInfo.value.duration,
           id: songInfo.id,
           platform: playInfo.value.platform
@@ -544,17 +545,20 @@ const handlePlay = (audio) => {
 .el-drawer {
   --el-drawer-bg-color: #212121 !important;
 }
-.el-table {
-  --el-table-bg-color: red !important;
-  --el-table-header-bg-color: #212121 !important;
-  --el-table-border-color: #333 !important;
 
-  --el-table-text-color: #aaa !important;
-  --el-table-header-text-color: #ccc !important;
-  --el-table-current-row-bg-color: purple !important;
+.is-dark {
+  .el-table {
+    --el-table-bg-color: red !important;
+    --el-table-header-bg-color: #212121 !important;
+    --el-table-border-color: #333 !important;
 
-  --el-table-fixed-box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
-  --el-table-bg-color: #212121 !important;
-  --el-table-tr-bg-color: #212121 !important; // 背景
+    --el-table-text-color: #aaa !important;
+    --el-table-header-text-color: #ccc !important;
+    --el-table-current-row-bg-color: purple !important;
+
+    --el-table-fixed-box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
+    --el-table-bg-color: #212121 !important;
+    --el-table-tr-bg-color: #212121 !important; // 背景
+  }
 }
 </style>

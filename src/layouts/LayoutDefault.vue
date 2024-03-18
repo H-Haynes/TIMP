@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-full overflow-hidden bg-gray-800">
+  <div class="flex flex-col h-full overflow-hidden dark:bg-gray-800">
     <div class="flex flex-1 relative" style="height: calc(100% - 16rem)">
       <layout-nav />
       <div class="flex-1 flex flex-col bg-primary-100 overflow-hidden">
@@ -131,9 +131,6 @@ eventBus.on("delCustomAlbum", removeCustomAlbum)
 
 // 添加到播放列表
 eventBus.on("addPlayList", addPlaylist)
-
-// 播放全部
-eventBus.on("playAll", batchAddPlaylist)
 
 // 监听添加歌曲到歌单事件
 

@@ -19,7 +19,7 @@ function toggleLocales() {
 </script>
 
 <template>
-  <div id="app" class="mx-auto dark:bg-gray-900 dark:text-gray-200 min-h-screen">
+  <div id="app" class="mx-auto dark:bg-gray-900 dark:text-gray-200 min-h-screen" :class="{ 'is-dark': isDark }">
     <!--
     <div class="mb-6 flex items-center justify-between">
       <button @click="toggleDark()">

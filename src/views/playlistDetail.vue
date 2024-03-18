@@ -53,7 +53,7 @@
               </el-scrollbar>
             </div>
             <div class="h-40px flex items-end flex-shrink-0">
-              <el-button color="#c10816" round>
+              <el-button color="#c10816" round @click="handlePlayAll">
                 <i class="icon-bofang mr-1"></i>
                 播放全部
               </el-button>
@@ -175,7 +175,7 @@ const loading = ref(true)
 
 const route = useRoute()
 
-const { albumList, likeList, addCollect } = useStore("db")
+const { albumList, likeList, addCollect, batchAddPlaylist } = useStore("db")
 
 // 下载歌曲
 const download = (song: ISong) => {
@@ -277,6 +277,31 @@ const handleAddCollect = () => {
     id,
     pic,
     platform
+  })
+}
+
+// 播放全部
+const handlePlayAll = () => {
+  // 弹出提示框
+  ElMessageBox.confirm("播放全部将会清除当前播放列表，是否继续？", "播放全部", {
+    center: true,
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    confirmButtonClass: "custom-cancel-btn w-24",
+    cancelButtonClass: "custom-cancel-btn w-24"
+  }).then(() => {
+    // 将歌单歌曲整理成符合播放列表的格式传递，并触法playAll
+
+    const list = playlistDetail.value.songList?.map((ele, index) => ({
+      id: ele.id,
+      platform: ele.platform,
+      name: ele.name,
+      artists: ele.artists.map((ele) => ({ id: ele.id, name: ele.name })),
+      timestamp: Date.now() + index,
+      pic: ele.pic,
+      duration: ele.duration
+    }))
+    batchAddPlaylist(list)
   })
 }
 

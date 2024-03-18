@@ -20,6 +20,11 @@ const router = createRouter({
           path: "playlist/:id",
           name: "PlaylistDetail",
           component: () => import('@/views/playlistDetail.vue')
+        },
+        {
+          path: "songList",
+          name: "SongList",
+          component: () => import('@/views/songList/index.vue')
         }
         // {
         //   path: "spectrum",

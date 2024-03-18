@@ -2,7 +2,7 @@
   <div
     style="z-index: 3400"
     :style="{ top: show ? '0' : '100%' }"
-    class="flex justify-around transition-all duration-500 absolute py-16 h-full w-full left-0 bg-gray-800 box-border"
+    class="flex justify-around transition-all duration-500 absolute py-16 h-full w-full left-0 bg-white dark:bg-gray-800 box-border"
   >
     <div class="flex flex-col relative w-400px h-400px">
       <div class="w-full h-full absolute left-0 top-0 flex justify-center items-center rotate">
@@ -13,14 +13,14 @@
     </div>
 
     <div class="w-96 mb-10 flex flex-col" style="min-height: 300px">
-      <strong class="text-2xl text-white">{{ playInfo.name }}</strong>
-      <span class="text-white leading-8">{{ playInfo.artists?.map((ele) => ele.name).join("/") }}</span>
+      <strong class="text-2xl dark:text-white">{{ playInfo.name }}</strong>
+      <span class="dark:text-white leading-8">{{ playInfo.artists?.map((ele) => ele.name).join("/") }}</span>
       <ul ref="lyricWrapRef" class="overflow-y-scroll flex-1 lyric-wrap">
         <li
           v-for="(item, index) in lyric"
           :key="index"
           :class="{ 'lyric-highlight': highlightLine === index }"
-          class="leading-8 text-gray-500"
+          class="leading-8 dark:text-gray-500 text-gray-700"
           v-html="item.words"
         ></li>
       </ul>
