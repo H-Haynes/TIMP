@@ -29,3 +29,9 @@ body {
   border-radius: 25px;
   box-shadow: inset 0 0 6px rgba(111, 108, 108, 0.2);
 }
+
+.playlist-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(192px, 1fr));
+  grid-template-rows: repeat(auto-fit, minmax(192px, 1fr));
+}

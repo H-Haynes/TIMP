@@ -25,6 +25,26 @@ const router = createRouter({
           path: "songList",
           name: "SongList",
           component: () => import('@/views/songList/index.vue')
+        },
+        {
+          path: "video",
+          name: "Video",
+          component: () => import('@/views/index.vue'),
+          redirect: {
+            name: "VideoList"
+          },
+          children: [
+            {
+              path: "list",
+              name: "VideoList",
+              component: () => import("@/views/video/list.vue")
+            },
+            {
+              path: "detail/:id",
+              name: "VideoDetail",
+              component: () => import("@/views/video/detail.vue")
+            }
+          ]
         }
         // {
         //   path: "spectrum",

@@ -1,4 +1,9 @@
-
+import { EPlatform } from "@/enum";
+import kuwoPng from "@/assets/images/kuwo.png"
+import kugouPng from "@/assets/images/kugou.png"
+import neteasePng from "@/assets/images/netease.png"
+import qqPng from "@/assets/images/qq.png"
+import miguPng from "@/assets/images/migu.png"
 export const durationFormat = (value: number) => {
   if (!value) return '--:--';
   const minute = Math.floor(value / 60000);
@@ -27,4 +32,21 @@ export const durationTransSec = (value: string) => {
   const minute = temp[0];
   const second = temp[1];
   return (+minute) * 60 + (+second);
+}
+
+export const whichLogo = (platform: EPlatform) => {
+  switch (platform) {
+    case EPlatform.QQ:
+      return qqPng
+    case EPlatform.网易:
+      return neteasePng
+    case EPlatform.酷狗:
+      return kugouPng
+    case EPlatform.酷我:
+      return kuwoPng
+    case EPlatform.咪咕:
+      return miguPng
+    default:
+      return ""
+  }
 }

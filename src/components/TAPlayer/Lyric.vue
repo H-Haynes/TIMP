@@ -1,8 +1,8 @@
 <template>
   <div
     style="z-index: 3400"
-    :style="{ top: show ? '0' : '100%' }"
-    class="flex justify-around transition-all duration-500 absolute py-16 h-full w-full left-0 bg-white dark:bg-gray-800 box-border"
+    :style="{ top: show ? '0' : '100%', height: 'calc(100% - 64px)' }"
+    class="overflow-hidden flex justify-around transition-all duration-500 absolute py-16 h-full w-full left-0 bg-white dark:bg-gray-800 box-border"
   >
     <div class="flex flex-col relative w-400px h-400px">
       <div class="w-full h-full absolute left-0 top-0 flex justify-center items-center rotate">

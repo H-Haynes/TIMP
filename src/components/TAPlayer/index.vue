@@ -1,6 +1,6 @@
 <template lang="">
   <!-- bg-gray-800 -->
-  <div style="z-index: 4000" class="h-16 flex justify-between items-center border-t border-gray-900 px-5">
+  <div style="z-index: 14000" class="h-16 flex justify-between items-center border-t border-gray-900 px-5">
     <!-- 切歌、播放控制器 -->
     <div class="flex text-gray-400 items-center h-full">
       <i class="iconfont icon-shangyishou mx-4 text-xl cursor-pointer" @click="prevSong(false)" />

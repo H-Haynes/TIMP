@@ -47,11 +47,7 @@
 <script setup lang="ts">
 import { getBanner, getRankList } from "@/api"
 import { EPlatform } from "@/enum"
-import kuwoPng from "@/assets/images/kuwo.png"
-import kugouPng from "@/assets/images/kugou.png"
-import neteasePng from "@/assets/images/netease.png"
-import qqPng from "@/assets/images/qq.png"
-import miguPng from "@/assets/images/migu.png"
+import { whichLogo } from "@/utils/filters"
 
 interface Banner {
   pic: string
@@ -95,24 +91,6 @@ const getBannerList = () => {
     })
 }
 
-// 平台 logo
-const whichLogo = (platform: EPlatform) => {
-  switch (platform) {
-    case EPlatform.QQ:
-      return qqPng
-    case EPlatform.网易:
-      return neteasePng
-    case EPlatform.酷狗:
-      return kugouPng
-    case EPlatform.酷我:
-      return kuwoPng
-    case EPlatform.咪咕:
-      return miguPng
-    default:
-      return ""
-  }
-}
-
 // 排行榜列表
 const rankList = ref<IRank[]>([])
 
@@ -152,3 +130,4 @@ getRankLists()
   grid-template-rows: repeat(auto-fit, minmax(192px, 1fr));
 }
 </style>
+import { whichLogo } from "@/utils/filters";
