@@ -6,6 +6,10 @@ interface Window {
   $notification?: import('element-plus').NotificationProviderInst;
   ElMessage?: import('element-plus').ElMessage;
   ElLoading?: import('element-plus').ElLoading
+  electron: {
+    receive: import('electron').IpcRenderer.on
+    send: import('electron').IpcRenderer.send
+  }
 }
 
 declare global {

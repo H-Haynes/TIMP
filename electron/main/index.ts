@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, screen, globalShortcut } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, screen, globalShortcut, dialog, webContents, session } from 'electron';
 import { release } from 'node:os';
 import { join } from 'node:path';
 
@@ -39,6 +39,8 @@ if (!app.requestSingleInstanceLock()) {
 
 let win: BrowserWindow | null = null;
 let lyricWindow: null | BrowserWindow = null
+let downloadFileName
+let downloadDir
 
 // Here, you can also use other preload
 const preload = join(__dirname, '../preload/index.js');
@@ -84,6 +86,8 @@ async function createWindow() {
     return { action: 'deny' };
   });
 
+
+
   if (import.meta.env.DEV) {
     import('electron-devtools-installer').then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
       installExtension(VUEJS3_DEVTOOLS, {
@@ -104,9 +108,51 @@ async function createWindow() {
     lyricWindow && lyricWindow.destroy();
     lyricWindow = null;
   });
+
 }
 
-app.whenReady().then(createWindow);
+// 注册下载事件
+const registerDownloadEvent = () => {
+  // 监听 will-download 事件
+  session.defaultSession.on('will-download', (event, item, webContents) => {
+    // 设置文件保存路径
+    // item.setSavePath(join(app.getPath('downloads'), item.getFilename()));
+    // 接收渲染进程发送的文件名
+
+    // item.setSavePath(join(app.getPath('downloads'), downloadFileName));
+    item.setSavePath(join(downloadDir, downloadFileName));
+
+
+    item.on('updated', (event, state) => {
+      if (state === 'interrupted') {
+        console.log('Download is interrupted but can be resumed')
+      } else if (state === 'progressing') {
+        if (item.isPaused()) {
+          console.log('Download is paused')
+        } else {
+          console.log(`Received bytes: ${item.getReceivedBytes()}`)
+        }
+      }
+    })
+    // 监听下载完成事件
+    item.once('done', (event, state) => {
+      if (state === 'completed') {
+        console.log('Download completed');
+        // 下载完成后通知渲染进程
+        win.webContents.send('download-completed', downloadFileName);
+      } else {
+        console.log(`Download failed: ${state}`);
+      }
+    });
+  });
+}
+
+app.whenReady().then(() => {
+  createWindow()
+  registerDownloadEvent()
+});
+
+
 
 app.on('window-all-closed', () => {
   win = null;
@@ -182,22 +228,6 @@ const openLyric = () => {
 
 }
 
-// New window example arg: new windows url
-// ipcMain.handle('open-win', (_, arg) => {
-//   const childWindow = new BrowserWindow({
-//     webPreferences: {
-//       preload,
-//       nodeIntegration: true,
-//       contextIsolation: false,
-//     },
-//   });
-
-//   if (process.env.VITE_DEV_SERVER_URL) {
-//     childWindow.loadURL(`${url}#${arg}`);
-//   } else {
-//     childWindow.loadFile(indexHtml, { hash: arg });
-//   }
-// });
 
 // 打开歌词窗口
 ipcMain.on('openLyric', openLyric)
@@ -222,5 +252,30 @@ ipcMain.on('unfixed', () => {
   lyricWindow && lyricWindow.setAlwaysOnTop(false);
   lyricWindow && lyricWindow.setMovable(true);
 });
+
+// 打开文件夹选择对话框
+ipcMain.on('select-folder', async (event, defaultPath) => {
+  dialog.showOpenDialog(win, {
+    properties: ['openDirectory'],
+    defaultPath
+  }).then((result) => {
+    // 如果用户选择了文件夹，将文件夹路径发送回渲染进程
+    if (!result.canceled && result.filePaths.length > 0) {
+      event.sender.send('select-folder-reply', result.filePaths[0]);
+    }
+  })
+})
+
+
+ipcMain.on('download-file', (event, { url, fileName, dir }) => {
+
+
+  downloadFileName = fileName
+  downloadDir = dir
+  // 开始下载
+  win.webContents.downloadURL(url);
+
+})
+
 
 

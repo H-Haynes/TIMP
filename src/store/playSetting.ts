@@ -22,7 +22,8 @@ export default defineStore({
         platform: EPlatform.QQ
       } as ISong, // 当前播放音频信息
       lyric: [],
-      url: ""
+      url: "",
+      downloadPath: localStorage.getItem('downloadPath') || '~/Downloads'
     }
   },
 
@@ -48,6 +49,10 @@ export default defineStore({
     },
     updateUrl(url: string) {
       this.url = url
+    },
+    setDownloadPath(path: string) {
+      localStorage.setItem('downloadPath', path)
+      this.downloadPath = path
     }
   }
 })

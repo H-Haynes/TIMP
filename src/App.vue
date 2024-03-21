@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ElNotification } from "element-plus"
 import LogoViewLink from "./components/LogoViewLink.vue"
 
 // console.log(
@@ -16,6 +17,13 @@ function toggleLocales() {
   const locales = availableLocales
   locale.value = locales[(locales.indexOf(locale.value) + 1) % locales.length]
 }
+
+window.electron.receive("download-completed", (event, fileName) => {
+  ElNotification({
+    title: "下载完成",
+    message: h("i", { style: "color: teal" }, fileName)
+  })
+})
 </script>
 
 <template>

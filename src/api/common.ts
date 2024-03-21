@@ -23,7 +23,7 @@ export const getMusicLyric = (params: {
 }) => http.get('/timp/lyric', params)
 
 
-export const downloadSong = (params: any, fileName: string) => http.download('/timp/download', fileName, params, { method: 'post' })
+export const downloadSong = (params: any, fileName: string) => http.download('/timp/download', fileName, params, { method: 'get' })
 
 /**
  * 音乐地址代理

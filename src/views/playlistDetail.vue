@@ -172,7 +172,7 @@ export interface IPlaylistDetail extends IRank {
 }
 
 const loading = ref(true)
-
+const { downloadPath } = useStore("playSetting")
 const route = useRoute()
 
 const { albumList, likeList, addCollect, batchAddPlaylist } = useStore("db")
@@ -183,12 +183,14 @@ const download = (song: ISong) => {
     id: song.id,
     platform: song.platform
   }).then((res: any) => {
-    downloadSong(
-      {
-        url: res.data
-      },
-      song.name + ".mp3"
-    )
+    const fileName = song.artists.map((e) => e.name).join("/") + "-" + song.name + ".mp3"
+    // downloadSong(
+    //   {
+    //     url: res.data
+    //   },
+    //   song.name + ".mp3"
+    // )
+    window.electron.send("download-file", { url: res.data, fileName, dir: downloadPath.value })
     // downloadFile({
     //   url: res.data
     // })

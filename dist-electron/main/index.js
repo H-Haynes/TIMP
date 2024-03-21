@@ -37,6 +37,8 @@ if (!electron.app.requestSingleInstanceLock()) {
 }
 let win = null;
 let lyricWindow = null;
+let downloadFileName;
+let downloadDir;
 const preload = node_path.join(__dirname, "../preload/index.js");
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = node_path.join(process.env.DIST, "index.html");
@@ -85,7 +87,34 @@ async function createWindow() {
     lyricWindow = null;
   });
 }
-electron.app.whenReady().then(createWindow);
+const registerDownloadEvent = () => {
+  electron.session.defaultSession.on("will-download", (event, item, webContents2) => {
+    item.setSavePath(node_path.join(downloadDir, downloadFileName));
+    item.on("updated", (event2, state) => {
+      if (state === "interrupted") {
+        console.log("Download is interrupted but can be resumed");
+      } else if (state === "progressing") {
+        if (item.isPaused()) {
+          console.log("Download is paused");
+        } else {
+          console.log(`Received bytes: ${item.getReceivedBytes()}`);
+        }
+      }
+    });
+    item.once("done", (event2, state) => {
+      if (state === "completed") {
+        console.log("Download completed");
+        win.webContents.send("download-completed", downloadFileName);
+      } else {
+        console.log(`Download failed: ${state}`);
+      }
+    });
+  });
+};
+electron.app.whenReady().then(() => {
+  createWindow();
+  registerDownloadEvent();
+});
 electron.app.on("window-all-closed", () => {
   win = null;
   if (process.platform !== "darwin")
@@ -159,5 +188,20 @@ electron.ipcMain.on("fixed", () => {
 electron.ipcMain.on("unfixed", () => {
   lyricWindow && lyricWindow.setAlwaysOnTop(false);
   lyricWindow && lyricWindow.setMovable(true);
+});
+electron.ipcMain.on("select-folder", async (event, defaultPath) => {
+  electron.dialog.showOpenDialog(win, {
+    properties: ["openDirectory"],
+    defaultPath
+  }).then((result) => {
+    if (!result.canceled && result.filePaths.length > 0) {
+      event.sender.send("select-folder-reply", result.filePaths[0]);
+    }
+  });
+});
+electron.ipcMain.on("download-file", (event, { url: url2, fileName, dir }) => {
+  downloadFileName = fileName;
+  downloadDir = dir;
+  win.webContents.downloadURL(url2);
 });
 //# sourceMappingURL=index.js.map

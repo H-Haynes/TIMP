@@ -166,7 +166,7 @@ export default defineStore({
 
     // 从数据库初始化数据
     async initDB() {
-      return indexedDB.openDB("TIMP", 2).then(() => {
+      return indexedDB.openDB("TIMP", 3).then(() => {
         this.dbOnline = true
         console.log("*****数据库已连接*****")
       })
@@ -179,6 +179,8 @@ export default defineStore({
             this.getPlayList()
           ])
         })
-    }
+    },
+
+
   }
 })

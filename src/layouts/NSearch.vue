@@ -5,10 +5,10 @@
         class="w-32 leading-6 text-white-300 bg-primary-200 rounded-xl outline-none text-sm px-2 dark:border-none border-1 border-gray-700"
         placeholder="请输入搜索内容"
         :value="keywords"
-        @input="(e) => (keywords = e.target.value)"
+        @input="(e: any) => (keywords = e?.target!.value)"
         @focus="visiblePanel = true"
       />
-      <i class="iconfont icon-set text-sm ml-3 cursor-pointer" />
+      <i @click="openSetting" class="iconfont icon-set text-sm ml-3 cursor-pointer" />
       <i class="iconfont icon-pifu text-sm ml-3 cursor-pointer" />
       <i class="iconfont icon-shensemoshi ml-3 cursor-pointer" @click="toggleDark()"></i>
       <i class="iconfont icon-fuzhi text-sm ml-3 cursor-pointer" />
@@ -28,6 +28,10 @@ const keywords = ref("")
 const visiblePanel = ref(false)
 const hidePanel = () => {
   visiblePanel.value = false
+}
+
+const openSetting = () => {
+  router.push({ name: "Setting" })
 }
 </script>
 

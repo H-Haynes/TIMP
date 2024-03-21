@@ -45,6 +45,11 @@ const router = createRouter({
               component: () => import("@/views/video/detail.vue")
             }
           ]
+        },
+        {
+          path: "setting",
+          name: "Setting",
+          component: () => import('@/views/setting/index.vue'),
         }
         // {
         //   path: "spectrum",
