@@ -22,14 +22,15 @@
       <p class="leading-6 text-sm text-gray-700">{{ videoInfo.description }}</p>
       <div class="h-400px"></div>
     </div>
-    <div class="sidebar-wrapper"></div>
+    <!-- <div class="sidebar-wrapper"></div> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { getVideoDetail } from "@/api"
+import { getRelatedVideo, getVideoDetail } from "@/api"
 import dayjs from "dayjs"
 import { whichLogo,countFormat } from "@/utils/filters"
+import { EPlatform } from "@/enum";
 const router = useRouter()
 const route = useRoute()
 
@@ -58,8 +59,22 @@ const getVideoInfo = () => {
     })
 }
 
+const relatedList = ref<any[]>([])
+
+const getRelatedList = () => {
+  getRelatedVideo({
+    id:route.params.id as string,
+    platform: route.query.platform as any as EPlatform
+  }).then((res=>{
+    console.log(res)
+  }))
+}
+
+
+
 onMounted(() => {
   getVideoInfo()
+  getRelatedList()
 })
 </script>
 

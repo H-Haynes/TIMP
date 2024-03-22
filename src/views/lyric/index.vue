@@ -1,5 +1,5 @@
 <template lang="">
-  <div class="bg-opacity-10 h-full" @mouseenter="focus = true" @mouseleave="focus = false">
+  <div class="bg-opacity-10 h-full desktop-lyric" @mouseenter="focus = true" @mouseleave="focus = false">
     <div class="toolbar h-8 relative flex justify-center">
       <div v-show="!isLock" class="text-gray-400">
         <i class="iconfont icon-yanse cursor-pointer hover:text-red-500 hover:font-bold" @click="showColorList = true"></i>
@@ -80,5 +80,11 @@ body,
 #app {
   background: rgba(0, 0, 0, 0);
   border: none;
+}
+.desktop-lyric {
+  ul,
+  li {
+    list-style: none;
+  }
 }
 </style>

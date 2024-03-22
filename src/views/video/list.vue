@@ -1,6 +1,6 @@
 <template>
-  <div class="p-6">
-    <div>
+  <el-scrollbar ref="containerRef" class="p-6 pt-0 video-list-container" @scroll="handleScroll">
+    <div ref="contentRef">
       <h4 class="text-20px mb-6 sticky top-0 z-999 h-40px dark:bg-gray-800 leading-40px bg-white">视频/MV</h4>
 
       <el-skeleton :loading="loading" animated>
@@ -33,17 +33,22 @@
         </template>
       </el-skeleton>
     </div>
-  </div>
+  </el-scrollbar>
 </template>
 
 <script setup lang="ts">
-import { getVideoList } from "@/api"
+import { getRelatedVideo, getVideoList } from "@/api"
 import type { IVideo } from "@/api"
 import { whichLogo, countFormat } from "@/utils/filters"
-
+import { debounce, throttle } from "throttle-debounce"
 const router = useRouter()
 
 const loading = ref(false)
+
+const moreLoading = ref(false)
+
+const contentRef = ref()
+const containerRef = ref()
 
 const videoListData = ref({
   list: [] as IVideo[],
@@ -53,22 +58,24 @@ const videoListData = ref({
 })
 
 // 获取歌单列表
-const getVideoListData = (page?: number) => {
+const getVideoListData = throttle(1000, (page?: number) => {
   if (page) {
     videoListData.value.pageNum = page
   }
-  loading.value = true
+  videoListData.value.pageNum === 1 && (loading.value = true)
+  moreLoading.value = true
   getVideoList({
     pageNum: videoListData.value.pageNum,
     pageSize: videoListData.value.pageSize
   })
     .then((res: any) => {
-      videoListData.value.list = res.data
+      videoListData.value.list = videoListData.value.pageNum === 1 ? res.data : videoListData.value.list.concat(res.data)
     })
     .finally(() => {
       loading.value = false
+      moreLoading.value = false
     })
-}
+})
 
 const handleVideoDetail = (video: IVideo) => {
   router.push({
@@ -82,9 +89,21 @@ const handleVideoDetail = (video: IVideo) => {
   })
 }
 
+const handleScroll = ({ scrollTop, scrollLeft }) => {
+  if (containerRef.value.$el.offsetHeight + scrollTop + 50 > contentRef.value.offsetHeight && !moreLoading.value) {
+    // 触底
+    getVideoListData(videoListData.value.pageNum + 1)
+  }
+}
+
 getVideoListData()
 </script>
 <style lang="scss" scoped>
+.video-list-container {
+  height: calc(100vh - 48px - 64px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
 .play-btn {
   width: 50px;
   height: 50px;

@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { getPlaylistDetail, getSongPlayUrl, downloadSong, downloadFile } from "@/api"
+import { getPlaylistDetail, getSongPlayUrl } from "@/api"
 
 import { durationTransSec, durationFormat } from "@/utils/filters"
 import dayjs from "dayjs"
@@ -183,13 +183,14 @@ const download = (song: ISong) => {
     id: song.id,
     platform: song.platform
   }).then((res: any) => {
-    const fileName = song.artists.map((e) => e.name).join("/") + "-" + song.name + ".mp3"
+    const fileName = song.artists.map((e) => e.name).join("_") + "-" + song.name + ".mp3"
     // downloadSong(
     //   {
     //     url: res.data
     //   },
     //   song.name + ".mp3"
     // )
+    // 推送到主进程下载
     window.electron.send("download-file", { url: res.data, fileName, dir: downloadPath.value })
     // downloadFile({
     //   url: res.data
@@ -273,12 +274,13 @@ const handleDbClick = (row: ISong) => {
 
 // 添加到收藏
 const handleAddCollect = () => {
-  const { name, id, pic, platform } = playlistDetail.value
+  const { name, id, pic, platform, isRank } = playlistDetail.value
   addCollect({
     name,
     id,
     pic,
-    platform
+    platform,
+    isRank
   })
 }
 

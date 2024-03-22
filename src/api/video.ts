@@ -35,3 +35,14 @@ export const getVideoDetail = (params: {
   id: string
   platform: EPlatform
 }) => http.get('/timp/video/detail', params)
+
+
+/**
+ * 获取相关视频列表
+ * @param id 视频id
+ * @param platform 平台
+ */
+export const getRelatedVideo = (params: {
+  id: string
+  platform: EPlatform
+}) => http.get('/timp/video/related', params)

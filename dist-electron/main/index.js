@@ -1,33 +1,11 @@
 "use strict";
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 const electron = require("electron");
-const node_os = require("node:os");
+const os = require("node:os");
 const node_path = require("node:path");
 process.env.DIST_ELECTRON = node_path.join(__dirname, "..");
 process.env.DIST = node_path.join(process.env.DIST_ELECTRON, "../dist");
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL ? node_path.join(process.env.DIST_ELECTRON, "../public") : process.env.DIST;
-if (node_os.release().startsWith("6.1"))
+if (os.release().startsWith("6.1"))
   electron.app.disableHardwareAcceleration();
 if (process.platform === "win32")
   electron.app.setAppUserModelId(electron.app.getName());
@@ -42,6 +20,10 @@ let downloadDir;
 const preload = node_path.join(__dirname, "../preload/index.js");
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = node_path.join(process.env.DIST, "index.html");
+const vueDevToolsPath = node_path.join(
+  os.homedir(),
+  "/Library/Application Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/6.6.1_0"
+);
 async function createWindow() {
   win = new electron.BrowserWindow({
     title: "Main window",
@@ -72,15 +54,6 @@ async function createWindow() {
       electron.shell.openExternal(url2);
     return { action: "deny" };
   });
-  {
-    import("electron-devtools-installer").then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
-      installExtension(VUEJS3_DEVTOOLS, {
-        loadExtensionOptions: {
-          allowFileAccess: true
-        }
-      });
-    }).then(() => console.log("---------Vue调试工具已加载------------")).catch((e) => console.error("Failed install extension:", e));
-  }
   win.on("closed", () => {
     console.log("销毁 2");
     lyricWindow && lyricWindow.destroy();
@@ -111,9 +84,11 @@ const registerDownloadEvent = () => {
     });
   });
 };
-electron.app.whenReady().then(() => {
+electron.app.whenReady().then(async () => {
   createWindow();
   registerDownloadEvent();
+  console.log(vueDevToolsPath);
+  await electron.session.defaultSession.loadExtension(vueDevToolsPath);
 });
 electron.app.on("window-all-closed", () => {
   win = null;

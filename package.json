@@ -58,6 +58,7 @@
     "vue-tsc": "^1.0.22"
   },
   "dependencies": {
+    "@vue/devtools": "^7.0.20",
     "axios": "^1.6.5",
     "electron-devtools-installer": "^3.2.0",
     "element-plus": "^2.4.4",
@@ -65,6 +66,7 @@
     "normalize.css": "^8.0.1",
     "pinia-auto-refs": "^0.0.10",
     "qs": "^6.11.2",
+    "throttle-debounce": "^5.0.0",
     "unocss": "^0.58.3",
     "unplugin-vue-components": "^0.26.0"
   }

@@ -72,6 +72,7 @@ export interface IRank {
   playCount?: number
   subscribedCount?: number
   platform: EPlatform
+  isRank: number
 }
 
 const router = useRouter()
@@ -114,6 +115,7 @@ const handleRankDetail = (rank: IRank) => {
       id: rank.relationId
     },
     query: {
+      isRank: rank.isRank,
       platform: rank.platform
     }
   })

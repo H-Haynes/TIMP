@@ -1,6 +1,6 @@
 <template>
-  <div class="p-6">
-    <div>
+  <el-scrollbar ref="containerRef" class="p-6 pt-0 play-list-container relative" @scroll="handleScroll">
+    <div ref="contentRef">
       <h4 class="text-20px mb-6 sticky top-0 z-999 h-40px dark:bg-gray-800 leading-40px bg-white">推荐歌单</h4>
 
       <el-skeleton :loading="loading" animated>
@@ -28,16 +28,23 @@
           </div>
         </template>
       </el-skeleton>
+      <div class="w-full h-full absolute mask left-0 top-0 bg-opacity-5" v-if="moreLoading"></div>
     </div>
-  </div>
+  </el-scrollbar>
 </template>
 
 <script setup lang="ts">
 import { getRecommendPlaylist } from "@/api"
 import { whichLogo, countFormat } from "@/utils/filters"
+import { IRank } from "../rank.vue"
+import { throttle } from "throttle-debounce"
 
 const router = useRouter()
 const loading = ref(false)
+const moreLoading = ref(false)
+
+const contentRef = ref()
+const containerRef = ref()
 
 const recommendData = ref({
   list: [] as IRank[],
@@ -47,22 +54,24 @@ const recommendData = ref({
 })
 
 // 获取歌单列表
-const getRecommendList = (page?: number) => {
+const getRecommendList = throttle(1000, (page?: number) => {
   if (page) {
     recommendData.value.pageNum = page
   }
-  loading.value = true
+  recommendData.value.pageNum === 1 && (loading.value = true)
+  moreLoading.value = true
   getRecommendPlaylist({
     pageNum: recommendData.value.pageNum,
     pageSize: recommendData.value.pageSize
   })
     .then((res: any) => {
-      recommendData.value.list = res.data
+      recommendData.value.list = recommendData.value.pageNum === 1 ? res.data : recommendData.value.list.concat(res.data)
     })
     .finally(() => {
       loading.value = false
+      moreLoading.value = false
     })
-}
+})
 
 const handlePlayListDetail = (playlist: IRank) => {
   router.push({
@@ -77,5 +86,19 @@ const handlePlayListDetail = (playlist: IRank) => {
   })
 }
 
+const handleScroll = ({ scrollTop, scrollLeft }) => {
+  if (containerRef.value.$el.offsetHeight + scrollTop + 50 > contentRef.value.offsetHeight && !moreLoading.value) {
+    // 触底
+    getRecommendList(recommendData.value.pageNum + 1)
+  }
+}
+
 getRecommendList()
 </script>
+<style lang="scss" scoped>
+.play-list-container {
+  height: calc(100vh - 48px - 64px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+</style>

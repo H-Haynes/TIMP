@@ -1,9 +1,8 @@
 import { app, BrowserWindow, shell, ipcMain, screen, globalShortcut, dialog, webContents, session } from 'electron';
 import { release } from 'node:os';
 import { join } from 'node:path';
-
-
-
+// import { devtools } from '@vue/devtools'
+import os from "node:os"
 
 // The built directory structure
 //
@@ -47,6 +46,12 @@ const preload = join(__dirname, '../preload/index.js');
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = join(process.env.DIST, 'index.html');
 
+const vueDevToolsPath = join(
+  os.homedir(),
+  '/Library/Application\ Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/6.6.1_0'
+)
+
+
 async function createWindow() {
   win = new BrowserWindow({
     title: 'Main window',
@@ -75,6 +80,8 @@ async function createWindow() {
   }
 
 
+
+
   // Test actively push message to the Electron-Renderer
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', new Date().toLocaleString());
@@ -89,15 +96,23 @@ async function createWindow() {
 
 
   if (import.meta.env.DEV) {
-    import('electron-devtools-installer').then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
-      installExtension(VUEJS3_DEVTOOLS, {
-        loadExtensionOptions: {
-          allowFileAccess: true,
-        },
-      })
-    })
-      .then(() => console.log('---------Vue调试工具已加载------------'))
-      .catch(e => console.error('Failed install extension:', e));
+
+
+    // devtools.connect(/* host (the default is "http://localhost"), port (the default is 8090) */)
+    // devtools.connect("http://127.0.0.1", 8098)
+
+
+
+
+    // import('electron-devtools-installer').then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
+    //   installExtension(VUEJS3_DEVTOOLS, {
+    //     loadExtensionOptions: {
+    //       allowFileAccess: true,
+    //     },
+    //   })
+    // })
+    //   .then(() => console.log('---------Vue调试工具已加载------------'))
+    //   .catch(e => console.error('Failed install extension:', e));
   }
 
   // 主窗口销毁时，同时销毁子窗口
@@ -147,9 +162,11 @@ const registerDownloadEvent = () => {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow()
   registerDownloadEvent()
+  console.log(vueDevToolsPath)
+  await session.defaultSession.loadExtension(vueDevToolsPath);
 });
 
 

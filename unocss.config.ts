@@ -40,6 +40,10 @@ export default defineConfig({
   /** 自定义快捷方式 */
   shortcuts: {
     "border": "border-1 border-solid",
+    // "border-t-1": "border-t-1 border-solid",
+    // "border-r": "border-r-1 border-solid",
+    // "border-b": "border-b-1 border-solid",
+    // "border-l": "border-l-1 border-solid",
   },
 
   theme: {
