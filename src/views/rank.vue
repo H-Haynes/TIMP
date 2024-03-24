@@ -11,7 +11,7 @@
         </template>
         <template #default>
           <el-carousel v-show="bannerList.length > 0" :interval="4000" type="card" height="200px" class="w-11/12 mx-auto h-200px">
-            <el-carousel-item v-for="item in bannerList" :key="item.bannerId" class="relative">
+            <el-carousel-item @click="toBannerDetail(item)" v-for="item in bannerList" :key="item.bannerId" class="relative">
               <img width="24" class="absolute left-1 top-1" :src="whichLogo(item.platform)" />
               <img :src="item.pic" class="w-full object-cover h-full rounded-lg" />
               <span class="absolute right-0 p-1 text-xs rounded-md bottom-0" :style="{ backgroundColor: item.tagColor }">{{ item.tag }}</span>
@@ -45,8 +45,9 @@
 </template>
 
 <script setup lang="ts">
-import { getBanner, getRankList } from "@/api"
+import { getBanner, getRankList, getSongDetail } from "@/api"
 import { EPlatform } from "@/enum"
+import eventBus from "@/utils/eventBus"
 import { whichLogo } from "@/utils/filters"
 
 interface Banner {
@@ -85,7 +86,7 @@ const getBannerList = () => {
   bannerLoading.value = true
   getBanner()
     .then((res: any) => {
-      bannerList.value = res.data
+      bannerList.value = res.data.filter((e) => e.pic?.startsWith("http"))
     })
     .finally(() => {
       bannerLoading.value = false
@@ -121,15 +122,37 @@ const handleRankDetail = (rank: IRank) => {
   })
 }
 
+const toBannerDetail = (banner: Banner) => {
+  if ([EPlatform.QQ, EPlatform.网易].includes(banner.platform)) {
+    getSongDetail({
+      id: banner.relationId,
+      platform: banner.platform
+    }).then((res) => {
+      eventBus.emit("playSong", res.data)
+    })
+  } else {
+    eventBus.emit("playSong", {
+      id: banner.relationId,
+      platform: banner.platform
+    })
+  }
+}
+
 getBannerList()
 getRankLists()
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .rank-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(192px, 1fr));
   grid-template-rows: repeat(auto-fit, minmax(192px, 1fr));
 }
+.el-carousel__indicator {
+  --el-carousel-indicator-width: 10px;
+  width: 10px;
+  &.is-active {
+    width: 10px;
+  }
+}
 </style>
-import { whichLogo } from "@/utils/filters";

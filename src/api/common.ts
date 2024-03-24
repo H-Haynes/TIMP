@@ -60,3 +60,14 @@ export const getSearch = (params: {
  * @returns
  */
 export const getSearchSuggest = () => http.get('/timp/search/suggest')
+
+
+/**
+ * 获取歌曲详情
+ * @param id 歌曲 id
+ * @param platform 平台信息
+ */
+export const getSongDetail = (params: {
+  id: string
+  platform: EPlatform
+}) => http.get('/timp/song/detail', params)
