@@ -38,4 +38,7 @@ declare module 'vue' {
     TDragProgress: typeof import('./src/components/TDragProgress/index.vue')['default']
     TVPlayer: typeof import('./src/components/TVPlayer/index.vue')['default']
   }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
+  }
 }

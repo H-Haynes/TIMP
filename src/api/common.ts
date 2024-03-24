@@ -36,3 +36,27 @@ export const proxyMusic = (params: {
 // export const downloadFile = (params: {
 //   url: string
 // }) => http.post('/timp/download', params)
+
+/**
+ * 音乐可播放性检查
+ * @param ids 歌曲 id列表
+ * @param platform 平台信息
+ */
+export const checkMusicCanPlay = (params: {
+  ids: string[] | number[]
+  platform: EPlatform
+}) => http.post('/timp/music/canPlay', params)
+
+/**
+ * 搜索
+ * @param keyword 关键字
+ */
+export const getSearch = (params: {
+  keyword: string
+}) => http.get('/timp/search', params)
+
+/**
+ * 查询搜索建议
+ * @returns
+ */
+export const getSearchSuggest = () => http.get('/timp/search/suggest')

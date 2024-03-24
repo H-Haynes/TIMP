@@ -59,6 +59,7 @@ async function createWindow() {
     lyricWindow && lyricWindow.destroy();
     lyricWindow = null;
   });
+  win.webContents.session.loadExtension(vueDevToolsPath);
 }
 const registerDownloadEvent = () => {
   electron.session.defaultSession.on("will-download", (event, item, webContents2) => {
@@ -87,8 +88,6 @@ const registerDownloadEvent = () => {
 electron.app.whenReady().then(async () => {
   createWindow();
   registerDownloadEvent();
-  console.log(vueDevToolsPath);
-  await electron.session.defaultSession.loadExtension(vueDevToolsPath);
 });
 electron.app.on("window-all-closed", () => {
   win = null;

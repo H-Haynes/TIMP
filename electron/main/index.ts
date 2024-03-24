@@ -124,6 +124,9 @@ async function createWindow() {
     lyricWindow = null;
   });
 
+  win.webContents.session.loadExtension(vueDevToolsPath)
+  // await session.defaultSession.loadExtension(vueDevToolsPath);
+
 }
 
 // 注册下载事件
@@ -165,8 +168,6 @@ const registerDownloadEvent = () => {
 app.whenReady().then(async () => {
   createWindow()
   registerDownloadEvent()
-  console.log(vueDevToolsPath)
-  await session.defaultSession.loadExtension(vueDevToolsPath);
 });
 
 

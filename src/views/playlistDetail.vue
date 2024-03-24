@@ -57,10 +57,15 @@
                 <i class="icon-bofang mr-1"></i>
                 播放全部
               </el-button>
-              <el-button @click="handleAddCollect" color="#2a3240" round>
+              <el-button v-if="collectList.some((e: any) => e.id === playlistDetail.id)" @click="handleCancelCollect" color="#2a3240" round>
+                <i class="icon-icon-xian- mr-1"></i>
+                取消收藏
+              </el-button>
+              <el-button v-else @click="handleAddCollect" color="#2a3240" round>
                 <i class="icon-icon-xian- mr-1"></i>
                 收藏歌单
               </el-button>
+
               <el-button color="#a63784" round>
                 <i class="icon-download mr-1"></i>
                 下载全部
@@ -84,13 +89,14 @@
           class="mt-16"
           @row-dblclick="handleDbClick"
           min-height="500px"
-          row-class-name="h-12 cursor-pointer"
+          :row-class-name="({ row }) => `${canPlayInfo[row.id] === false ? 'text-red-500' : ''} h-12 cursor-pointer`"
           :data="playlistDetail?.songList"
         >
+          <!-- <el-table-column type="index" label="序号" width="60px"></el-table-column> -->
           <el-table-column label="歌曲" prop="name">
             <template #default="{ row }">
-              {{ row.name }}
-              <i class="icon-mv text-red-500 ml-1" v-if="row.video"></i>
+              <span>{{ row.name }}</span>
+              <i @click="toMv(row)" class="icon-mv text-red-500 ml-1" v-if="row.video"></i>
             </template>
           </el-table-column>
           <el-table-column label="歌手">
@@ -127,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { getPlaylistDetail, getSongPlayUrl } from "@/api"
+import { checkMusicCanPlay, getPlaylistDetail, getSongPlayUrl } from "@/api"
 
 import { durationTransSec, durationFormat } from "@/utils/filters"
 import dayjs from "dayjs"
@@ -164,6 +170,7 @@ export interface ISong {
   alias?: string[]
   url?: string
   timestamp?: number
+  video?: string
 }
 export interface IPlaylistDetail extends IRank {
   creator?: ICreator
@@ -174,8 +181,9 @@ export interface IPlaylistDetail extends IRank {
 const loading = ref(true)
 const { downloadPath } = useStore("playSetting")
 const route = useRoute()
+const router = useRouter()
 
-const { albumList, likeList, addCollect, batchAddPlaylist } = useStore("db")
+const { albumList, likeList, addCollect, batchAddPlaylist, collectList, removeCollect } = useStore("db")
 
 // 下载歌曲
 const download = (song: ISong) => {
@@ -214,7 +222,8 @@ const playlistDetail = ref<IPlaylistDetail>({
   relationId: "0",
   pic: posterJpg,
   platform: EPlatform.自建,
-  createTime: ""
+  createTime: "",
+  isRank: 0
 })
 
 // 获取歌单详情
@@ -229,6 +238,8 @@ const getDetail = () => {
   getPlaylistDetail(query.value)
     .then((res: any) => {
       playlistDetail.value = res.data
+      const ids = res.data.songList.map((e) => e.id)
+      checkMusic(ids)
     })
     .finally(() => {
       loading.value = false
@@ -284,6 +295,48 @@ const handleAddCollect = () => {
   })
 }
 
+// 取消收藏
+const handleCancelCollect = () => {
+  ElMessageBox.confirm("确定取消收藏该歌单？", "取消收藏", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    confirmButtonClass: "custom-confirm-btn w-24",
+    cancelButtonClass: "custom-cancel-btn w-24",
+    showClose: false,
+    center: true
+  }).then(() => {
+    removeCollect(playlistDetail.value.id)
+  })
+}
+
+const toMv = (song: ISong) => {
+  console.log(song, "歌曲")
+  router.push({
+    name: "VideoDetail",
+    params: {
+      id: song.video?.id
+    },
+    query: {
+      platform: song.platform
+    }
+  })
+}
+
+const canPlayInfo = ref<{
+  [key: string]: boolean
+}>({})
+
+const checkMusic = (ids: string[] | number[]) => {
+  checkMusicCanPlay({
+    ids,
+    platform: route.query.platform as unknown as EPlatform
+  }).then((res: any) => {
+    res.data.forEach((ele) => {
+      canPlayInfo.value[ele.id] = ele.canPlay
+    })
+  })
+}
+
 // 播放全部
 const handlePlayAll = () => {
   // 弹出提示框
@@ -311,3 +364,9 @@ const handlePlayAll = () => {
 
 getDetail()
 </script>
+<style lang="scss">
+.el-message-box {
+  padding: 30px;
+  box-sizing: border-box;
+}
+</style>
