@@ -1,6 +1,6 @@
-import { app, BrowserWindow, shell, ipcMain, screen, globalShortcut, dialog, webContents, session } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, screen, globalShortcut, dialog, webContents, session, Menu, Tray, nativeImage } from 'electron';
 import { release } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 // import { devtools } from '@vue/devtools'
 import os from "node:os"
 
@@ -38,19 +38,21 @@ if (!app.requestSingleInstanceLock()) {
 
 let win: BrowserWindow | null = null;
 let lyricWindow: null | BrowserWindow = null
-let downloadFileName
-let downloadDir
+let downloadFileName // 下载文件名称
+let downloadDir // 下载文件夹目录
+let tray // 系统托盘
+
 
 // Here, you can also use other preload
 const preload = join(__dirname, '../preload/index.js');
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = join(process.env.DIST, 'index.html');
 
+
 const vueDevToolsPath = join(
   os.homedir(),
-  '/Library/Application\ Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/6.6.1_0'
+  '/Library/Application Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/6.6.1_0'
 )
-
 
 async function createWindow() {
   win = new BrowserWindow({
@@ -113,6 +115,8 @@ async function createWindow() {
     // })
     //   .then(() => console.log('---------Vue调试工具已加载------------'))
     //   .catch(e => console.error('Failed install extension:', e));
+
+
   }
 
   // 主窗口销毁时，同时销毁子窗口
@@ -122,6 +126,8 @@ async function createWindow() {
 
     lyricWindow && lyricWindow.destroy();
     lyricWindow = null;
+    // 销毁系统托盘
+    tray?.destroy();
   });
 
   win.webContents.session.loadExtension(vueDevToolsPath)
@@ -165,9 +171,27 @@ const registerDownloadEvent = () => {
   });
 }
 
+
+
+
 app.whenReady().then(async () => {
-  createWindow()
-  registerDownloadEvent()
+  await createWindow()
+  await registerDownloadEvent()
+  await session.defaultSession.loadExtension(vueDevToolsPath)
+
+  // 托盘图片路径
+  const templateFile = resolve(__dirname, '../../public/timp_32x32@2x.png')
+  // 创建模板图像
+  const trayIcon = nativeImage.createFromPath(templateFile)
+  // 创建系统托盘
+  tray = new Tray(trayIcon)
+  tray.setTitle('TIMP音乐，随心而行')
+
+  // const contextMenu = Menu.buildFromTemplate([
+  //   { label: '菜单 1', type: 'radio' },
+  //   { label: '菜单 2', type: 'radio' },
+  // ])
+  // tray.setToolTip('emmmm')
 });
 
 
@@ -257,7 +281,15 @@ ipcMain.on('closeLyric', () => {
 // 歌词更新
 ipcMain.on('lyric', (_, lyric: string) => {
   // 监听到歌词信息变更，通过事件传入子窗口
-  console.log(lyric)
+  // console.log(lyric)
+  // 菜单栏更新歌词
+  if (lyric) {
+    let trayLyric = lyric.slice(0, 9)
+    if (trayLyric.length != 9) {
+      trayLyric = new Array(9 - trayLyric.length).fill(1).map(e => " ").join("") + trayLyric
+    }
+    tray?.setTitle(trayLyric)
+  }
   lyricWindow && lyricWindow.webContents.send('lyric', lyric)
 })
 

@@ -85,9 +85,15 @@ const registerDownloadEvent = () => {
     });
   });
 };
+let tray;
 electron.app.whenReady().then(async () => {
-  createWindow();
-  registerDownloadEvent();
+  await createWindow();
+  await registerDownloadEvent();
+  await electron.session.defaultSession.loadExtension(vueDevToolsPath);
+  const templateFile = node_path.resolve(__dirname, "../../public/timp_32x32@2x.png");
+  const trayIcon = electron.nativeImage.createFromPath(templateFile);
+  tray = new electron.Tray(trayIcon);
+  tray.setTitle("TIMP音乐，随心而行");
 });
 electron.app.on("window-all-closed", () => {
   win = null;
@@ -152,7 +158,13 @@ electron.ipcMain.on("closeLyric", () => {
   lyricWindow && lyricWindow.hide();
 });
 electron.ipcMain.on("lyric", (_, lyric) => {
-  console.log(lyric);
+  if (lyric) {
+    let trayLyric = lyric.slice(0, 9);
+    if (trayLyric.length != 9) {
+      trayLyric = new Array(9 - trayLyric.length).fill(1).map((e) => " ").join("") + trayLyric;
+    }
+    tray == null ? void 0 : tray.setTitle(trayLyric);
+  }
   lyricWindow && lyricWindow.webContents.send("lyric", lyric);
 });
 electron.ipcMain.on("fixed", () => {

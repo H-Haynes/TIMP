@@ -1,6 +1,6 @@
 <template lang="">
   <!-- bg-gray-800 -->
-  <div style="z-index: 14000" class="h-16 flex justify-between items-center top-line px-5">
+  <div style="z-index: 100" class="h-16 flex justify-between items-center top-line px-5">
     <!-- 切歌、播放控制器 -->
     <div class="flex text-gray-400 items-center h-full">
       <i class="iconfont icon-shangyishou mx-4 text-xl cursor-pointer" @click="prevSong(false)" />
@@ -11,7 +11,6 @@
       />
       <i class="iconfont icon-xiayishou mx-4 text-xl cursor-pointer" @click="nextSong(false)" />
     </div>
-
     <!-- 播放控制台 -->
     <div class="flex w-96 items-center text-sm text-gray-400 h-full">
       <el-avatar
@@ -70,19 +69,19 @@
   </div>
 
   <!-- 侧边播放列表 -->
-  <el-drawer v-model="isShowPlayList" :show-close="false">
+  <el-drawer custom-class="!bg-white !dark:bg-gray-800" v-model="isShowPlayList" :show-close="false">
     <template #header>
       <div class="">播放列表</div>
     </template>
     <el-table :data="playlist" @row-dblclick="toggleSong">
       <el-table-column label="歌曲名">
         <template #default="scope">
-          <span class="truncate" :class="{ 'text-red-500': curSongId == scope.row.id }">{{ scope.row.name }}</span>
+          <span class="truncate" :class="{ 'text-green-500': curSongId == scope.row.id }">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="歌手">
         <template #default="scope">
-          <span class="truncate" :class="{ 'text-red-500': curSongId == scope.row.id }">
+          <span class="truncate" :class="{ 'text-green-500': curSongId == scope.row.id }">
             {{
               scope.row.artists.reduce((prev, cur) => {
                 return prev + " " + cur.name
@@ -117,7 +116,7 @@ import poster from "@/assets/poster.jpg"
 import lyricComp from "./Lyric.vue"
 import { durationTransSec, secToMin, durationFormat } from "@/utils/filters"
 import type { ISong } from "@/views/playlistDetail.vue"
-import { getMusicLyric, getSongPlayUrl, proxyMusic } from "@/api"
+import { getMusicLyric, getSongDetail, getSongPlayUrl, proxyMusic } from "@/api"
 
 export interface ILyricItem {
   time: number
@@ -157,16 +156,12 @@ const {
 
 const { addPlaylist } = useStore("db")
 
-watch(
-  () => url.value,
-  (val) => {
-    if (audio.value) {
-      audio.value.preload = "auto"
-      audio.value.src = import.meta.env.VITE_APP_WEB_URL + `/timp/proxy?url=${encodeURIComponent(val)}`
-      // audio.value.src = val
-    }
+watchEffect(() => {
+  if (url.value && audio.value) {
+    audio.value.preload = "auto"
+    audio.value.src = import.meta.env.VITE_APP_WEB_URL + `/timp/proxy?url=${encodeURIComponent(url.value)}`
   }
-)
+})
 
 // 是否显示播放列表
 const isShowPlayList = ref(false)
@@ -242,56 +237,12 @@ const getLyric = async (id: string, platform: EPlatform) => {
 //   }
 // )
 
-// watchEffect(async () => {
-//   if (appear.value && playlist.value.length) {
-//     const { curSongId } = useStore("playSetting")
-//     let song = playlist.value.find((ele) => ele.id == curSongId.value)
-//     console.log(song, "歌曲", curSongId.value)
-//     if (song) {
-//       updateUrl(await getSongUrl(curSongId.value, song.platform))
-
-//       updatePlayInfo(await getSongInfo(curSongId.value, song.platform))
-//       updateLyric(await getLyric(curSongId.value, song.platform))
-
-//       appear.value = false
-//       audio.value?.pause()
-//     }
-//   }
-// })
-
 interface PlayParam {
   id: string
   platform: EPlatform
   auto?: boolean
   force?: boolean
 }
-
-// 监听播放歌曲
-// eventBus.on("playSong", async ({ id: songId, type, auto = false, force = false }: any) => {
-//   if (curSongId.value == songId && !force) return // 当前歌曲不切换
-//   const songUrl = await getSongUrl(songId, type)
-//   if (!songUrl) {
-//     return
-//   }
-//   updateUrl(songUrl)
-//   updatePlayInfo(await getSongInfo(songId, type))
-//   updateLyric(await getLyric(songId, type))
-//   // 触发添加播放列表事件, 并传递当前播放歌曲信息:歌曲id,歌曲名称,歌手，歌曲平台
-//   platformType.value = type
-
-//   updateCurSongId(songId)
-//   audio.value?.play()
-//   if (!auto) {
-//     // 如果不是自动切歌，则添加到播放列表
-//     addPlayList({
-//       id: songId,
-//       type: type,
-//       name: playInfo.value.name,
-//       art: playInfo.value.art.map((ele) => ({ name: ele.name, id: ele.id })),
-//       timestamp: Date.now()
-//     })
-//   }
-// })
 
 // 设置播放进度
 const setCurrentTime = (percent: number) => {
@@ -351,9 +302,15 @@ watchEffect(() => {
 
 // 切换播放状态
 const toggleState = () => {
+  if (!curSongId.value) {
+    return
+  }
   if (audioState.value === "play") {
     audio.value?.pause()
   } else {
+    if (currentTime.value) {
+      audio.value.currentTime = currentTime.value
+    }
     audio.value?.play()
   }
 }
@@ -421,21 +378,13 @@ const prevSong = (auto = true) => {
       targetIndex = index
     }
   }
-  eventBus.emit("playSong", {
-    id: playlist.value[targetIndex].id,
-    type: playlist.value[targetIndex].type,
-    auto: true,
-    force: true // 强制切换，用于单曲循环
-  })
+
+  playSong(playlist.value[targetIndex], true, true)
 }
 
 // 切歌
 const toggleSong = (song) => {
-  eventBus.emit("playSong", {
-    id: song.id,
-    type: song.type,
-    auto: true
-  })
+  playSong(song, true)
 }
 
 // 桌面歌词
@@ -487,7 +436,6 @@ const confirmCollectSong = () => {
 }
 
 // 重写部分
-
 /**
  * 播放歌曲处理
  * @param songInfo 歌曲信息
@@ -540,6 +488,31 @@ eventBus.on("pauseSong", audio.value?.pause)
 const handlePlay = (audio) => {
   eventBus.emit("audioPlay", audio)
 }
+
+onMounted(() => {
+  setTimeout(() => {
+    // 如果当前无歌曲，且播放列表有歌曲，则设置为第一条
+    let songId, songPlatform
+
+    if ((curSongId.value && playlist.value.every((e) => e.id != curSongId.value)) || !curSongId.value) {
+      console.log(JSON.stringify(playlist.value[0]))
+      songId = playlist.value[0].id
+      songPlatform = playlist.value[0].platform
+    } else {
+      songId = curSongId.value
+      songPlatform = playlist.value.find((e) => e.id === songId)?.platform
+    }
+
+    getSongDetail({ id: songId, platform: songPlatform }).then((res: any) => {
+      updatePlayInfo(res.data)
+      getSongPlayUrl({ id: songId, platform: songPlatform }).then((res1: any) => {
+        updateUrl(res1.data)
+      })
+      updateCurSongId(res.data.id)
+      getLyric(songId, songPlatform)
+    })
+  }, 2000)
+})
 </script>
 <style lang="scss">
 .top-line {
@@ -568,5 +541,9 @@ const handlePlay = (audio) => {
     --el-table-bg-color: #212121 !important;
     --el-table-tr-bg-color: #212121 !important; // 背景
   }
+}
+
+.el-drawer__header {
+  margin-bottom: 0px;
 }
 </style>
