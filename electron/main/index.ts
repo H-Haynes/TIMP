@@ -3,6 +3,7 @@ import { release } from 'node:os';
 import { join, resolve } from 'node:path';
 // import { devtools } from '@vue/devtools'
 import os from "node:os"
+import { truncateString } from './utils';
 
 // The built directory structure
 //
@@ -98,13 +99,8 @@ async function createWindow() {
 
 
   if (import.meta.env.DEV) {
-
-
     // devtools.connect(/* host (the default is "http://localhost"), port (the default is 8090) */)
     // devtools.connect("http://127.0.0.1", 8098)
-
-
-
 
     // import('electron-devtools-installer').then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
     //   installExtension(VUEJS3_DEVTOOLS, {
@@ -115,8 +111,6 @@ async function createWindow() {
     // })
     //   .then(() => console.log('---------Vue调试工具已加载------------'))
     //   .catch(e => console.error('Failed install extension:', e));
-
-
   }
 
   // 主窗口销毁时，同时销毁子窗口
@@ -145,7 +139,6 @@ const registerDownloadEvent = () => {
 
     // item.setSavePath(join(app.getPath('downloads'), downloadFileName));
     item.setSavePath(join(downloadDir, downloadFileName));
-
 
     item.on('updated', (event, state) => {
       if (state === 'interrupted') {
@@ -229,7 +222,6 @@ const openLyric = () => {
     lyricWindow.show()
     return
   }
-
   // 不存在，创建窗口
   lyricWindow = new BrowserWindow({
     width: 800,
@@ -275,7 +267,11 @@ const openLyric = () => {
 ipcMain.on('openLyric', openLyric)
 // 关闭歌词窗口
 ipcMain.on('closeLyric', () => {
-  lyricWindow && lyricWindow.hide()
+  if (lyricWindow) {
+    lyricWindow.hide()
+    lyricWindow.destroy()
+    lyricWindow = null
+  }
 })
 
 // 歌词更新
@@ -284,11 +280,7 @@ ipcMain.on('lyric', (_, lyric: string) => {
   // console.log(lyric)
   // 菜单栏更新歌词
   if (lyric) {
-    let trayLyric = lyric.slice(0, 9)
-    if (trayLyric.length != 9) {
-      trayLyric = new Array(9 - trayLyric.length).fill(1).map(e => " ").join("") + trayLyric
-    }
-    tray?.setTitle(trayLyric)
+    tray?.setTitle(truncateString(lyric, 16))
   }
   lyricWindow && lyricWindow.webContents.send('lyric', lyric)
 })
@@ -319,12 +311,10 @@ ipcMain.on('select-folder', async (event, defaultPath) => {
 
 ipcMain.on('download-file', (event, { url, fileName, dir }) => {
 
-
   downloadFileName = fileName
   downloadDir = dir
   // 开始下载
   win.webContents.downloadURL(url);
-
 })
 
 

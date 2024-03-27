@@ -10,7 +10,6 @@
             <el-option label="跟随系统" :value="0"></el-option>
             <el-option label="浅色" :value="1"></el-option>
             <el-option label="深色" :value="2"></el-option>
-            <el-option label="自定义" :value="3"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item v-if="settingForm.skin === 3" label="设置皮肤"></el-form-item>
@@ -22,35 +21,43 @@
         </el-form-item>
 
         <el-form-item label="下载通知">
-          <el-input placeholder="请选择下载失败是否通知"></el-input>
+          <el-select v-model="settingForm.downloadNotice" class="w-full" placeholder="是否开启下载通知">
+            <el-option label="开启" :value="1"></el-option>
+            <el-option label="关闭" :value="0"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="自动下载歌词">
+          <el-select v-model="settingForm.downloadLyric" class="w-full" placeholder="是否自动下载歌词">
+            <el-option label="开启" :value="1"></el-option>
+            <el-option label="关闭" :value="0"></el-option>
+          </el-select>
         </el-form-item>
 
         <div class="my-6 text-18px">播放设置</div>
 
-        <el-form-item label="播放顺序">
+        <el-form-item label="播放模式">
           <el-select class="w-full" v-model="settingForm.loop">
             <el-option label="顺序播放" :value="0"></el-option>
             <el-option label="随机播放" :value="1"></el-option>
             <el-option label="单曲循环" :value="2"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="菜单栏">
-          <el-form-item label="菜单栏歌词">
-            <el-select>
-              <el-option label="显示" :value="1"></el-option>
-              <el-option label="不显示" :value="0"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="菜单栏控制">
-            <el-select></el-select>
-          </el-form-item>
-        </el-form-item>
+
         <div class="my-6 text-18px">歌词设置</div>
 
-        <el-form-item label="桌面歌词"> </el-form-item>
-        <div class="my-6 text-18px">快捷键设置</div>
-
-        <el-form-item label="快捷键"></el-form-item>
+        <el-form-item label="桌面歌词">
+          <el-select v-model="settingForm.deskLyric" class="w-full" placeholder="是否开启桌面歌词">
+            <el-option label="开启" :value="1"></el-option>
+            <el-option label="关闭" :value="0"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="菜单栏歌词">
+          <el-select v-model="settingForm.trayLyric" class="w-full" placeholder="是否开启菜单栏歌词">
+            <el-option label="开启" :value="1"></el-option>
+            <el-option label="关闭" :value="0"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
     </div>
   </div>
@@ -58,10 +65,22 @@
 
 <script setup lang="ts">
 const { setDownloadPath, downloadPath } = useStore("playSetting")
-const settingForm = ref({
-  skin: 0,
-  loop: 0
-})
+
+const { setting, updateSetting } = useStore("playSetting")
+
+const settingForm = ref(
+  Object.assign(
+    {
+      skin: 0,
+      loop: 0,
+      downloadLyric: 0, //下载歌词
+      downloadNotice: 1, // 下载通知
+      deskLyric: 0, // 桌面歌词
+      trayLyric: 0 // 菜单栏歌词
+    },
+    setting.value
+  )
+)
 
 const chooseDir = () => {
   window.electron.send("select-folder", downloadPath.value)
@@ -70,6 +89,16 @@ const chooseDir = () => {
 window.electron.receive("select-folder-reply", (event, folder) => {
   setDownloadPath(folder)
 })
+
+watch(
+  () => settingForm.value,
+  (val) => {
+    updateSetting(val)
+  },
+  {
+    deep: true
+  }
+)
 </script>
 
 <style scoped></style>

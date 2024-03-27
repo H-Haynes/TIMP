@@ -23,7 +23,15 @@ export default defineStore({
       } as ISong, // 当前播放音频信息
       lyric: [],
       url: "",
-      downloadPath: localStorage.getItem('downloadPath') || '~/Downloads'
+      setting: {
+        skin: 0,
+        loop: 0,
+        downloadLyric: 0, //下载歌词
+        downloadNotice: 0, // 下载通知
+        deskLyric: 0, // 桌面歌词
+        trayLyric: 0 // 菜单栏歌词
+      },
+      downloadPath: localStorage.getItem('downloadPath') || '~/Downloads',
     }
   },
 
@@ -53,6 +61,9 @@ export default defineStore({
     setDownloadPath(path: string) {
       localStorage.setItem('downloadPath', path)
       this.downloadPath = path
+    },
+    updateSetting(setting) {
+      this.setting = setting
     }
   }
 })

@@ -24,7 +24,7 @@
       </ul>
       <i v-show="isLock && focus" class="iconfont icon-suoding text-green-500 cursor-pointer" @click="unlockWindow"></i>
     </div>
-    <p class="font-bold mt-2 px-4" :style="{ fontSize: fontSize + 'px', color: color }" v-html="lyric"></p>
+    <p class="font-bold mt-2 px-4" :style="{ fontSize: fontSize + 'px', color: color }">{{ lyric }}</p>
   </div>
 </template>
 <script setup lang="ts">

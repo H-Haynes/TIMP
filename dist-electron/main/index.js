@@ -2,6 +2,23 @@
 const electron = require("electron");
 const os = require("node:os");
 const node_path = require("node:path");
+const truncateString = (str, length) => {
+  let result = "";
+  let byteLength = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charAt(i);
+    if (byteLength >= length) {
+      break;
+    }
+    result += char;
+    byteLength += encodeURIComponent(char).length > 1 ? 2 : 1;
+  }
+  while (byteLength < length) {
+    result = " " + result;
+    byteLength++;
+  }
+  return result;
+};
 process.env.DIST_ELECTRON = node_path.join(__dirname, "..");
 process.env.DIST = node_path.join(process.env.DIST_ELECTRON, "../dist");
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL ? node_path.join(process.env.DIST_ELECTRON, "../public") : process.env.DIST;
@@ -17,6 +34,7 @@ let win = null;
 let lyricWindow = null;
 let downloadFileName;
 let downloadDir;
+let tray;
 const preload = node_path.join(__dirname, "../preload/index.js");
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = node_path.join(process.env.DIST, "index.html");
@@ -58,6 +76,7 @@ async function createWindow() {
     console.log("销毁 2");
     lyricWindow && lyricWindow.destroy();
     lyricWindow = null;
+    tray == null ? void 0 : tray.destroy();
   });
   win.webContents.session.loadExtension(vueDevToolsPath);
 }
@@ -85,7 +104,6 @@ const registerDownloadEvent = () => {
     });
   });
 };
-let tray;
 electron.app.whenReady().then(async () => {
   await createWindow();
   await registerDownloadEvent();
@@ -155,15 +173,15 @@ const openLyric = () => {
 };
 electron.ipcMain.on("openLyric", openLyric);
 electron.ipcMain.on("closeLyric", () => {
-  lyricWindow && lyricWindow.hide();
+  if (lyricWindow) {
+    lyricWindow.hide();
+    lyricWindow.destroy();
+    lyricWindow = null;
+  }
 });
 electron.ipcMain.on("lyric", (_, lyric) => {
   if (lyric) {
-    let trayLyric = lyric.slice(0, 9);
-    if (trayLyric.length != 9) {
-      trayLyric = new Array(9 - trayLyric.length).fill(1).map((e) => " ").join("") + trayLyric;
-    }
-    tray == null ? void 0 : tray.setTitle(trayLyric);
+    tray == null ? void 0 : tray.setTitle(truncateString(lyric, 16));
   }
   lyricWindow && lyricWindow.webContents.send("lyric", lyric);
 });
