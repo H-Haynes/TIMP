@@ -14,7 +14,7 @@
       <div class="flex overflow-hidden flex-1 flex-col w-full item-center mx-2">
         <div class="flex">
           <p class="flex-1 truncate">
-            {{ playInfo.name || "TIMP，随心听曲" }}
+            {{ playInfo.name || "TIMP，随心而行" }}
           </p>
           <i
             @click="unlike"

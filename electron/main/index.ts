@@ -1,9 +1,9 @@
 import { app, BrowserWindow, shell, ipcMain, screen, globalShortcut, dialog, webContents, session, Menu, Tray, nativeImage } from 'electron';
 import { release } from 'node:os';
 import { join, resolve } from 'node:path';
-// import { devtools } from '@vue/devtools'
 import os from "node:os"
 import { truncateString } from './utils';
+import { loadDevtools, registerKeyboardEvent } from './winEvent'
 
 // The built directory structure
 //
@@ -37,8 +37,9 @@ if (!app.requestSingleInstanceLock()) {
 // Read more on https://www.electronjs.org/docs/latest/tutorial/security
 // process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
-let win: BrowserWindow | null = null;
-let lyricWindow: null | BrowserWindow = null
+let win: BrowserWindow | null = null;  // 主窗口
+let lyricWindow: null | BrowserWindow = null // 桌面歌词窗口
+let miniLyricWindow: null | BrowserWindow = null // 固定迷你歌词窗口
 let downloadFileName // 下载文件名称
 let downloadDir // 下载文件夹目录
 let tray // 系统托盘
@@ -50,10 +51,7 @@ const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = join(process.env.DIST, 'index.html');
 
 
-const vueDevToolsPath = join(
-  os.homedir(),
-  '/Library/Application Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/6.6.1_0'
-)
+
 
 async function createWindow() {
   win = new BrowserWindow({
@@ -99,34 +97,22 @@ async function createWindow() {
 
 
   if (import.meta.env.DEV) {
-    // devtools.connect(/* host (the default is "http://localhost"), port (the default is 8090) */)
-    // devtools.connect("http://127.0.0.1", 8098)
-
-    // import('electron-devtools-installer').then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
-    //   installExtension(VUEJS3_DEVTOOLS, {
-    //     loadExtensionOptions: {
-    //       allowFileAccess: true,
-    //     },
-    //   })
-    // })
-    //   .then(() => console.log('---------Vue调试工具已加载------------'))
-    //   .catch(e => console.error('Failed install extension:', e));
+    // 加载调试工具
+    loadDevtools(win)
   }
 
   // 主窗口销毁时，同时销毁子窗口
   win.on('closed', () => {
     // 销毁歌词窗口
-    console.log('销毁 2')
-
     lyricWindow && lyricWindow.destroy();
     lyricWindow = null;
+
+    miniLyricWindow && miniLyricWindow.destroy()
+    miniLyricWindow = null
     // 销毁系统托盘
     tray?.destroy();
+    // 注销所有
   });
-
-  win.webContents.session.loadExtension(vueDevToolsPath)
-  // await session.defaultSession.loadExtension(vueDevToolsPath);
-
 }
 
 // 注册下载事件
@@ -170,7 +156,7 @@ const registerDownloadEvent = () => {
 app.whenReady().then(async () => {
   await createWindow()
   await registerDownloadEvent()
-  await session.defaultSession.loadExtension(vueDevToolsPath)
+  await registerKeyboardEvent(win)
 
   // 托盘图片路径
   const templateFile = resolve(__dirname, '../../public/timp_32x32@2x.png')
@@ -179,12 +165,6 @@ app.whenReady().then(async () => {
   // 创建系统托盘
   tray = new Tray(trayIcon)
   tray.setTitle('TIMP音乐，随心而行')
-
-  // const contextMenu = Menu.buildFromTemplate([
-  //   { label: '菜单 1', type: 'radio' },
-  //   { label: '菜单 2', type: 'radio' },
-  // ])
-  // tray.setToolTip('emmmm')
 });
 
 
@@ -213,6 +193,11 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+app.on('will-quit', () => {
+  // 注销所有快捷键
+  globalShortcut.unregisterAll()
+})
 
 
 
@@ -262,9 +247,58 @@ const openLyric = () => {
 
 }
 
+const openMiniLyric = () => {
+  if (miniLyricWindow) {
+    miniLyricWindow.show()
+    // 主窗口隐藏
+    // 桌面歌词窗口隐藏
+    win.hide()
+    lyricWindow.hide()
+    setTimeout(() => {
+      win.webContents.send('need-send-lyric')
+    }, 1000)
+
+    return
+  }
+  // 创建迷你歌词窗口
+  miniLyricWindow = new BrowserWindow({
+    width: 350,
+    height: 700,
+    transparent: true,
+    webPreferences: {
+      preload,
+      nodeIntegration: true,
+      contextIsolation: true,
+    },
+    x: screen.getPrimaryDisplay().workAreaSize.width - 390, // 距离右边40px
+    y: screen.getPrimaryDisplay().workAreaSize.height - 700 - 150,
+    frame: false,
+    backgroundColor: "#0000000",
+    alwaysOnTop: true
+  })
+  if (process.env.VITE_DEV_SERVER_URL) {
+    miniLyricWindow.loadURL(`${url}#/fixLyric`);
+    console.log('here', `${url}#/fixLyric`)
+  } else {
+    miniLyricWindow.loadFile(indexHtml, { hash: '#/fixLyric' });
+  }
+
+  // 销毁歌词窗口
+  miniLyricWindow.on('close', () => {
+    miniLyricWindow && miniLyricWindow.destroy()
+    miniLyricWindow = null
+  })
+  win.hide()
+  lyricWindow.hide()
+  setTimeout(() => {
+    win.webContents.send('need-send-lyric')
+  }, 1000)
+}
+
 
 // 打开歌词窗口
 ipcMain.on('openLyric', openLyric)
+
 // 关闭歌词窗口
 ipcMain.on('closeLyric', () => {
   if (lyricWindow) {
@@ -273,6 +307,8 @@ ipcMain.on('closeLyric', () => {
     lyricWindow = null
   }
 })
+
+
 
 // 歌词更新
 ipcMain.on('lyric', (_, lyric: string) => {
@@ -285,11 +321,13 @@ ipcMain.on('lyric', (_, lyric: string) => {
   lyricWindow && lyricWindow.webContents.send('lyric', lyric)
 })
 
+// 固定桌面歌词
 ipcMain.on('fixed', () => {
   lyricWindow && lyricWindow.setAlwaysOnTop(true);
   lyricWindow && lyricWindow.setMovable(false);
 })
 
+// 取消固定桌面歌词
 ipcMain.on('unfixed', () => {
   lyricWindow && lyricWindow.setAlwaysOnTop(false);
   lyricWindow && lyricWindow.setMovable(true);
@@ -308,7 +346,7 @@ ipcMain.on('select-folder', async (event, defaultPath) => {
   })
 })
 
-
+// 下载文件
 ipcMain.on('download-file', (event, { url, fileName, dir }) => {
 
   downloadFileName = fileName
@@ -317,5 +355,44 @@ ipcMain.on('download-file', (event, { url, fileName, dir }) => {
   win.webContents.downloadURL(url);
 })
 
+// 打开固定迷你左面歌词
+ipcMain.on('open-mini-lyric', (event) => {
+  openMiniLyric()
+})
 
+// 关闭mini歌词面板
+ipcMain.on('close-mini-lyric', () => {
+  if (miniLyricWindow) {
+    miniLyricWindow.hide()
+    miniLyricWindow.destroy()
+    miniLyricWindow = null
+  }
+})
 
+// 更新播放时间，向mini歌词窗口转发事件
+ipcMain.on('update-currentTime', (_, time: number) => {
+  miniLyricWindow && miniLyricWindow.webContents.send('update-currentTime', time)
+})
+
+// 更新歌词，向mini歌词窗口转发事件
+ipcMain.on('update-lyric', (_, lyric: any[]) => {
+  miniLyricWindow && miniLyricWindow.webContents.send('update-lyric', lyric)
+})
+
+// 更新歌曲信息，向mini歌词窗口转发事件
+ipcMain.on('update-playInfo', (_, playInfo: any[]) => {
+  miniLyricWindow && miniLyricWindow.webContents.send('update-playInfo', playInfo)
+})
+
+// 迷你歌词窗口回退
+ipcMain.on('mini-lyric-back', () => {
+  // 销毁 mini歌词窗口
+  // 显示桌面歌词
+  // 显示主窗口
+  if (miniLyricWindow) {
+    miniLyricWindow.destroy()
+    miniLyricWindow = null
+  }
+  win.show()
+  lyricWindow && lyricWindow.show()
+})

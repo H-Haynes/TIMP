@@ -1,4 +1,26 @@
 "use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 const electron = require("electron");
 const os = require("node:os");
 const node_path = require("node:path");
@@ -19,6 +41,34 @@ const truncateString = (str, length) => {
   }
   return result;
 };
+const registerKeyboardEvent = (window) => {
+  electron.globalShortcut.register("MediaPreviousTrack", () => {
+    window.webContents.send("media-previous-track");
+  });
+  electron.globalShortcut.register("MediaNextTrack", () => {
+    window.webContents.send("media-next-track");
+  });
+  electron.globalShortcut.register("MediaPlayPause", () => {
+    window.webContents.send("media-play-pause");
+  });
+  electron.globalShortcut.register("MediaStop", () => {
+    window.webContents.send("media-stop");
+  });
+};
+const loadDevtools = (window) => {
+  const vueDevToolsPath = node_path.join(
+    os.homedir(),
+    "/Library/Application Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/6.6.1_0"
+  );
+  import("electron-devtools-installer").then(({ default: installExtension, VUEJS3_DEVTOOLS }) => {
+    installExtension(VUEJS3_DEVTOOLS, {
+      loadExtensionOptions: {
+        allowFileAccess: true
+      }
+    });
+  }).then(() => console.log("---------Vue调试工具已加载------------")).catch((e) => console.error("Failed install extension:", e));
+  window.webContents.session.loadExtension(vueDevToolsPath);
+};
 process.env.DIST_ELECTRON = node_path.join(__dirname, "..");
 process.env.DIST = node_path.join(process.env.DIST_ELECTRON, "../dist");
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL ? node_path.join(process.env.DIST_ELECTRON, "../public") : process.env.DIST;
@@ -32,16 +82,13 @@ if (!electron.app.requestSingleInstanceLock()) {
 }
 let win = null;
 let lyricWindow = null;
+let miniLyricWindow = null;
 let downloadFileName;
 let downloadDir;
 let tray;
 const preload = node_path.join(__dirname, "../preload/index.js");
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = node_path.join(process.env.DIST, "index.html");
-const vueDevToolsPath = node_path.join(
-  os.homedir(),
-  "/Library/Application Support/Google/Chrome/Default/Extensions/nhdogjmejiglipccpnnnanhbledajbpd/6.6.1_0"
-);
 async function createWindow() {
   win = new electron.BrowserWindow({
     title: "Main window",
@@ -72,13 +119,16 @@ async function createWindow() {
       electron.shell.openExternal(url2);
     return { action: "deny" };
   });
+  {
+    loadDevtools(win);
+  }
   win.on("closed", () => {
-    console.log("销毁 2");
     lyricWindow && lyricWindow.destroy();
     lyricWindow = null;
+    miniLyricWindow && miniLyricWindow.destroy();
+    miniLyricWindow = null;
     tray == null ? void 0 : tray.destroy();
   });
-  win.webContents.session.loadExtension(vueDevToolsPath);
 }
 const registerDownloadEvent = () => {
   electron.session.defaultSession.on("will-download", (event, item, webContents2) => {
@@ -107,7 +157,7 @@ const registerDownloadEvent = () => {
 electron.app.whenReady().then(async () => {
   await createWindow();
   await registerDownloadEvent();
-  await electron.session.defaultSession.loadExtension(vueDevToolsPath);
+  await registerKeyboardEvent(win);
   const templateFile = node_path.resolve(__dirname, "../../public/timp_32x32@2x.png");
   const trayIcon = electron.nativeImage.createFromPath(templateFile);
   tray = new electron.Tray(trayIcon);
@@ -133,6 +183,9 @@ electron.app.on("activate", () => {
   } else {
     createWindow();
   }
+});
+electron.app.on("will-quit", () => {
+  electron.globalShortcut.unregisterAll();
 });
 const openLyric = () => {
   if (lyricWindow) {
@@ -171,6 +224,48 @@ const openLyric = () => {
     lyricWindow = null;
   });
 };
+const openMiniLyric = () => {
+  if (miniLyricWindow) {
+    miniLyricWindow.show();
+    win.hide();
+    lyricWindow.hide();
+    setTimeout(() => {
+      win.webContents.send("need-send-lyric");
+    }, 1e3);
+    return;
+  }
+  miniLyricWindow = new electron.BrowserWindow({
+    width: 350,
+    height: 700,
+    transparent: true,
+    webPreferences: {
+      preload,
+      nodeIntegration: true,
+      contextIsolation: true
+    },
+    x: electron.screen.getPrimaryDisplay().workAreaSize.width - 390,
+    // 距离右边40px
+    y: electron.screen.getPrimaryDisplay().workAreaSize.height - 700 - 150,
+    frame: false,
+    backgroundColor: "#0000000",
+    alwaysOnTop: true
+  });
+  if (process.env.VITE_DEV_SERVER_URL) {
+    miniLyricWindow.loadURL(`${url}#/fixLyric`);
+    console.log("here", `${url}#/fixLyric`);
+  } else {
+    miniLyricWindow.loadFile(indexHtml, { hash: "#/fixLyric" });
+  }
+  miniLyricWindow.on("close", () => {
+    miniLyricWindow && miniLyricWindow.destroy();
+    miniLyricWindow = null;
+  });
+  win.hide();
+  lyricWindow.hide();
+  setTimeout(() => {
+    win.webContents.send("need-send-lyric");
+  }, 1e3);
+};
 electron.ipcMain.on("openLyric", openLyric);
 electron.ipcMain.on("closeLyric", () => {
   if (lyricWindow) {
@@ -207,5 +302,32 @@ electron.ipcMain.on("download-file", (event, { url: url2, fileName, dir }) => {
   downloadFileName = fileName;
   downloadDir = dir;
   win.webContents.downloadURL(url2);
+});
+electron.ipcMain.on("open-mini-lyric", (event) => {
+  openMiniLyric();
+});
+electron.ipcMain.on("close-mini-lyric", () => {
+  if (miniLyricWindow) {
+    miniLyricWindow.hide();
+    miniLyricWindow.destroy();
+    miniLyricWindow = null;
+  }
+});
+electron.ipcMain.on("update-currentTime", (_, time) => {
+  miniLyricWindow && miniLyricWindow.webContents.send("update-currentTime", time);
+});
+electron.ipcMain.on("update-lyric", (_, lyric) => {
+  miniLyricWindow && miniLyricWindow.webContents.send("update-lyric", lyric);
+});
+electron.ipcMain.on("update-playInfo", (_, playInfo) => {
+  miniLyricWindow && miniLyricWindow.webContents.send("update-playInfo", playInfo);
+});
+electron.ipcMain.on("mini-lyric-back", () => {
+  if (miniLyricWindow) {
+    miniLyricWindow.destroy();
+    miniLyricWindow = null;
+  }
+  win.show();
+  lyricWindow && lyricWindow.show();
 });
 //# sourceMappingURL=index.js.map

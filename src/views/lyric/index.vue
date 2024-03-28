@@ -6,6 +6,7 @@
         <i class="iconfont icon-sousuofangda ml-2 cursor-pointer hover:text-red-500 hover:font-bold" @click="magnify"></i>
         <i class="iconfont icon-suoxiao ml-2 cursor-pointer hover:text-red-500 hover:font-bold" @click="lessen"></i>
         <i class="iconfont icon-suoding ml-2 cursor-pointer hover:text-red-500 hover:font-bold" @click="fixedWindow"></i>
+        <i class="iconfont icon-fuzhi ml-2 cursor-pointer hover:text-red-500 hover-font-bold" @click="openFixLyric"></i>
       </div>
       <ul v-show="showColorList" class="flex justify-center items-center absolute" style="left: 50%; bottom: -10px; transform: translateX(-50%)">
         <li
@@ -29,7 +30,7 @@
 </template>
 <script setup lang="ts">
 const isLock = ref(false)
-const lyric = ref("TIMP，你想听的都在这里!")
+const lyric = ref("TIMP音乐，随心而行!")
 const fontSize = ref(+(localStorage.getItem("fontSize") || 20))
 const color = ref(localStorage.getItem("color") || "#f40")
 const focus = ref(false)
@@ -66,6 +67,10 @@ const fixedWindow = () => {
 const unlockWindow = () => {
   window.electron.send("unlock")
   isLock.value = false
+}
+
+const openFixLyric = () => {
+  window.electron.send("open-mini-lyric")
 }
 
 watch([() => color.value, () => fontSize.value], () => {

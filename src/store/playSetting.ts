@@ -1,6 +1,6 @@
 import { EPlatform } from "@/enum"
 import { ISong } from "@/views/playlistDetail.vue"
-
+import { cloneDeep } from 'lodash-es'
 export default defineStore({
   id: "playSetting",
   persist: {
@@ -41,6 +41,7 @@ export default defineStore({
     },
     updateCurrentTime(currentTime: number) {
       this.currentTime = currentTime
+      window.electron.send('update-currentTime', currentTime)
     },
     updateCurSongId(songId: string) {
       console.log('歌曲id被更新了', songId)
@@ -51,9 +52,11 @@ export default defineStore({
     },
     updatePlayInfo(playInfo: any) {
       this.playInfo = playInfo
+      window.electron.send('update-playInfo', JSON.stringify(playInfo))
     },
     updateLyric(lyric: any) {
       this.lyric = lyric
+      window.electron.send('update-lyric', JSON.stringify(lyric))
     },
     updateUrl(url: string) {
       this.url = url

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ElNotification } from "element-plus"
 import LogoViewLink from "./components/LogoViewLink.vue"
+import { cloneDeep } from "lodash-es"
 
 // console.log(
 //   '[App.vue]',
@@ -9,7 +10,7 @@ import LogoViewLink from "./components/LogoViewLink.vue"
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
-
+const { updateLyric, lyric, updatePlayInfo, playInfo } = useStore("playSetting")
 const { t, availableLocales, locale } = useI18n()
 
 function toggleLocales() {
@@ -23,6 +24,12 @@ window.electron.receive("download-completed", (event, fileName) => {
     title: "下载完成",
     message: h("i", { style: "color: teal" }, fileName)
   })
+})
+
+// 主进程请求发送一次歌词列表、播放信息
+window.electron.receive("need-send-lyric", () => {
+  updateLyric(cloneDeep(lyric.value))
+  updatePlayInfo(cloneDeep(playInfo.value))
 })
 </script>
 

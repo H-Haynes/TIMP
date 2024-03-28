@@ -21,6 +21,7 @@
       </el-skeleton>
     </div>
 
+    <button @click="() => router.push({ name: 'FixLyric' })">小窗歌词</button>
     <el-skeleton :loading="rankLoading" animated>
       <template #template>
         <div class="rank-container gap-x-6 gap-y-6 w-full">

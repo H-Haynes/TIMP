@@ -50,7 +50,8 @@ const router = createRouter({
           path: "setting",
           name: "Setting",
           component: () => import('@/views/setting/index.vue'),
-        }
+        },
+
         // {
         //   path: "spectrum",
         //   name: "spectrum",
@@ -90,7 +91,14 @@ const router = createRouter({
       path: "/lyric",
       name: "Lyric",
       component: () => import("@/views/lyric/index.vue")
+    },
+    {
+      // 小窗固定歌词
+      path: "/fixLyric",
+      name: "FixLyric",
+      component: () => import('@/views/lyric/fixLyric.vue')
     }
+
     // {
     //   path: '/lyric',
     //   name: 'lyric',

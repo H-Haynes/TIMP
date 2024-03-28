@@ -6,7 +6,9 @@
           class="w-48 leading-6 text-white-300 rounded-xl outline-none text-sm px-2 dark:border-none border-1 border-gray-700"
           placeholder="请输入搜索内容"
           :value="keywords"
-          @input="(e: any) => (keywords = e?.target!.value)"
+          @compositionstart="() => (isComposing = true)"
+          @compositionend="() => (isComposing = false)"
+          @input="handleKeywordsChange($event)"
           @focus="visiblePanel = true"
         />
         <Transition name="el-zoom-in-top">
@@ -69,6 +71,8 @@ const openSetting = () => {
   router.push({ name: "Setting" })
 }
 
+const isComposing = ref(false)
+
 const searchResult = ref<ISong[]>([])
 
 const suggestList = ref<string[]>([])
@@ -90,6 +94,13 @@ const search = debounce(500, () => {
       searchLoading.value = false
     })
 })
+
+const handleKeywordsChange = (e) => {
+  // 防止中文输入时频繁触发
+  if (!isComposing.value) {
+    keywords.value = e?.target!.value
+  }
+}
 
 const getSuggestList = () => {
   getSearchSuggest().then((res: any) => {
