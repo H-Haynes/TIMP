@@ -6,8 +6,9 @@
           class="w-48 leading-6 text-white-300 rounded-xl outline-none text-sm px-2 dark:border-none border-1 border-gray-700"
           placeholder="请输入搜索内容"
           :value="keywords"
-          @compositionstart="() => (isComposing = true)"
-          @compositionend="() => (isComposing = false)"
+          ref="inputRef"
+          @compositionstart="handleCompositingStart"
+          @compositionend="handleCompositingEnd"
           @input="handleKeywordsChange($event)"
           @focus="visiblePanel = true"
         />
@@ -66,6 +67,7 @@ const router = useRouter()
 const keywords = ref("")
 const visiblePanel = ref(false)
 
+const inputRef = ref()
 const searchLoading = ref(false)
 const openSetting = () => {
   router.push({ name: "Setting" })
@@ -76,6 +78,21 @@ const isComposing = ref(false)
 const searchResult = ref<ISong[]>([])
 
 const suggestList = ref<string[]>([])
+
+const handleCompositingStart = () => {
+  console.log("开始输入了")
+  isComposing.value = true
+}
+
+const handleCompositingEnd = () => {
+  isComposing.value = false
+
+  handleKeywordsChange({
+    target: {
+      value: inputRef.value?.value
+    }
+  })
+}
 
 const search = debounce(500, () => {
   if (!keywords.value) {
@@ -114,7 +131,6 @@ const handlePlay = (song: ISong) => {
 }
 
 const toMv = (song: ISong) => {
-  console.log(song, "歌曲")
   router.push({
     name: "VideoDetail",
     params: {
@@ -128,7 +144,7 @@ const toMv = (song: ISong) => {
 
 getSuggestList()
 watch(
-  keywords,
+  () => keywords.value,
   () => {
     search()
   },
