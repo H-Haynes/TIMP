@@ -2,7 +2,7 @@
 import { ElNotification } from "element-plus"
 import LogoViewLink from "./components/LogoViewLink.vue"
 import { cloneDeep } from "lodash-es"
-
+import eventBus from "./utils/eventBus"
 // console.log(
 //   '[App.vue]',
 //   `Hello world from Electron ${process.versions.electron}!`,
@@ -13,106 +13,53 @@ const toggleDark = useToggle(isDark)
 const { updateLyric, lyric, updatePlayInfo, playInfo } = useStore("playSetting")
 const { t, availableLocales, locale } = useI18n()
 
+const { tasks, removeTask } = useStore("download")
+
+const downloading = ref(false)
+
 function toggleLocales() {
   // change to some real logic
   const locales = availableLocales
   locale.value = locales[(locales.indexOf(locale.value) + 1) % locales.length]
 }
 
-window.electron.receive("download-completed", (event, fileName) => {
-  ElNotification({
-    title: "下载完成",
-    message: h("i", { style: "color: teal" }, fileName)
-  })
-})
-
 // 主进程请求发送一次歌词列表、播放信息
 window.electron.receive("need-send-lyric", () => {
   updateLyric(cloneDeep(lyric.value))
   updatePlayInfo(cloneDeep(playInfo.value))
 })
+
+watchEffect(() => {
+  console.log("task", tasks.value[0])
+  if (tasks.value.length > 0 && !downloading.value) {
+    downloading.value = true
+    window.electron.send("download-file", cloneDeep(tasks.value[0]))
+  }
+})
+
+window.electron.receive("download-completed", (event, fileName) => {
+  ElNotification({
+    title: "下载完成",
+    message: h("i", { style: "color: teal" }, fileName)
+  })
+  removeTask()
+
+  downloading.value = false
+})
+
+window.electron.receive("download-fail", (event, fileName) => {
+  ElNotification({
+    title: "下载失败",
+    message: h("i", { style: "color: red" }, fileName)
+  })
+  removeTask()
+
+  downloading.value = false
+})
 </script>
 
 <template>
   <div id="app" class="mx-auto dark:bg-gray-900 dark:text-gray-200 min-h-screen" :class="{ 'is-dark': isDark }">
-    <!--
-    <div class="mb-6 flex items-center justify-between">
-      <button @click="toggleDark()">
-        <span class="ml-2">
-          {{ isDark ? `🌙 ${t('common.dark')}` : `💡 ${t('common.light')}` }}
-          {{ t('common.theme') }}
-        </span>
-      </button>
-
-      <button @click="toggleLocales">
-        <span>{{ t('common.language') }}: </span>
-        <span class="text-green-600">{{ locale }}</span>
-      </button>
-    </div>
-
-    <div class="flex flex-wrap gap-5 items-center justify-center">
-      <LogoViewLink
-        href="https://www.electronjs.org/"
-        img-src="electron.svg"
-        img-alt="Electron logo"
-      />
-      <LogoViewLink
-        href="https://vitejs.dev/"
-        img-src="vite.svg"
-        img-alt="Vite logo"
-      />
-      <LogoViewLink
-        href="https://vuejs.org/"
-        img-src="vue.svg"
-        img-alt="Vue logo"
-      />
-      <LogoViewLink
-        href="https://pinia.vuejs.org/"
-        img-src="pinia.svg"
-        img-alt="Pinia logo"
-      />
-      <LogoViewLink
-        href="https://tailwindcss.com/"
-        img-src="tailwindcss.png"
-        img-alt="Tailwind CSS logo"
-      />
-      <LogoViewLink
-        href="https://eslint.org/"
-        img-src="eslint.png"
-        img-alt="Eslint logo"
-      />
-      <LogoViewLink
-        href="https://prettier.io/"
-        img-src="prettier.png"
-        img-alt="Prettier logo"
-      />
-      <LogoViewLink
-        href="https://vueuse.org/"
-        img-src="vueuse.svg"
-        img-alt="VueUse logo"
-      />
-    </div>
-
-    <p class="text-center mt-6 flex items-center justify-center">
-      <router-link
-        to="/home"
-        class="block mx-4 px-2 py-1 border-b-2 border-green-300 hover:border-green-500 transition"
-      >
-        {{ t('homepage.goToHome') }}
-      </router-link>
-      <router-link
-        to="/about"
-        class="block mx-4 px-2 py-1 border-b-2 border-green-300 hover:border-green-500 transition"
-      >
-        {{ t('aboutPage.goToAbout') }}
-      </router-link>
-    </p> -->
-
     <router-view />
-
-    <!-- <div class="flex items-center justify-center mt-4">
-      <span v-html="t('footer.placeStaticFiles')" />
-      <img src="/node.svg" alt="Node logo" class="w-10" />
-    </div> -->
   </div>
 </template>

@@ -71,3 +71,14 @@ export const getSongDetail = (params: {
   id: string
   platform: EPlatform
 }) => http.get('/timp/song/detail', params)
+
+
+/**
+ * 下载歌词
+ * @param id 歌曲id
+ * @param platform 平台信息
+ */
+export const downloadLyric = (params: {
+  id: string
+  platform: EPlatform
+}) => http.get('/timp/download/lyric', params)

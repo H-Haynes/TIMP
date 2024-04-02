@@ -145,6 +145,7 @@ const registerDownloadEvent = () => {
         win.webContents.send('download-completed', downloadFileName);
       } else {
         console.log(`Download failed: ${state}`);
+        win.webContents.send('download-fail', downloadFileName);
       }
     });
   });
@@ -352,6 +353,7 @@ ipcMain.on('download-file', (event, { url, fileName, dir }) => {
   downloadFileName = fileName
   downloadDir = dir
   // 开始下载
+  console.log('开始下载', url)
   win.webContents.downloadURL(url);
 })
 

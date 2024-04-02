@@ -5,6 +5,7 @@
 import type { AutoToRefs, ToRef } from 'vue'
 
 import dbStore from '@/store/db'
+import downloadStore from '@/store/download'
 import playSettingStore from '@/store/playSetting'
 import testStore from '@/store/test'
 import userInfoStore from '@/store/userInfo'
@@ -19,6 +20,7 @@ declare module 'vue' {
 
 const storeExports = {
   db: dbStore,
+  download: downloadStore,
   playSetting: playSettingStore,
   test: testStore,
   userInfo: userInfoStore,

@@ -66,9 +66,9 @@
                 收藏歌单
               </el-button>
 
-              <el-button color="#a63784" round>
+              <el-button :disabled="downloading" @click="downloadAll" color="#a63784" round>
                 <i class="icon-download mr-1"></i>
-                下载全部
+                下载全部{{ downloading }}
               </el-button>
             </div>
           </div>
@@ -184,25 +184,56 @@ const route = useRoute()
 const router = useRouter()
 
 const { albumList, likeList, addCollect, batchAddPlaylist, collectList, removeCollect } = useStore("db")
+const { pushTasks } = useStore("download")
+const downloading = ref(false)
 
 // 下载歌曲
 const download = (song: ISong) => {
-  getSongPlayUrl({
+  return getSongPlayUrl({
     id: song.id,
     platform: song.platform
-  }).then((res: any) => {
-    const fileName = song.artists.map((e) => e.name).join("_") + "-" + song.name + ".mp3"
-    // downloadSong(
-    //   {
-    //     url: res.data
-    //   },
-    //   song.name + ".mp3"
-    // )
-    // 推送到主进程下载
-    window.electron.send("download-file", { url: res.data, fileName, dir: downloadPath.value })
-    // downloadFile({
-    //   url: res.data
-    // })
+  }).then(
+    (res: any) => {
+      const fileName = song.artists.map((e) => e.name).join("_") + "-" + song.name
+      // downloadSong(
+      //   {
+      //     url: res.data
+      //   },
+      //   song.name + ".mp3"
+      // )
+      // 推送到主进程下载
+      // window.electron.send("download-file", { url: res.data, fileName, dir: downloadPath.value })
+      // downloadFile({
+      //   url: res.data
+      // })
+
+      // 添加到下载队列
+      pushTasks([
+        {
+          url: res.data,
+          fileName: fileName + ".mp3",
+          dir: downloadPath.value
+        },
+        {
+          url: import.meta.env.VITE_APP_WEB_URL + `/timp/download/lyric?id=${song.id}&platform=${song.platform}`,
+          fileName: `${fileName}.lrc`,
+          dir: downloadPath.value
+        }
+      ])
+    },
+    () => {
+      return Promise.resolve()
+    }
+  )
+}
+
+const downloadAll = () => {
+  if (downloading.value) {
+    return
+  }
+  downloading.value = true
+  Promise.all(playlistDetail.value.songList.map((song) => download(song))).then(() => {
+    downloading.value = false
   })
 }
 

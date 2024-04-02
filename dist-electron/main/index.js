@@ -150,6 +150,7 @@ const registerDownloadEvent = () => {
         win.webContents.send("download-completed", downloadFileName);
       } else {
         console.log(`Download failed: ${state}`);
+        win.webContents.send("download-fail", downloadFileName);
       }
     });
   });
@@ -301,6 +302,7 @@ electron.ipcMain.on("select-folder", async (event, defaultPath) => {
 electron.ipcMain.on("download-file", (event, { url: url2, fileName, dir }) => {
   downloadFileName = fileName;
   downloadDir = dir;
+  console.log("开始下载", url2);
   win.webContents.downloadURL(url2);
 });
 electron.ipcMain.on("open-mini-lyric", (event) => {

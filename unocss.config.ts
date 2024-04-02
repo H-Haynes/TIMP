@@ -26,12 +26,17 @@ const sizeMapping: Record<string, string> = {
 
 export default defineConfig({
   /** 排除 */
-  exclude: ["node_modules", ".git", ".husky", ".vscode", "dist", "public", "build", "mock", "./stats.html"],
   /** 预设 */
   presets: [
     presetAttributify(), // 属性化模式 & 无值的属性模式
     presetUno() // 默认预设
   ],
+  content: {
+    pipeline: {
+      exclude: ["node_modules", ".git", ".husky", ".vscode", "dist", "public", "build", "mock", "./stats.html"],
+
+    }
+  },
   /** 自定义规则 */
   rules: [
 

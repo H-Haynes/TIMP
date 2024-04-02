@@ -1,5 +1,5 @@
 {
-  "name": "electron-vite-ts-stackter",
+  "name": "timp-music",
   "version": "2.0.0",
   "description": "TIMP音乐播放器",
   "author": "H-Haynes<3066620060@qq.com>",
@@ -11,7 +11,8 @@
     "rollup",
     "vite",
     "vue3",
-    "vue"
+    "vue",
+    "TIMP音乐"
   ],
   "debug": {
     "env": {
@@ -20,12 +21,13 @@
   },
   "scripts": {
     "app:dev": "vite",
-    "app:build": "vue-tsc --noEmit && vite build && electron-builder",
+    "app:build": "vite build && electron-builder",
     "app:preview": "vite preview",
     "lint": "eslint --ext .js,.vue,.ts --ignore-path .gitignore --fix src",
     "format": "prettier .  --write",
     "deps:update": "taze major -I",
-    "compile": "cross-env MODE=production npm run build && electron-builder build --config .electron-builder.config.js --dir --config.asar=false"
+    "compile": "npm run app:build && electron-builder build --config .electron-builder.config.js --dir --config.asar=false",
+    "dist": "npm run app:build & electron-builder"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.2",

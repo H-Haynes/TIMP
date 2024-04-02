@@ -17,10 +17,6 @@ const config = {
   ],
   extraMetadata: {
     version: process.env.VITE_APP_VERSION,
-  },
-  mac: {
-    "entitlements": "entitlements.mac.plist",
-    "entitlementsInherit": "build/entitlements.mac.plist"
   }
 };
 
