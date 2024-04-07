@@ -1,11 +1,11 @@
 # TIMP音乐聚合平台
 
-TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件，项目基于vue3 + vite + electron + unocss进行开发，数据来源于github开源项目.
+TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件,目前支持网易、QQ、酷狗、咪咕，项目基于vue3 + vite + electron + unocss进行开发，数据来源于github开源项目及网络获取.
 
-- 网易云音乐: [网易云音乐API](https://github.com/Binaryify/NeteaseCloudMusicApi)
+<!-- - 网易云音乐: [网易云音乐API](https://github.com/Binaryify/NeteaseCloudMusicApi)
 - QQ音乐API: [QQ音乐API](https://github.com/Rain120/qq-music-api)
 - 酷狗音乐API: [酷狗音乐API](https://github.com/H-Haynes/kuwoMusicApi)
-- 酷我音乐API: [酷我与酷狗同项目](https://github.com/H-Haynes/kuwoMusicApi)
+- 酷我音乐API: [酷我与酷狗同项目](https://github.com/H-Haynes/kuwoMusicApi) -->
 
 本次重构服务端对API进行了统一，减少请求数量，并采用redis缓存，提升响应速度
 

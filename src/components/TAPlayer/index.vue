@@ -32,6 +32,8 @@
           ></i>
           <i @click="() => playInfo.id && addLike(playInfo)" v-else class="iconfont icon-xihuan cursor-pointer"></i>
           <i @click="handleCollectSongClick(playInfo)" class="iconfont icon-icon-xian- text-sm ml-2 cursor-pointer" />
+          <i @click="download(playInfo)" class="icon-download text-sm ml-2 cursor-pointer" />
+
           <i @click="updateMode((mode + 1) % playModeList.length)" class="iconfont text--sm ml-2 cursor-pointer" :class="playModeList[mode].icon" />
         </div>
         <p class="flex justify-between items-ceter text-xs mt-1 text-gray-500">
@@ -218,24 +220,37 @@ const getLyric = async (id: string, platform: EPlatform) => {
     })
 }
 
-// watch(
-//   [() => appear.value, () => playlist.value.length],
-//   async () => {
-//     let song = playlist.value.find((ele) => ele.id == curSongId.value)
-//     console.log(curSongId.value, "当前歌曲", playlist.value)
+const { pushTasks } = useStore("download")
+const { downloadPath } = useStore("playSetting")
 
-//     updateUrl(await getSongUrl(curSongId.value, song.platform))
+// 下载歌曲
+const download = (song: ISong) => {
+  return getSongPlayUrl({
+    id: song.id,
+    platform: song.platform
+  }).then(
+    (res: any) => {
+      const fileName = song.artists.map((e) => e.name).join("_") + "-" + song.name
 
-//     updatePlayInfo(await getSongInfo(curSongId.value, song.platform))
-//     updateLyric(await getLyric(curSongId.value, song.platform))
-
-//     appear.value = false
-//     audio.value?.pause()
-//   },
-//   {
-//     immediate: true
-//   }
-// )
+      // 添加到下载队列
+      pushTasks([
+        {
+          url: res.data,
+          fileName: fileName + ".mp3",
+          dir: downloadPath.value
+        },
+        {
+          url: import.meta.env.VITE_APP_WEB_URL + `/timp/download/lyric?id=${song.id}&platform=${song.platform}`,
+          fileName: `${fileName}.lrc`,
+          dir: downloadPath.value
+        }
+      ])
+    },
+    () => {
+      return Promise.resolve()
+    }
+  )
+}
 
 interface PlayParam {
   id: string

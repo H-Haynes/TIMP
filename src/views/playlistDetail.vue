@@ -68,7 +68,7 @@
 
               <el-button :disabled="downloading" @click="downloadAll" color="#a63784" round>
                 <i class="icon-download mr-1"></i>
-                下载全部{{ downloading }}
+                下载全部
               </el-button>
             </div>
           </div>
