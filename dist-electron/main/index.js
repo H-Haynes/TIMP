@@ -162,7 +162,7 @@ electron.app.whenReady().then(async () => {
   const templateFile = node_path.resolve(__dirname, "../../public/timp_32x32@2x.png");
   const trayIcon = electron.nativeImage.createFromPath(templateFile);
   tray = new electron.Tray(trayIcon);
-  tray.setTitle("TIMP音乐，随心而行");
+  tray == null ? void 0 : tray.setTitle("TIMP音乐，随心而行");
 });
 electron.app.on("window-all-closed", () => {
   win = null;

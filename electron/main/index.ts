@@ -165,7 +165,7 @@ app.whenReady().then(async () => {
   const trayIcon = nativeImage.createFromPath(templateFile)
   // 创建系统托盘
   tray = new Tray(trayIcon)
-  tray.setTitle('TIMP音乐，随心而行')
+  tray?.setTitle('TIMP音乐，随心而行')
 });
 
 
