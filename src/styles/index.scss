@@ -35,3 +35,20 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(192px, 1fr));
   grid-template-rows: repeat(auto-fit, minmax(192px, 1fr));
 }
+*::-webkit-scrollbar {
+  cursor: pointer;
+  width: 8px;
+  height: 8px;
+  &-track {
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  &-thumb {
+    background: #77777730;
+    border-radius: 8px;
+    &:hover {
+      background: #77777777;
+    }
+  }
+}

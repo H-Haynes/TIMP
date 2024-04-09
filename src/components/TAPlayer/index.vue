@@ -320,14 +320,23 @@ const toggleState = () => {
   if (!curSongId.value) {
     return
   }
-  if (audioState.value === "play") {
-    audio.value?.pause()
-  } else {
+  if (audio.value.paused || audio.value.ended) {
     if (currentTime.value) {
       audio.value.currentTime = currentTime.value
     }
     audio.value?.play()
+  } else {
+    audio.value?.pause()
   }
+
+  // if (audioState.value === "play") {
+  //   audio.value?.pause()
+  // } else {
+  //   if (currentTime.value) {
+  //     audio.value.currentTime = currentTime.value
+  //   }
+  //   audio.value?.play()
+  // }
 }
 
 // 下一首

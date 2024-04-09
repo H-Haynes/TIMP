@@ -293,7 +293,7 @@ const openMiniLyric = () => {
   lyricWindow.hide()
   setTimeout(() => {
     win.webContents.send('need-send-lyric')
-  }, 1000)
+  }, 2000)
 }
 
 
