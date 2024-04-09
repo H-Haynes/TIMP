@@ -26,4 +26,6 @@ dist-ssr
 *.sw?
 
 dist-electron
-
+src/helper
+src/auto-imports.d.ts
+components.d.ts
