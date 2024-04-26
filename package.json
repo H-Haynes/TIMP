@@ -62,8 +62,11 @@
   "dependencies": {
     "@vue/devtools": "^7.0.20",
     "axios": "^1.6.5",
+    "dayjs": "^1.11.10",
     "electron-devtools-installer": "^3.2.0",
     "element-plus": "^2.4.4",
+    "form-data": "^4.0.0",
+    "lodash-es": "^4.17.21",
     "mitt": "^3.0.1",
     "normalize.css": "^8.0.1",
     "pinia-auto-refs": "^0.0.10",

@@ -22,6 +22,13 @@ TIMP音乐聚合平台是一个聚合多个平台的桌面音乐播放软件,目
 - `npm run test` : 本地测试
 - `npm run dist --平台 --架构`: 打包为对应系统安装包程序
 
+如：
+
+```bash
+ npm run dist --win --ia32
+ npm run dist --mac
+```
+
 <!-- ## mac logo生成
 
 ```shell

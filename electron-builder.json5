@@ -3,8 +3,8 @@
  */
 {
   appId: "com.electron.app",
-  asar: true,
-  // asar: false,
+  // asar: true,
+  asar: false,
 
   icon: "public/favicon.ico",
   directories: {
@@ -12,12 +12,14 @@
   },
   files: ["dist-electron", "dist"],
   mac: {
+    icon: "public/favicon.icns",
     artifactName: "${productName}_${version}.${ext}",
     target: ["dmg"],
     entitlements: "entitlements.mac.plist",
     entitlementsInherit: "build/entitlements.mac.plist"
   },
   win: {
+    icon: "public/favicon.ico",
     target: [
       {
         target: "nsis",
