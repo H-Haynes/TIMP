@@ -2,7 +2,7 @@ import { EPlatform } from "@/enum";
 import kuwoPng from "@/assets/images/kuwo.png"
 import kugouPng from "@/assets/images/kugou.png"
 import neteasePng from "@/assets/images/netease.png"
-import qqPng from "@/assets/images/qq.png"
+import qqPng from "@/assets/images/QQ.png"
 import miguPng from "@/assets/images/migu.png"
 export const durationFormat = (value: number) => {
   if (!value) return '--:--';
