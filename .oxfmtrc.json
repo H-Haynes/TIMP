@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": false,
+  "singleQuote": false,
+  "printWidth": 150,
+  "tabWidth": 2,
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "vueIndentScriptAndStyle": false,
+  "singleAttributePerLine": false,
+  "bracketSpacing": true,
+  "trailingComma": "none",
+  "useTabs": false,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "coverage",
+    "pnpm-lock.yaml",
+    "docs/components.d.ts",
+    "*/**/.DS_Store",
+    "*/**/node_modules",
+    "*/**/dist",
+    "*/**/dist-ssr",
+    "*/**/*.local",
+    "apps/**/public/*"
+  ]
+}

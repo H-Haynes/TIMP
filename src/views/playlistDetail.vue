@@ -101,7 +101,7 @@
           </el-table-column>
           <el-table-column label="歌手">
             <template #default="{ row }">
-              {{ row.artists?.map((item) => item.name).join("/") }}
+              {{ row.artists?.map(item => item.name).join("/") }}
             </template>
           </el-table-column>
           <el-table-column label="专辑">
@@ -112,7 +112,7 @@
           <el-table-column
             label="时长"
             align="center"
-            :formatter="(row) => durationFormat(row.duration)"
+            :formatter="row => durationFormat(row.duration)"
             prop="duration"
             width="100px"
           ></el-table-column>
@@ -150,28 +150,9 @@ interface ICreator {
   specialIdentify?: string // 身份标识(认证、会员等)
 }
 
-interface IArtist {
-  id: string | number
-  name: string
-}
+import type { IArtist, ISong } from "@/typings/song"
 
-export interface ISong {
-  platform: EPlatform
-  name: string
-  publishTime?: string
-  id: string
-  duration: number
-  album?: {
-    id: string | number
-    name: string
-    pic: string
-  }
-  artists: IArtist[]
-  alias?: string[]
-  url?: string
-  timestamp?: number
-  video?: string
-}
+export type { IArtist, ISong }
 export interface IPlaylistDetail extends IRank {
   creator?: ICreator
   songList: ISong[]
@@ -194,7 +175,7 @@ const download = (song: ISong) => {
     platform: song.platform
   }).then(
     (res: any) => {
-      const fileName = song.artists.map((e) => e.name).join("_") + "-" + song.name
+      const fileName = song.artists.map(e => e.name).join("_") + "-" + song.name
       // downloadSong(
       //   {
       //     url: res.data
@@ -232,7 +213,7 @@ const downloadAll = () => {
     return
   }
   downloading.value = true
-  Promise.all(playlistDetail.value.songList.map((song) => download(song))).then(() => {
+  Promise.all(playlistDetail.value.songList.map(song => download(song))).then(() => {
     downloading.value = false
   })
 }
@@ -269,7 +250,7 @@ const getDetail = () => {
   getPlaylistDetail(query.value)
     .then((res: any) => {
       playlistDetail.value = res.data
-      const ids = res.data.songList.map((e) => e.id)
+      const ids = res.data.songList.map(e => e.id)
       checkMusic(ids)
     })
     .finally(() => {
@@ -299,7 +280,7 @@ const getLocalDetail = () => {
   } else {
     // 我的歌单
     console.log(albumList.value, query.value.id)
-    const album = albumList.value.find((e) => e.id === query.value.id)
+    const album = albumList.value.find(e => e.id === query.value.id)
     if (album) {
       console.log(album, "歌单")
       playlistDetail.value = album
@@ -362,7 +343,7 @@ const checkMusic = (ids: string[] | number[]) => {
     ids,
     platform: route.query.platform as unknown as EPlatform
   }).then((res: any) => {
-    res.data.forEach((ele) => {
+    res.data.forEach(ele => {
       canPlayInfo.value[ele.id] = ele.canPlay
     })
   })
@@ -384,7 +365,7 @@ const handlePlayAll = () => {
       id: ele.id,
       platform: ele.platform,
       name: ele.name,
-      artists: ele.artists.map((ele) => ({ id: ele.id, name: ele.name })),
+      artists: ele.artists.map(ele => ({ id: ele.id, name: ele.name })),
       timestamp: Date.now() + index,
       pic: ele.pic,
       duration: ele.duration

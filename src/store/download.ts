@@ -1,10 +1,9 @@
 interface Task {
-  url: string,
+  url: string
   fileName: string
   dir: string
 }
-export default defineStore({
-  id: "download",
+export default defineStore("download", {
   // persist: {
   //   enabled: true
   // },
@@ -21,6 +20,6 @@ export default defineStore({
     },
     removeTask() {
       this.tasks.shift()
-    },
+    }
   }
 })

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ElNotification } from "element-plus"
 import LogoViewLink from "./components/LogoViewLink.vue"
+import UpdateDialog from "./components/UpdateDialog.vue"
 import { cloneDeep } from "lodash-es"
 import eventBus from "./utils/eventBus"
 // console.log(
@@ -61,5 +62,6 @@ window.electron.receive("download-fail", (event, fileName) => {
 <template>
   <div id="app" class="mx-auto dark:bg-gray-900 dark:text-gray-200 min-h-screen" :class="{ 'is-dark': isDark }">
     <router-view />
+    <UpdateDialog />
   </div>
 </template>

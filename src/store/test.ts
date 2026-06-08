@@ -1,5 +1,4 @@
-export default defineStore({
-  id: "test",
+export default defineStore("test", {
   persist: {
     enabled: true
   },

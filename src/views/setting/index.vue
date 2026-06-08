@@ -58,15 +58,34 @@
             <el-option label="关闭" :value="0"></el-option>
           </el-select>
         </el-form-item>
+
+        <div class="my-6 text-18px">版本更新</div>
+
+        <el-form-item label="检查更新">
+          <el-button @click="checkForUpdate" :loading="checkingUpdate">检查更新</el-button>
+          <span class="ml-4 text-14px text-gray-400">当前版本: {{ pkgVersion }}</span>
+        </el-form-item>
+
+        <el-form-item label="自动检查更新">
+          <el-select v-model="settingForm.autoCheckUpdate" class="w-full" placeholder="自动检查更新">
+            <el-option label="开启" :value="1"></el-option>
+            <el-option label="关闭" :value="0"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import pkg from "../../../package.json"
+import { checkUpdate } from "@/api"
+
 const { setDownloadPath, downloadPath } = useStore("playSetting")
 
 const { setting, updateSetting } = useStore("playSetting")
+const pkgVersion = pkg.version
+const checkingUpdate = ref(false)
 
 const settingForm = ref(
   Object.assign(
@@ -76,7 +95,8 @@ const settingForm = ref(
       downloadLyric: 0, //下载歌词
       downloadNotice: 1, // 下载通知
       deskLyric: 0, // 桌面歌词
-      trayLyric: 0 // 菜单栏歌词
+      trayLyric: 0, // 菜单栏歌词
+      autoCheckUpdate: 0 // 自动检查更新
     },
     setting.value
   )
@@ -86,13 +106,29 @@ const chooseDir = () => {
   window.electron.send("select-folder", downloadPath.value)
 }
 
+const checkForUpdate = async () => {
+  checkingUpdate.value = true
+  try {
+    const res = await checkUpdate()
+    if (res.code === 200 && res.data?.hasUpdate) {
+      window.electron.send("show-update-dialog", res.data)
+    } else {
+      ElMessage.success("当前已是最新版本")
+    }
+  } catch {
+    ElMessage.error("检查更新失败")
+  } finally {
+    checkingUpdate.value = false
+  }
+}
+
 window.electron.receive("select-folder-reply", (event, folder) => {
   setDownloadPath(folder)
 })
 
 watch(
   () => settingForm.value,
-  (val) => {
+  val => {
     updateSetting(val)
   },
   {

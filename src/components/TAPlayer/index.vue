@@ -27,7 +27,7 @@
           </p>
           <i
             @click="removeLike(playInfo.id, playInfo.platform)"
-            v-if="likeList.some((ele) => ele.id == curSongId)"
+            v-if="likeList.some(ele => ele.id == curSongId)"
             class="iconfont icon-chuangyikongjianICON_fuzhi- text-red-500 ml-2 cursor-pointer"
           ></i>
           <i @click="() => playInfo.id && addLike(playInfo)" v-else class="iconfont icon-xihuan cursor-pointer"></i>
@@ -117,7 +117,7 @@ import dayjs from "dayjs"
 import poster from "@/assets/poster.jpg"
 import lyricComp from "./Lyric.vue"
 import { durationTransSec, secToMin, durationFormat } from "@/utils/filters"
-import type { ISong } from "@/views/playlistDetail.vue"
+import type { ISong } from "@/typings/song"
 import { getMusicLyric, getSongDetail, getSongPlayUrl, proxyMusic } from "@/api"
 
 export interface ILyricItem {
@@ -230,7 +230,7 @@ const download = (song: ISong) => {
     platform: song.platform
   }).then(
     (res: any) => {
-      const fileName = song.artists.map((e) => e.name).join("_") + "-" + song.name
+      const fileName = song.artists.map(e => e.name).join("_") + "-" + song.name
 
       // 添加到下载队列
       pushTasks([
@@ -342,9 +342,9 @@ const toggleState = () => {
 // 下一首
 const nextSong = (auto = true) => {
   // 获取到当前索引;
-  const index = playlist.value.findIndex((ele) => ele.id == curSongId.value)
+  const index = playlist.value.findIndex(ele => ele.id == curSongId.value)
   console.log(index)
-  let len = playlist.value.length
+  const len = playlist.value.length
   // TODO 播放模式功能在此处完成
   let targetIndex
   if (mode.value === 0) {
@@ -377,8 +377,8 @@ const nextSong = (auto = true) => {
 
 // 上一首
 const prevSong = (auto = true) => {
-  const index = playlist.value.findIndex((ele) => ele.id == curSongId.value)
-  let len = playlist.value.length
+  const index = playlist.value.findIndex(ele => ele.id == curSongId.value)
+  const len = playlist.value.length
   let targetIndex
   // TODO 播放模式功能在此处完成
   if (mode.value === 0) {
@@ -407,7 +407,7 @@ const prevSong = (auto = true) => {
 }
 
 // 切歌
-const toggleSong = (song) => {
+const toggleSong = song => {
   playSong(song, true)
 }
 
@@ -468,7 +468,9 @@ const confirmCollectSong = () => {
  */
 const playSong = (songInfo: ISong, auto = false, force = false) => {
   // 如果目标歌曲就是当前歌曲，且不是强制切歌，那么不处理
-  if (curSongId.value == songInfo.id && !force) return // 当前歌曲不切换
+  if (curSongId.value == songInfo.id && !force) {
+    return
+  } // 当前歌曲不切换
 
   // 获取播放地址
   getSongUrl(songInfo.id, songInfo.platform).then((src: string) => {
@@ -490,7 +492,7 @@ const playSong = (songInfo: ISong, auto = false, force = false) => {
         addPlaylist({
           name: playInfo.value.name,
           timestamp: Date.now(),
-          artists: playInfo.value.artists.map((e) => ({ name: e.name, id: e.id })),
+          artists: playInfo.value.artists.map(e => ({ name: e.name, id: e.id })),
           // artists: playInfo.value.artists,
           pic: playInfo.value.pic,
           duration: playInfo.value.duration,
@@ -509,7 +511,7 @@ eventBus.on("playSong", (song: any) => playSong(song))
 // 暂停歌曲
 eventBus.on("pauseSong", audio.value?.pause)
 
-const handlePlay = (audio) => {
+const handlePlay = audio => {
   eventBus.emit("audioPlay", audio)
 }
 
@@ -518,13 +520,13 @@ onMounted(() => {
     // 如果当前无歌曲，且播放列表有歌曲，则设置为第一条
     let songId, songPlatform
 
-    if ((curSongId.value && playlist.value.every((e) => e.id != curSongId.value)) || !curSongId.value) {
+    if ((curSongId.value && playlist.value.every(e => e.id != curSongId.value)) || !curSongId.value) {
       console.log(JSON.stringify(playlist.value[0]))
-      songId = playlist.value[0].id
-      songPlatform = playlist.value[0].platform
+      songId = playlist.value[0]?.id
+      songPlatform = playlist.value[0]?.platform
     } else {
       songId = curSongId.value
-      songPlatform = playlist.value.find((e) => e.id === songId)?.platform
+      songPlatform = playlist.value.find(e => e.id === songId)?.platform
     }
 
     getSongDetail({ id: songId, platform: songPlatform }).then((res: any) => {

@@ -1,5 +1,4 @@
-export default defineStore({
-  id: "userInfo",
+export default defineStore("userInfo", {
   persist: {
     enabled: true
   },
@@ -11,12 +10,8 @@ export default defineStore({
     }
   },
   actions: {
-    getUserInfo() {
-
-    },
-    logout() {
-
-    },
+    getUserInfo() {},
+    logout() {},
     getToken() {
       return this.userInfo.token
     }

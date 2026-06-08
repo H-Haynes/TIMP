@@ -1,12 +1,9 @@
-import { EPlatform } from '@/enum'
-import eventBus from '@/utils/eventBus'
-import indexedDB from '@/utils/indexedDB'
-import { ISong } from '@/views/playlistDetail.vue'
-export interface IAlbum { }
+import { EPlatform } from "@/enum"
+import eventBus from "@/utils/eventBus"
+import indexedDB from "@/utils/indexedDB"
+import type { ISong, IAlbum } from "@/typings/song"
 
-export default defineStore({
-  id: "playlist",
-
+export default defineStore("playlist", {
   state: () => {
     return {
       dbOnline: false, // 数据库是否在线
@@ -16,44 +13,44 @@ export default defineStore({
           artists: [],
           duration: 0,
           id: "",
-          platform: EPlatform.网易,
+          platform: EPlatform.网易
         }
       ] as ISong[], // 播放列表
       likeList: [], // 我喜欢 列表
       collectList: [], // 收藏 列表
-      albumList: [] as any[], // 我的歌单列表
+      albumList: [] as any[] // 我的歌单列表
     }
   },
 
   actions: {
     // 获取播放列表
     async getPlayList() {
-      indexedDB.get('playlist').then((res: any) => {
+      indexedDB.get("playlist").then((res: any) => {
         this.playlist = res.sort((a, b) => {
-          return b.timestamp - a.timestamp;
+          return b.timestamp - a.timestamp
         })
       })
     },
 
     // 获取自建歌单
     async getMyAlbumList() {
-      indexedDB.get('album').then((res: any) => {
-        this.albumList = res;
-      });
+      indexedDB.get("album").then((res: any) => {
+        this.albumList = res
+      })
     },
 
     // 获取我喜欢
     async getLikeList() {
-      return indexedDB.get('like').then((res: any) => {
-        this.likeList = res;
+      return indexedDB.get("like").then((res: any) => {
+        this.likeList = res
       })
     },
 
     // 获取我收藏的歌单
     async getCollectList() {
-      indexedDB.get('collect').then((res: any) => {
-        this.collectList = res;
-      });
+      indexedDB.get("collect").then((res: any) => {
+        this.collectList = res
+      })
     },
 
     // 添加到我喜欢
@@ -101,19 +98,18 @@ export default defineStore({
      */
     async addSongToAlbum(albumId: string, song: ISong) {
       // 检查是否重复
-      const album = this.albumList.find((item) => item.id === albumId)
-      if (album.songList.some((ele) => ele.id === song.id)) {
+      const album = this.albumList.find(item => item.id === albumId)
+      if (album.songList.some(ele => ele.id === song.id)) {
         ElMessage.warning("歌曲已存在")
         return Promise.reject()
-      } else {
-        // 未重复 , 添加歌曲，更新整项
-        // TODO: 添加歌曲到自定义歌单改为添加数据到数据库，而不是更新整项
-        album.songList.unshift(song)
-        return indexedDB.update("album", toRaw(album)).then(() => {
-          ElMessage.success("歌曲添加成功")
-          return this.getMyAlbumList()
-        })
       }
+      // 未重复 , 添加歌曲，更新整项
+      // TODO: 添加歌曲到自定义歌单改为添加数据到数据库，而不是更新整项
+      album.songList.unshift(song)
+      return indexedDB.update("album", toRaw(album)).then(() => {
+        ElMessage.success("歌曲添加成功")
+        return this.getMyAlbumList()
+      })
     },
 
     /**
@@ -135,7 +131,7 @@ export default defineStore({
      */
     async addPlaylist(song: ISong) {
       // 检查是否已存在播放列表中(存在则先移除再重新添加啊)
-      if (this.playlist.some((ele) => ele.id === song.id)) {
+      if (this.playlist.some(ele => ele.id === song.id)) {
         // 如果存在则从播放列表中删除
         await indexedDB.remove("playlist", song.id)
       }
@@ -152,7 +148,7 @@ export default defineStore({
      */
     async batchAddPlaylist(list: ISong[], isClear = true) {
       // 清空播放列表数据库
-      isClear && await indexedDB.clear("playlist")
+      isClear && (await indexedDB.clear("playlist"))
 
       //播放第一首
       isClear && eventBus.emit("playSong", list[0])
@@ -166,21 +162,16 @@ export default defineStore({
 
     // 从数据库初始化数据
     async initDB() {
-      return indexedDB.openDB("TIMP", 3).then(() => {
-        this.dbOnline = true
-        console.log("*****数据库已连接*****")
-      })
+      return indexedDB
+        .openDB("TIMP", 3)
+        .then(() => {
+          this.dbOnline = true
+          console.log("*****数据库已连接*****")
+        })
         .then(async () => {
           // 从数据库获取数据
-          return Promise.all([
-            this.getLikeList(),
-            this.getCollectList(),
-            this.getMyAlbumList(),
-            this.getPlayList()
-          ])
+          return Promise.all([this.getLikeList(), this.getCollectList(), this.getMyAlbumList(), this.getPlayList()])
         })
-    },
-
-
+    }
   }
 })

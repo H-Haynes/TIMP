@@ -28,4 +28,6 @@ dist-ssr
 dist-electron
 src/helper
 src/auto-imports.d.ts
+auto-imports.d.ts
 components.d.ts
+dump.rdb

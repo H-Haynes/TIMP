@@ -1,8 +1,7 @@
 import { EPlatform } from "@/enum"
-import { ISong } from "@/views/playlistDetail.vue"
-import { cloneDeep } from 'lodash-es'
-export default defineStore({
-  id: "playSetting",
+import type { ISong } from "@/typings/song"
+import { cloneDeep } from "lodash-es"
+export default defineStore("playSetting", {
   persist: {
     enabled: true
   },
@@ -31,7 +30,7 @@ export default defineStore({
         deskLyric: 0, // 桌面歌词
         trayLyric: 0 // 菜单栏歌词
       },
-      downloadPath: localStorage.getItem('downloadPath') || '~/Downloads',
+      downloadPath: localStorage.getItem("downloadPath") || "~/Downloads"
     }
   },
 
@@ -41,10 +40,10 @@ export default defineStore({
     },
     updateCurrentTime(currentTime: number) {
       this.currentTime = currentTime
-      window.electron.send('update-currentTime', currentTime)
+      window.electron.send("update-currentTime", currentTime)
     },
     updateCurSongId(songId: string) {
-      console.log('歌曲id被更新了', songId)
+      console.log("歌曲id被更新了", songId)
       this.curSongId = songId
     },
     updateVolume(volume: number) {
@@ -52,17 +51,17 @@ export default defineStore({
     },
     updatePlayInfo(playInfo: any) {
       this.playInfo = playInfo
-      window.electron.send('update-playInfo', JSON.stringify(playInfo))
+      window.electron.send("update-playInfo", JSON.stringify(playInfo))
     },
     updateLyric(lyric: any) {
       this.lyric = lyric
-      window.electron.send('update-lyric', JSON.stringify(lyric))
+      window.electron.send("update-lyric", JSON.stringify(lyric))
     },
     updateUrl(url: string) {
       this.url = url
     },
     setDownloadPath(path: string) {
-      localStorage.setItem('downloadPath', path)
+      localStorage.setItem("downloadPath", path)
       this.downloadPath = path
     },
     updateSetting(setting) {

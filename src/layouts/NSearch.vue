@@ -27,7 +27,7 @@
                     <i @click.stop="toMv(song)" class="icon-mv text-red-500 ml-1" v-if="song.video"></i>
 
                     <span class="ml-2" v-html="song.name.replace(new RegExp(keywords), `<span class='highlight'>${keywords}</span>`)"></span>
-                    <span> - {{ song.artists.map((e) => e.name).join("/") }}</span>
+                    <span> - {{ song.artists.map(e => e.name).join("/") }}</span>
                   </span>
                 </div>
               </div>
@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ISong } from "@/views/playlistDetail.vue"
+import type { ISong } from "@/typings/song"
 import { useDark, useToggle } from "@vueuse/core"
 import { throttle, debounce } from "throttle-debounce"
 import { getSearch, getSearchSuggest } from "@/api"
@@ -112,7 +112,7 @@ const search = debounce(500, () => {
     })
 })
 
-const handleKeywordsChange = (e) => {
+const handleKeywordsChange = e => {
   // 防止中文输入时频繁触发
   if (!isComposing.value) {
     keywords.value = e?.target!.value
@@ -155,7 +155,7 @@ watch(
 
 watch(
   () => visiblePanel.value,
-  (val) => {
+  val => {
     if (val) {
       getSuggestList()
     }
