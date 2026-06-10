@@ -1,4 +1,4 @@
-import { EPlatform } from "@/enum"
+import { EPlatform } from "@/types/enums"
 
 // Vendor-prefixed fallback (legacy browser support)
 const w = window as unknown as Record<string, unknown>

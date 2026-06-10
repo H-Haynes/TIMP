@@ -47,7 +47,7 @@ export default defineConfig({
         "vue/macros",
         "@vueuse/core",
         {
-          "@/helper/pinia-auto-refs": ["useStore"]
+          "@/store/helper": ["useStore"]
         }
       ],
       dts: "./auto-imports.d.ts",

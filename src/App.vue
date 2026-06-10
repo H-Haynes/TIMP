@@ -3,26 +3,13 @@ import { ElNotification } from "element-plus"
 import LogoViewLink from "./components/LogoViewLink.vue"
 import UpdateDialog from "./components/UpdateDialog.vue"
 import { cloneDeep } from "lodash-es"
-import eventBus from "./utils/eventBus"
-// console.log(
-//   '[App.vue]',
-//   `Hello world from Electron ${process.versions.electron}!`,
-// );
 
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
+const { isDark } = useTheme()
 const { updateLyric, lyric, updatePlayInfo, playInfo } = useStore("playSetting")
-const { t, availableLocales, locale } = useI18n()
 
 const { tasks, removeTask } = useStore("download")
 
 const downloading = ref(false)
-
-function toggleLocales() {
-  // change to some real logic
-  const locales = availableLocales
-  locale.value = locales[(locales.indexOf(locale.value) + 1) % locales.length]
-}
 
 // 主进程请求发送一次歌词列表、播放信息
 window.electron.receive("need-send-lyric", () => {
@@ -31,7 +18,6 @@ window.electron.receive("need-send-lyric", () => {
 })
 
 watchEffect(() => {
-  console.log("task", tasks.value[0])
   if (tasks.value.length > 0 && !downloading.value) {
     downloading.value = true
     window.electron.send("download-file", cloneDeep(tasks.value[0]))

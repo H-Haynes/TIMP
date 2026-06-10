@@ -11,7 +11,7 @@
       <div v-for="(menu, menuIndex) in menus" :key="menuIndex" class="px-8">
         <div class="leading-12 text-gray-400 font-bold flex items-center">
           <span>{{ menu.name }}</span>
-          <i v-if="menu.creatable" @click="createAlbum" class="icon-plus ml-8 cursor-pointer"></i>
+          <i v-if="menu.creatable" @click="handleCreateAlbum" class="icon-plus ml-8 cursor-pointer"></i>
         </div>
         <div @click="handleNav(nav)" v-for="nav in menu.children" :key="nav.name" class="px-4 leading-8 hover:bg-blue-500 cursor-pointer rounded-md">
           {{ nav.name }}
@@ -21,15 +21,15 @@
   </div>
 </template>
 <script lang="ts" setup>
-import eventBus from "@/utils/eventBus"
 import posterJpg from "@/assets/poster.jpg"
 import { dayjs } from "element-plus"
-import { EPlatform } from "@/enum"
-import { IPlaylistDetail } from "@/views/playlistDetail.vue"
+import { EPlatform } from "@/types/enums"
+import type { IPlaylistDetail } from "@/types/api"
 
 const router = useRouter()
-const { albumList, collectList, likeList } = useStore("db")
-const createAlbum = () => {
+const { albumList, collectList, likeList, createAlbum } = useStore("db")
+
+const handleCreateAlbum = () => {
   ElMessageBox.prompt("", "新建歌单", {
     center: true,
     confirmButtonText: "确定",
@@ -48,15 +48,15 @@ const createAlbum = () => {
       pic: posterJpg,
       createTime: dayjs().format("YYYY-MM-DD"),
       updateTime: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-      platform: EPlatform.自建,
+      platform: EPlatform.SelfBuilt,
       creator: {
-        avatar: posterJpg, // 头像
-        nickname: "我", // 昵称
-        signature: "" // 签名
+        avatar: posterJpg,
+        nickname: "我",
+        signature: ""
       },
       songList: []
     }
-    eventBus.emit("createAlbum", albumInfo)
+    createAlbum(albumInfo)
   })
 }
 
@@ -77,14 +77,12 @@ const menus = computed(() => {
 })
 
 // 我的音乐
-const mineMenus = ref([{ name: "我喜欢", id: 0, platform: EPlatform.自建 }])
+const mineMenus = ref([{ name: "我喜欢", id: 0, platform: EPlatform.SelfBuilt }])
 
-const handleNav = (nav) => {
+const handleNav = nav => {
   if (nav.path) {
-    // 是页面
     router.push({ path: `/${nav.path}` })
   } else {
-    // 是歌单
     router.push({
       name: "PlaylistDetail",
       params: {

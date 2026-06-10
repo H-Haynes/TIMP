@@ -1,4 +1,5 @@
-export * from "./common"
-export * from "./playlist"
-export * from "./video"
-export * from "./update"
+// QQMusic
+export * from "./qqmusic/index"
+
+// 整合
+export * from "./timp/index"

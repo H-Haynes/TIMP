@@ -7,25 +7,20 @@ import {
   NETWORK_ERROR_CODE,
   NETWORK_ERROR_MSG,
   REQUEST_TIMEOUT_CODE,
-  REQUEST_TIMEOUT_MSG,
+  REQUEST_TIMEOUT_MSG
 } from "./constant"
 import { exeStrategyActions } from "./utils"
 import { showErrorMsg } from "./msg"
-import whiteCode from "./whiteCode"
-
-
+import { WHITE_CODE as whiteCode } from "./constant"
 
 /**
  * 刷新token
  * @param axiosConfig - token失效时的请求配置
  */
 export async function handleRefreshToken(axiosConfig: AxiosRequestConfig) {
-  console.log(axiosConfig)
   const { logout } = useStore("userInfo")
   logout()
 }
-
-
 
 type ErrorStatus = keyof typeof ERROR_STATUS
 
@@ -37,10 +32,8 @@ export function handleAxiosError(axiosError: AxiosError) {
   const error: Service.RequestError = {
     type: "axios",
     code: DEFAULT_REQUEST_ERROR_CODE,
-    // message: DEFAULT_REQUEST_ERROR_MSG
     message: axiosError.response?.data?.message ?? DEFAULT_REQUEST_ERROR_MSG
   }
-
 
   const actions: Common.StrategyAction[] = [
     [
@@ -87,9 +80,8 @@ export function handleResponseError(response: AxiosResponse) {
   }
 
   if (!window.navigator.onLine) {
-    Object.assign(error, { code: NETWORK_ERROR_CODE, msg: NETWORK_ERROR_MSG }) // 网路错误
+    Object.assign(error, { code: NETWORK_ERROR_CODE, msg: NETWORK_ERROR_MSG })
   } else {
-    // 请求成功的状态码非200的错误
     const errorCode: ErrorStatus = response.status as ErrorStatus
     const msg = ERROR_STATUS[errorCode] || DEFAULT_REQUEST_ERROR_MSG
     Object.assign(error, { type: "http", code: errorCode, message: msg })
@@ -116,45 +108,11 @@ export function handleBackendError(backendResult: Record<string, any>, config: S
   return error
 }
 
-
-
 /** 统一失败和成功的请求结果的数据类型 */
 export async function handleServiceResult<T = any>(error: Service.RequestError | null, data: any) {
-  // if (error) {
-  //   const fail: Service.FailedResult = { error, data: null }
-  //   return fail
-  // }
-  // const success: Service.SuccessResult<T> = { error: null, data }
-  // return success
-
   if (data && whiteCode.includes(data.code)) {
     return Promise.resolve(data)
   } else if (error) {
     return Promise.reject(error)
   }
 }
-
-/** 请求结果的适配器：用于接收适配器函数和请求结果 */
-export function adapter<T extends Service.ServiceAdapter>(
-  adapterFun: T,
-  ...args: Service.MultiRequestResult<TypeUtil.GetFunArgs<T>>
-): Service.RequestResult<ReturnType<T>> {
-  let result: Service.RequestResult | undefined
-
-  const hasError = args.some((item: any) => {
-    const flag = Boolean(item.error)
-    if (flag) {
-      result = { error: item.error, data: null }
-    }
-    return flag
-  })
-
-  if (!hasError) {
-    const adapterFunArgs = args.map((item) => item.data)
-    result = { error: null, data: adapterFun(...adapterFunArgs) }
-  }
-
-  return result!
-}
-
-

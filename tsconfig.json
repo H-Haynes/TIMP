@@ -14,9 +14,9 @@
     "noEmit": true,
     "noImplicitAny": false,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     }
   },
-  "include": ["src", "auto-imports.d.ts"],
+  "include": ["auto-imports.d.ts", "src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { getBanner, getRankList, getSongDetail } from "@/api"
-import { EPlatform } from "@/enum"
+import { EPlatform } from "@/types/enums"
 import eventBus from "@/utils/eventBus"
 import { whichLogo } from "@/utils/filters"
 
@@ -86,7 +86,7 @@ const getBannerList = () => {
   bannerLoading.value = true
   getBanner()
     .then((res: any) => {
-      bannerList.value = res.data.filter((e) => e.pic?.startsWith("http"))
+      bannerList.value = res.data.filter(e => e.pic?.startsWith("http"))
     })
     .finally(() => {
       bannerLoading.value = false
@@ -123,11 +123,11 @@ const handleRankDetail = (rank: IRank) => {
 }
 
 const toBannerDetail = (banner: Banner) => {
-  if ([EPlatform.QQ, EPlatform.网易].includes(banner.platform)) {
+  if ([EPlatform.QQ, EPlatform.Netease].includes(banner.platform)) {
     getSongDetail({
       id: banner.relationId,
       platform: banner.platform
-    }).then((res) => {
+    }).then(res => {
       eventBus.emit("playSong", res.data)
     })
   } else {

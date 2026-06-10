@@ -5,7 +5,7 @@ export default defineStore("userInfo", {
   state: () => {
     return {
       userInfo: {
-        token: "kkkkkk"
+        token: ""
       }
     }
   },

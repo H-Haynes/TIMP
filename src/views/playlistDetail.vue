@@ -137,7 +137,7 @@ import { checkMusicCanPlay, getPlaylistDetail, getSongPlayUrl } from "@/api"
 
 import { durationTransSec, durationFormat } from "@/utils/filters"
 import dayjs from "dayjs"
-import { EPlatform } from "@/enum"
+import { EPlatform } from "@/types/enums"
 import eventBus from "@/utils/eventBus"
 import { IRank } from "./rank.vue"
 import posterJpg from "@/assets/poster.jpg"
@@ -150,7 +150,7 @@ interface ICreator {
   specialIdentify?: string // 身份标识(认证、会员等)
 }
 
-import type { IArtist, ISong } from "@/typings/song"
+import type { IArtist, ISong } from "@/types/song"
 
 export type { IArtist, ISong }
 export interface IPlaylistDetail extends IRank {
@@ -233,14 +233,14 @@ const playlistDetail = ref<IPlaylistDetail>({
   description: "我喜欢的歌曲",
   relationId: "0",
   pic: posterJpg,
-  platform: EPlatform.自建,
+  platform: EPlatform.SelfBuilt,
   createTime: "",
   isRank: 0
 })
 
 // 获取歌单详情
 const getDetail = () => {
-  if (+query.value.platform === EPlatform.自建) {
+  if (+query.value.platform === EPlatform.SelfBuilt) {
     getLocalDetail()
     loading.value = false
     return
@@ -274,7 +274,7 @@ const getLocalDetail = () => {
       description: "我喜欢的歌曲",
       relationId: "0",
       pic: posterJpg,
-      platform: EPlatform.自建,
+      platform: EPlatform.SelfBuilt,
       createTime: ""
     }
   } else {

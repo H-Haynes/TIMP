@@ -53,15 +53,14 @@
 </template>
 
 <script setup lang="ts">
-import type { ISong } from "@/typings/song"
-import { useDark, useToggle } from "@vueuse/core"
+import type { ISong } from "@/types/song"
 import { throttle, debounce } from "throttle-debounce"
 import { getSearch, getSearchSuggest } from "@/api"
 import { ClickOutside as vClickOutside } from "element-plus"
 import eventBus from "@/utils/eventBus"
 import { whichLogo } from "@/utils/filters"
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
+import { useTheme } from "@/composables/useTheme"
+const { isDark, toggleDark } = useTheme()
 const router = useRouter()
 
 const keywords = ref("")

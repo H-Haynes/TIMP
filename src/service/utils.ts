@@ -1,4 +1,3 @@
-
 import qs from "qs"
 import FormData from "form-data"
 
@@ -17,11 +16,10 @@ export enum EnumDataType {
   undefined = "[object Undefined]"
 }
 
-
 export enum EnumContentType {
   json = "application/json",
   formData = "multipart/form-data",
-  formUrlencoded = "application/json;charset=UTF-8"
+  formUrlencoded = "application/x-www-form-urlencoded"
 }
 
 export function isFile(data: unknown) {
@@ -36,13 +34,12 @@ export function isObject(data: unknown) {
  * @param actions 每一种可能执行的操作
  */
 export function exeStrategyActions(actions: Common.StrategyAction[]) {
-  actions.some((item) => {
+  actions.some(item => {
     const [flag, action] = item
     flag && action()
     return flag
   })
 }
-
 
 /**
  * 请求数据的转换
@@ -90,7 +87,7 @@ async function transformFile(formData: FormData, key: string, file: File[] | Fil
   if (Array.isArray(file)) {
     // 多文件
     await Promise.all(
-      (file as File[]).map((item) => {
+      (file as File[]).map(item => {
         formData.append(key, item)
         return true
       })

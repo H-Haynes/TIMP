@@ -1,5 +1,5 @@
-import { EPlatform } from "@/enum"
-import type { ISong } from "@/typings/song"
+import { EPlatform, PlayMode } from "@/types/enums"
+import type { ISong, ILyricItem } from "@/types/song"
 import { cloneDeep } from "lodash-es"
 export default defineStore("playSetting", {
   persist: {
@@ -7,10 +7,10 @@ export default defineStore("playSetting", {
   },
   state: () => {
     return {
-      mode: 0, // 播放模式 0循环播放 1随机播放 2 单曲循环
-      currentTime: 0, // 当前播放时间
-      curSongId: "", // 当前播放音频id
-      volume: 1, // 音量
+      mode: PlayMode.Loop as number,
+      currentTime: 0,
+      curSongId: "",
+      volume: 1,
       playInfo: {
         name: "",
         artists: [],
@@ -19,16 +19,16 @@ export default defineStore("playSetting", {
         albumId: "",
         id: "",
         platform: EPlatform.QQ
-      } as ISong, // 当前播放音频信息
-      lyric: [],
+      } as ISong,
+      lyric: [] as ILyricItem[],
       url: "",
       setting: {
         skin: 0,
         loop: 0,
-        downloadLyric: 0, //下载歌词
-        downloadNotice: 0, // 下载通知
-        deskLyric: 0, // 桌面歌词
-        trayLyric: 0 // 菜单栏歌词
+        downloadLyric: 0,
+        downloadNotice: 0,
+        deskLyric: 0,
+        trayLyric: 0
       },
       downloadPath: localStorage.getItem("downloadPath") || "~/Downloads"
     }
@@ -43,17 +43,16 @@ export default defineStore("playSetting", {
       window.electron.send("update-currentTime", currentTime)
     },
     updateCurSongId(songId: string) {
-      console.log("歌曲id被更新了", songId)
       this.curSongId = songId
     },
     updateVolume(volume: number) {
       this.volume = volume
     },
-    updatePlayInfo(playInfo: any) {
+    updatePlayInfo(playInfo: ISong) {
       this.playInfo = playInfo
       window.electron.send("update-playInfo", JSON.stringify(playInfo))
     },
-    updateLyric(lyric: any) {
+    updateLyric(lyric: ILyricItem[]) {
       this.lyric = lyric
       window.electron.send("update-lyric", JSON.stringify(lyric))
     },

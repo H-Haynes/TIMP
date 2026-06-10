@@ -1,5 +1,6 @@
-import mitt from 'mitt';
+import mitt from "mitt"
+import type { AppEvents } from "@/types/events"
 
-const eventBus = mitt();
+const eventBus = mitt<AppEvents>()
 
-export default eventBus;
+export default eventBus

@@ -111,13 +111,13 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import { EPlatform } from "@/enum"
+import { EPlatform } from "@/types/enums"
 import eventBus from "@/utils/eventBus"
 import dayjs from "dayjs"
 import poster from "@/assets/poster.jpg"
 import lyricComp from "./Lyric.vue"
 import { durationTransSec, secToMin, durationFormat } from "@/utils/filters"
-import type { ISong } from "@/typings/song"
+import type { ISong } from "@/types/song"
 import { getMusicLyric, getSongDetail, getSongPlayUrl, proxyMusic } from "@/api"
 
 export interface ILyricItem {
@@ -507,9 +507,6 @@ const playSong = (songInfo: ISong, auto = false, force = false) => {
 
 // 播放歌曲
 eventBus.on("playSong", (song: any) => playSong(song))
-
-// 暂停歌曲
-eventBus.on("pauseSong", audio.value?.pause)
 
 const handlePlay = audio => {
   eventBus.emit("audioPlay", audio)

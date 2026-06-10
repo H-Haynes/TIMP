@@ -35,7 +35,7 @@ export const ERROR_STATUS = {
   502: "502: 错误网关~",
   503: "503: 服务不可用~",
   504: "504: 网关超时~",
-  505: "505: http版本不支持该请求~",
+  505: "505: http版本不支持该请求~"
   // [DEFAULT_REQUEST_ERROR_CODE]: DEFAULT_REQUEST_ERROR_MSG
 }
 
@@ -44,3 +44,4 @@ export const NO_ERROR_MSG_CODE: (string | number)[] = []
 
 /** token失效需要刷新token的code*/
 export const REFRESH_TOKEN_CODE: (string | number)[] = [401]
+export const WHITE_CODE: (string | number)[] = [200]

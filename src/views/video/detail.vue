@@ -16,7 +16,7 @@
         <span class="ml-4">发布时间：{{ dayjs(videoInfo.createTime).format("YYYY-MM-DD") }}</span>
         <span class="ml-4 inline-flex items-center"
           >数据来源:
-          <img class="w-6 ml-2" :src="whichLogo(videoInfo.platform)"></img>
+          <img class="w-6 ml-2" :src="whichLogo(videoInfo.platform)" />
         </span>
       </div>
       <p class="leading-6 text-sm text-gray-700">{{ videoInfo.description }}</p>
@@ -29,8 +29,8 @@
 <script setup lang="ts">
 import { getRelatedVideo, getVideoDetail } from "@/api"
 import dayjs from "dayjs"
-import { whichLogo,countFormat } from "@/utils/filters"
-import { EPlatform } from "@/enum";
+import { whichLogo, countFormat } from "@/utils/filters"
+import { EPlatform } from "@/types/enums"
 const router = useRouter()
 const route = useRoute()
 
@@ -38,7 +38,7 @@ const videoInfo = ref({
   name: "",
   pic: "",
   urls: [],
-  creator: [] as {avatar:string,nickname:string}[],
+  creator: [] as { avatar: string; nickname: string }[],
   playCount: 0,
   createTime: 0,
   platform: 0,
@@ -51,7 +51,7 @@ const getVideoInfo = () => {
     id: route.params.id as string,
     platform: Number(route.query.platform)
   })
-    .then((res:any) => {
+    .then((res: any) => {
       videoInfo.value = res.data
     })
     .finally(() => {
@@ -63,14 +63,12 @@ const relatedList = ref<any[]>([])
 
 const getRelatedList = () => {
   getRelatedVideo({
-    id:route.params.id as string,
+    id: route.params.id as string,
     platform: route.query.platform as any as EPlatform
-  }).then((res=>{
+  }).then(res => {
     console.log(res)
-  }))
+  })
 }
-
-
 
 onMounted(() => {
   getVideoInfo()

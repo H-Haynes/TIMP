@@ -1,10 +1,9 @@
 import axios from "axios"
 import type { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios"
-import { REFRESH_TOKEN_CODE } from "./constant"
+import { REFRESH_TOKEN_CODE, WHITE_CODE } from "./constant"
 import { handleAxiosError, handleBackendError, handleResponseError, handleServiceResult } from "./helper"
-import { transformRequestData } from './utils'
+import { transformRequestData } from "./utils"
 import { handleRefreshToken } from "./helper"
-import whiteCode from "./whiteCode"
 /**
  * 封装axios请求类
  * @author Soybean<honghuangdc@gmail.com>
@@ -28,10 +27,10 @@ export default class CustomAxiosInstance {
   setInterceptor() {
     /** 设置请求拦截器 */
     this.instance.interceptors.request.use(
-      async (config) => {
+      async config => {
         const handleConfig = { ...config }
         if (handleConfig.headers) {
-          const { userInfo } = useStore('userInfo')
+          const { userInfo } = useStore("userInfo")
           const contentType = handleConfig.headers["Content-Type"] as string // 数据转换
           handleConfig.headers.Authorization = "Bearer " + userInfo.value.token // 设置token
           handleConfig.data = await transformRequestData(handleConfig.data, contentType)
@@ -45,7 +44,7 @@ export default class CustomAxiosInstance {
     )
     /** 设置响应拦截器 */
     this.instance.interceptors.response.use(
-      async (response) => {
+      async response => {
         // 如果是文件流，通过
         if (response.data instanceof Blob) {
           return Promise.resolve(response.data)
@@ -54,7 +53,7 @@ export default class CustomAxiosInstance {
         if (status === 200 || status < 300 || status === 304) {
           const backend = response.data
           const { codeKey, dataKey, successCode } = this.backendConfig
-          if (backend[codeKey] === successCode || whiteCode.includes(backend[codeKey])) {
+          if (backend[codeKey] === successCode || WHITE_CODE.includes(backend[codeKey])) {
             // return handleServiceResult(null, backend[dataKey]);
             return handleServiceResult(null, backend)
           }
